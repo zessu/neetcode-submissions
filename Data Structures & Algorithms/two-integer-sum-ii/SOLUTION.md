@@ -48,10 +48,21 @@ class Solution {
 - If sum < target: move left pointer right (increase sum)
 - If sum > target: move right pointer left (decrease sum)
 
-## Complexity
+## Complexity Analysis
 
-- **Two Pointers**: O(n), O(1) space
-- **Brute Force**: O(n²)
+- **Two Pointers (Optimal)**: O(n), O(1) space
+- **Binary Search**: O(n log n), O(1) space
+- **Brute Force**: O(n²), O(1) space
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Notes |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n²) | O(1) | Slow and doesn't use sorted property |
+| **Binary Search** | O(n log n) | O(1) | Better, but not optimal |
+| **Two Pointers** | O(n) | O(1) | Optimal use of sorted property |
+
+The **Two Pointers** approach is the best way to solve this problem as it leverages the sorted nature of the array to achieve linear time without extra space.
 
 ## Walkthrough
 

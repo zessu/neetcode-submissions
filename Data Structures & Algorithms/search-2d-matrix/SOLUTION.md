@@ -76,11 +76,20 @@ class Solution {
    - `row = mid / COLS`
    - `col = mid % COLS`
 
-## Complexity
+## Complexity Analysis
 
-- **Two-pass**: O(log m + log n) = O(log(m*n))
-- **One-pass**: O(log(m*n))
-- **Space**: O(1)
+- **Time Complexity**: O(log(m * n))
+- **Space Complexity**: O(1)
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(m * n) | O(1) | Scan every cell |
+| **Two-Pass Binary** | O(log m + log n) | O(1) | Find row then find column |
+| **One-Pass Binary** | O(log(m * n)) | O(1) | Treat as flattened array |
+
+The **One-Pass Binary Search** is often preferred for its conceptual simplicity once the coordinate conversion is understood.
 
 ## Walkthrough
 

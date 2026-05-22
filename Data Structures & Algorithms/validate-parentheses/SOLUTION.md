@@ -42,10 +42,19 @@ class Solution {
 2. **When closing bracket**: check if it matches the top of stack
 3. **At end**: stack must be empty for valid string
 
-## Complexity
+## Complexity Analysis
 
-- **Time**: O(n)
-- **Space**: O(n) in worst case
+- **Time**: O(n) - single pass through the string.
+- **Space**: O(n) - in the worst case (all opening brackets).
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n²) | O(n) | Easy to understand | Extremely slow for long strings |
+| **Stack** | O(n) | O(n) | Optimal performance | Requires stack knowledge |
+
+The **Stack** approach is the definitive way to solve this problem, providing linear performance by ensuring each bracket is processed only twice (push and pop).
 
 ## Walkthrough
 

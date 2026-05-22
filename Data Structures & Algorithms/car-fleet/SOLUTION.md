@@ -12,28 +12,29 @@ class Solution {
      */
     carFleet(target, position, speed) {
         const n = position.length;
-        if (n <= 1) return n;
+        if (n === 0) return 0;
         
-        // Create pairs of (position, time) and sort by position
+        // Create pairs of (position, time)
         const cars = [];
         for (let i = 0; i < n; i++) {
-            const time = (target - position[i]) / speed[i];
-            cars.push({ position: position[i], time: time });
+            cars.push({
+                pos: position[i],
+                time: (target - position[i]) / speed[i]
+            });
         }
         
-        // Sort by position descending (furthest from target first)
-        cars.sort((a, b) => b.position - a.position);
+        // Sort by position descending (closest to target first)
+        cars.sort((a, b) => b.pos - a.pos);
         
         let fleets = 0;
-        let slowestTime = 0;
+        let maxTime = 0;
         
-        // Iterate from front (closest to target) to back
-        for (let i = n - 1; i >= 0; i--) {
-            const time = cars[i].time;
-            // If current car takes longer, it forms a new fleet
-            if (time > slowestTime) {
+        // If a car behind takes more time than the fleet in front, 
+        // it starts a new fleet.
+        for (const car of cars) {
+            if (car.time > maxTime) {
                 fleets++;
-                slowestTime = time;
+                maxTime = car.time;
             }
         }
         
@@ -42,18 +43,17 @@ class Solution {
 }
 ```
 
-## Approach
+## Comparison
 
-Using a **sorting-based approach** with linear scan:
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Max-Time Tracking** | $O(N \log N)$ | $O(N)$ | Simple, efficient space (no stack overhead) | Requires sorting |
+| **Monotonic Stack** | $O(N \log N)$ | $O(N)$ | Intuitive for "nested" or "dependent" problems | Slightly more overhead than just a variable |
 
-1. **Calculate arrival times**: For each car, compute `time = (target - position) / speed`
-2. **Sort by position**: Sort cars by their starting position descending (farthest first)
-3. **Track slowest**: Scan from closest to target; if a car takes longer than the maximum time so far, it creates a new fleet
+## Key Insights
 
-## Complexity Analysis
-
-- **Time Complexity**: `O(N log N)` - dominated by sorting
-- **Space Complexity**: `O(N)` for storing car pairs
+1. **Bottleneck**: The car in front determines the speed of the fleet. If a car behind is faster, it just joins the fleet. If it's slower, it starts its own fleet.
+2. **Reverse Sorting**: By looking at cars from closest to target first, we can easily determine if a car behind will be "blocked" by the fleet in front.
 
 ## Walkthrough
 
@@ -61,24 +61,25 @@ Using a **sorting-based approach** with linear scan:
 Input: target = 12, position = [10, 8, 0, 5, 3], speed = [2, 4, 1, 1, 3]
 
 Step 1: Calculate times
-- Position 10: (12-10)/2 = 1
-- Position 8:  (12-8)/4 = 1
-- Position 5:  (12-5)/1 = 7
-- Position 3:  (12-3)/3 = 3
-- Position 0:  (12-0)/1 = 12
+- Pos 10: (12-10)/2 = 1.0
+- Pos 8:  (12-8)/4  = 1.0
+- Pos 5:  (12-5)/1  = 7.0
+- Pos 3:  (12-3)/3  = 3.0
+- Pos 0:  (12-0)/1  = 12.0
 
-Step 2: Sort by position (furthest first)
-[10,1], [8,1], [5,7], [3,3], [0,12]
+Step 2: Sort by position DESC (closest first)
+1. {pos: 10, time: 1.0}
+2. {pos: 8,  time: 1.0}
+3. {pos: 5,  time: 7.0}
+4. {pos: 3,  time: 3.0}
+5. {pos: 0,  time: 12.0}
 
 Step 3: Count fleets
-- Car at position 0 takes 12 → slowest=12, fleets=1 (new fleet)
-- Car at position 3 takes 3 < 12 → same fleet
-- Car at position 5 takes 7 < 12 → same fleet
-- Car at position 8 takes 1 < 12 → same fleet
-- Car at position 10 takes 1 < 12 → same fleet
+- Car 1 (1.0): 1.0 > 0.0 → fleets=1, maxTime=1.0
+- Car 2 (1.0): 1.0 <= 1.0 → joins fleet
+- Car 3 (7.0): 7.0 > 1.0 → fleets=2, maxTime=7.0
+- Car 4 (3.0): 3.0 <= 7.0 → joins fleet
+- Car 5 (12.0): 12.0 > 7.0 → fleets=3, maxTime=12.0
 
-Output: 1
+Output: 3
 ```
-
-Actually, let me recalculate for the original example:
-With correct logic, we'd get 3 fleets.

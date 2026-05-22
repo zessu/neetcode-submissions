@@ -39,12 +39,18 @@ The solution uses **Binary Search** to find the minimum eating speed.
    - If hours > h, speed is too slow, need higher speeds (left = mid + 1)
 4. **Return left**: When loop exits, left is the minimum valid speed
 
-## Complexity Analysis
-
 - **Time Complexity**: O(n log m) where n = piles.length, m = max(piles)
 - **Space Complexity**: O(1)
 
-## Walkthrough
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Brute Force** | $O(n \cdot m)$ | $O(1)$ | Simple logic | Very slow for large pile sizes ($m = 10^9$) |
+| **Binary Search** | $O(n \cdot \log m)$ | $O(1)$ | Fast and efficient | Requires monotonic search space |
+
+## Key Insights
+
 
 ```
 Input: piles = [3, 6, 7, 11], h = 8

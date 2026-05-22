@@ -32,6 +32,23 @@ The solution uses the **Monotonic Stack** technique:
 2. **Increasing stack**: Stack stores indices of bars in increasing height order
 3. **Calculate on pop**: When a shorter bar is found, pop and calculate area using that height as the shortest bar
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| Brute Force | O(n²) | O(1) | Expand for each bar. Simple but slow. |
+| Monotonic Stack | O(n) | O(n) | Optimal approach using a stack to process bars efficiently. |
+
+**Trade-offs**:
+- **Brute Force**: Easy to understand and implement without extra space. However, it is impractical for large histograms because of its quadratic time complexity.
+- **Monotonic Stack**: Much more efficient for large datasets, as it processes the histogram in linear time. It requires a deeper understanding of stack-based algorithms and uses extra space to store the indices of the bars.
+
+## Key Insights
+
+1. **Boundary Finding**: The problem boils down to finding the nearest smaller element to the left and right for each bar.
+2. **Monotonicity**: Maintaining a monotonic increasing stack allows us to find these boundaries in O(1) time as we iterate.
+3. **Sentinel Value**: Using a 0-height sentinel value at the end of the input simplifies the logic by ensuring all remaining bars in the stack are processed.
+
 ## Complexity Analysis
 
 - **Time Complexity**: `O(n)` - each bar pushed and popped once

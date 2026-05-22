@@ -16,6 +16,19 @@ Output: [0,1]
 - Array
 - Hash Table
 
-## Solution: Hash Map
+## Solution Approaches
 
-Store complements for O(1) lookup.
+### 1. Brute Force
+- Check every pair of numbers to see if they sum to the target.
+- **Time Complexity**: O(n²)
+- **Space Complexity**: O(1)
+
+### 2. Sorting + Two Pointers
+- Sort the array and use two pointers to find the sum. Note that this requires tracking original indices.
+- **Time Complexity**: O(n log n)
+- **Space Complexity**: O(n)
+
+### 3. Hash Map (One-Pass) (Optimal)
+- Iterate through the array once, storing the complement of each number in a hash map for O(1) lookup.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(n)

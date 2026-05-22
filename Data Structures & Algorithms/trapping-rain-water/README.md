@@ -22,6 +22,19 @@ Output: 9
 - Stack
 - Monotonic Stack
 
-## Solution: Two Pointers / DP
+## Solution Approaches
 
-Water at each position = min(maxLeft, maxRight) - height[i]
+### 1. Brute Force
+- For each bar, find the maximum height to its left and right, then calculate trapped water.
+- **Time Complexity**: O(n²)
+- **Space Complexity**: O(1)
+
+### 2. Dynamic Programming (Prefix/Suffix Arrays)
+- Precompute `maxLeft` and `maxRight` for each bar.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(n)
+
+### 3. Two Pointers (Optimal)
+- Use two pointers and track `leftMax` and `rightMax` on the fly to avoid O(n) space.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(1)

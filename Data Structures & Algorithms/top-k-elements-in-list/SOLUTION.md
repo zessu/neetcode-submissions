@@ -62,11 +62,21 @@ class Solution {
 2. **Sort by frequency** and take top k
 3. **Alternative (Bucket Sort)**: Use frequency as bucket index for O(n)
 
-## Complexity
+## Complexity Analysis
 
 - **Hash + Sort**: O(n log n)
-- **Bucket Sort**: O(n)
+- **Bucket Sort (Optimal)**: O(n)
 - **Space**: O(n)
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| **Sorting** | O(n log n) | O(n) | Simple to implement, good for small `n` |
+| **Heap** | O(n log k) | O(n) | Good when `k` is much smaller than `n` |
+| **Bucket Sort** | O(n) | O(n) | Best theoretical time complexity |
+
+While **Bucket Sort** is theoretically O(n), the **Sorting** approach is often easier to implement and sufficient given the constraints in most interview scenarios.
 
 ## Walkthrough
 

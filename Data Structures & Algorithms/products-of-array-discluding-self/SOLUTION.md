@@ -65,10 +65,20 @@ class Solution {
 **Key Idea**: For each index, multiply:
 - Product of all elements to the LEFT × Product of all elements to the RIGHT
 
-## Complexity
+## Complexity Analysis
 
-- **Time**: O(n)
-- **Space**: O(1) extra (ignoring output array)
+- **Time**: O(n) - two passes (prefix and suffix)
+- **Space**: O(1) extra space (the result array is usually not counted towards space complexity)
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Notes |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n²) | O(1) | Too slow for large inputs |
+| **Division** | O(n) | O(1) | Fails if the array contains zero |
+| **Prefix/Suffix (Optimal)** | O(n) | O(1) | Handles zeros and is efficient |
+
+The **Prefix and Suffix Products** approach is the standard optimal solution as it respects the constraint of not using division and handles zero values correctly.
 
 ## Walkthrough
 

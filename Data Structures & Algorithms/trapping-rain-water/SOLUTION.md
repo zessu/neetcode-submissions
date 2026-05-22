@@ -64,11 +64,21 @@ class Solution {
 - **Two Pointers**: Track leftMax and rightMax while moving inward
 - **DP**: Precompute leftMax and rightMax arrays
 
-## Complexity
+## Complexity Analysis
 
 - **Two Pointers**: O(n) time, O(1) space
-- **DP**: O(n) time, O(n) space
-- **Brute Force**: O(n²) time
+- **Dynamic Programming**: O(n) time, O(n) space
+- **Brute Force**: O(n²) time, O(1) space
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Notes |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n²) | O(1) | Scans for max left/right on every bar |
+| **Dynamic Programming**| O(n) | O(n) | Precomputes max values in arrays |
+| **Two Pointers** | O(n) | O(1) | Optimal: replaces arrays with variables |
+
+The **Two Pointers** approach is considered the most optimal as it achieves linear time complexity while using only constant additional space.
 
 ## Walkthrough
 

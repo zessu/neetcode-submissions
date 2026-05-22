@@ -17,6 +17,21 @@ Output: true
 - Binary Search
 - Matrix
 
-## Solution: Binary Search (One-Pass)
+## Solution Approaches
 
-Treat the matrix as a sorted 1D array by converting indices.
+### 1. Brute Force
+- Iterate through every element in the matrix.
+- **Time Complexity**: O(m * n)
+- **Space Complexity**: O(1)
+
+### 2. Two-Pass Binary Search
+- Binary search to find the correct row (compare target with row starts/ends).
+- Binary search within that row to find the target.
+- **Time Complexity**: O(log m + log n) = O(log(m * n))
+- **Space Complexity**: O(1)
+
+### 3. One-Pass Binary Search (Optimal)
+- Treat the matrix as a virtual 1D array.
+- Convert 1D index to 2D: `row = index / n`, `col = index % n`.
+- **Time Complexity**: O(log(m * n))
+- **Space Complexity**: O(1)

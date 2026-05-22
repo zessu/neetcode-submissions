@@ -75,6 +75,23 @@ class Solution {
    - Skip non-alphanumeric chars
    - Compare without creating new strings
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| Clean and Reverse | O(n) | O(n) | Easy to implement with built-in functions. |
+| Two Pointers | O(n) | O(1) | Optimal for memory efficiency. |
+
+**Trade-offs**:
+- **Clean and Reverse**: Very readable and concise in many languages (e.g., using `reverse()` and `join()`). However, it performs multiple passes and allocates significant additional memory for the filtered and reversed strings.
+- **Two Pointers**: More efficient as it only performs a single pass and doesn't require extra space. It is slightly more complex to implement correctly because it needs to handle non-alphanumeric characters and pointer updates within a single loop.
+
+## Key Insights
+
+1. **In-place Verification**: Using two pointers allows checking for a palindrome without creating a new "clean" string, saving O(n) space.
+2. **Character Filtering**: Character filtering can be done on-the-fly within the two-pointer loop to avoid an initial O(n) preprocessing step.
+3. **Symmetry**: A palindrome is inherently symmetric; comparing from both ends towards the middle is the most direct way to exploit this property.
+
 ## Complexity Analysis
 
 **Approach 1**: 

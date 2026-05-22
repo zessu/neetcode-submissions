@@ -50,21 +50,35 @@ Output: 23
 
 ## Solution Approaches
 
-### Binary Search
+### 1. Brute Force
 
-**Intuition**: The answer lies between 1 and max(piles). Use binary search to find the minimum speed k that allows Koko to finish in h hours.
+**Intuition**: Try every possible eating speed `k` starting from 1 until we find the first speed that allows Koko to finish all bananas within `h` hours.
 
 **Algorithm**:
-1. Set `low = 1` and `high = max(piles)`
-2. While `low <= high`:
-   - Calculate `mid = (low + high) / 2`
-   - Calculate hours needed at speed `mid`
-   - If hours <= h, try lower speed (high = mid - 1)
-   - Else, need higher speed (low = mid + 1)
-3. Return `low` (or `high + 1`)
+1. Start with `k = 1`.
+2. For each `k`, calculate the total hours needed.
+3. If total hours <= `h`, return `k`.
+4. Increment `k` and repeat.
 
-**Time Complexity**: O(n log max(piles))
-**Space Complexity**: O(1)
+**Time Complexity**: `O(n * max(piles))` where `n` is the number of piles.
+**Space Complexity**: `O(1)`
+
+### 2. Binary Search (Optimal)
+
+**Intuition**: The possible eating speed `k` is within the range `[1, max(piles)]`. Since the total time spent eating is inversely proportional to `k`, we can use binary search to find the minimum `k` efficiently.
+
+**Algorithm**:
+1. Set `low = 1` and `high = max(piles)`.
+2. While `low <= high`:
+   - Calculate `mid = (low + high) / 2`.
+   - Calculate total hours needed at speed `mid`.
+   - If total hours <= `h`, it's a possible speed, but try to find a smaller one: `high = mid - 1`.
+   - Else, speed is too slow: `low = mid + 1`.
+3. Return `low`.
+
+**Time Complexity**: `O(n * log(max(piles)))`
+**Space Complexity**: `O(1)`
+
 
 ## Visual Explanation
 

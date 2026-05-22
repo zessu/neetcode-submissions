@@ -62,6 +62,25 @@ Two main approaches:
 - Time: `O(n)`
 - Space: `O(1)` - fixed 26-element array
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| Brute Force | O(n²) | O(n) | Search and remove each character. Very slow. |
+| Sorting | O(n log n) | O(n) | Simple to implement using built-in sort functions. |
+| Frequency Counter | O(n) | O(1) | Optimal approach using a fixed-size frequency array. |
+
+**Trade-offs**:
+- **Brute Force**: Inefficient for large inputs and complex to implement correctly without bugs.
+- **Sorting**: Very clean code and easy to understand. However, it is slower than the frequency counter and usually requires extra space for the sorted versions of the strings.
+- **Frequency Counter**: The most efficient in terms of both time and space. It takes advantage of the limited character set (English lowercase letters) to achieve constant space complexity.
+
+## Key Insights
+
+1. **Space-Time Trade-off**: Sorting is easier to write but O(n log n), while the frequency array is O(n) but requires a bit more logic.
+2. **Fixed Space**: When the character set is limited (e.g., 26 lowercase letters), an array-based frequency counter is O(1) space.
+3. **Early Exit**: If the lengths of the two strings are different, they cannot be anagrams. Checking this first saves time.
+
 ## Walkthrough
 
 ```

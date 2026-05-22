@@ -50,10 +50,19 @@ class Solution {
 
 Why? The width decreases each move, so we can only increase area if the shorter height becomes taller. Moving the taller height can never help.
 
-## Complexity
+## Complexity Analysis
 
-- **Two Pointers**: Time O(n), Space O(1)
+- **Two Pointers (Optimal)**: Time O(n), Space O(1)
 - **Brute Force**: Time O(n²), Space O(1)
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| **Two Pointers** | O(n) | O(1) | Single pass, greedy optimization |
+| **Brute Force** | O(n²) | O(1) | Check every possible pair of lines |
+
+The **Two Pointers** approach is significantly more efficient for large datasets as it avoids the quadratic explosion of checks.
 
 ## Walkthrough
 

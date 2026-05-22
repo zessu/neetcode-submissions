@@ -84,7 +84,14 @@ class Solution {
 
 **Sorting**:
 - Time: `O(n log n)`
-- Space: `O(n)`
+- Space: `O(n)` (or O(1) depending on sort implementation)
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **HashSet (Optimal)** | O(n) | O(n) | Best time complexity | Higher memory usage |
+| **Sorting** | O(n log n) | O(n) or O(1) | Easier to implement if memory is tight | Slower for large inputs |
 
 ## Walkthrough
 

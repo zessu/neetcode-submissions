@@ -59,21 +59,37 @@ Sort cars by their starting position from farthest to closest to destination.
 
 If a car takes longer to reach the destination than the car ahead of it, it will never catch up and forms its own fleet.
 
-## Solution Approach
+## Solution Approaches
 
-### Monotonic Stack / Two Pointers
+### 1. Max-Time Tracking (Iterative)
 
 **Intuition**: 
-1. Calculate time to reach target for each car
-2. Sort by starting position (farthest first)
-3. Cars form a fleet if the one behind takes LONGER time than the one ahead (they can't catch up)
+1. Calculate the time each car needs to reach the destination: `time = (target - position) / speed`.
+2. Sort cars by their starting position in descending order (closest to the destination first).
+3. If a car behind takes more time to reach the destination than the car (or fleet) in front of it, it will never catch up and thus forms a new fleet. If it takes less or equal time, it will join the fleet in front.
 
 **Algorithm**:
-1. Create array of `{position, time}` pairs
-2. Sort by position descending (furthest first)
-3. Iterate and track the maximum time seen so far
-4. If current car's time > maxTime, it forms a new fleet
-5. Otherwise, it joins the fleet ahead
+1. Pair each position with its calculated time to destination.
+2. Sort pairs by position descending.
+3. Initialize `fleets = 0` and `maxTime = 0`.
+4. Iterate through the sorted cars:
+   - If current car's `time > maxTime`:
+     - Increment `fleets`.
+     - Update `maxTime = current car's time`.
+5. Return `fleets`.
 
-**Time Complexity**: `O(N log N)` for sorting
-**Space Complexity**: `O(N)` for storing pairs
+**Time Complexity**: `O(N log N)` due to sorting.
+**Space Complexity**: `O(N)` to store the position-time pairs.
+
+### 2. Monotonic Stack
+
+**Intuition**: Similar to the max-time tracking, but uses a stack to keep track of the fleets. We push the arrival time onto the stack if it's greater than the top of the stack (meaning it can't catch up to the fleet ahead).
+
+**Algorithm**:
+1. Pair positions and speeds, then sort by position descending.
+2. For each car, calculate its time to target.
+3. If the stack is empty or the current time is greater than the top of the stack, push the current time.
+4. The size of the stack at the end is the number of fleets.
+
+**Time Complexity**: `O(N log N)` due to sorting.
+**Space Complexity**: `O(N)` for the stack and storage.

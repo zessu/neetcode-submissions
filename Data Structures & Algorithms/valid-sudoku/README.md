@@ -32,6 +32,14 @@ Output: true
 - Hash Table
 - Matrix
 
-## Solution: Three Pass Validation
+## Solution Approaches
 
-Check rows, columns, and 3x3 boxes independently.
+### 1. Brute Force
+- For every filled cell, scan its entire row, column, and 3x3 box to see if the value is duplicated.
+- **Time Complexity**: O(n²) where n=9
+- **Space Complexity**: O(1)
+
+### 2. Hash Set (Single Pass) (Optimal)
+- Use three sets (or arrays of sets) for rows, columns, and boxes to track seen numbers in one iteration.
+- **Time Complexity**: O(81) = O(1)
+- **Space Complexity**: O(81) = O(1)

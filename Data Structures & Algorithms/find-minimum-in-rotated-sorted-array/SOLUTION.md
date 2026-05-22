@@ -63,6 +63,17 @@ start = end = 4
 Return nums[4] = 0
 ```
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| Brute Force | O(n) | O(1) | Simple linear scan. Reliable but slow for large arrays. |
+| Binary Search | O(log n) | O(1) | Optimal approach utilizing the sorted property (even when rotated). |
+
+**Trade-offs**:
+- **Brute Force**: Extremely simple to implement and doesn't require the input to be sorted or rotated. However, it doesn't take advantage of the array's special properties, leading to linear time complexity.
+- **Binary Search**: Significantly faster for large datasets. It requires understanding the pivot property of rotated sorted arrays but provides logarithmic time complexity, making it the preferred choice for this problem.
+
 ## Key Insights
 
 1. **Why compare with right**: Comparing with right works even for non-rotated arrays (where minimum is at index 0)

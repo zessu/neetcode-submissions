@@ -48,10 +48,20 @@ class Solution {
 1. Extract all lengths before `#`
 2. After `#`, extract substrings of those lengths
 
-## Complexity
+## Complexity Analysis
 
 - **Encode**: O(n) where n is total characters
 - **Decode**: O(n)
+- **Space**: O(1) extra space (ignoring the output string/list)
+
+## Comparison
+
+| Approach | Reliability | Efficiency | Notes |
+| :--- | :--- | :--- | :--- |
+| **Special Delimiter** | Low | High | Fails if the delimiter exists in the input |
+| **Length Prefix** | High | High | Robustly handles any character in strings |
+
+The **Length Prefix** approach is the most robust as it can handle strings containing any possible character, including delimiters like `#` or `,`.
 
 ## Walkthrough
 

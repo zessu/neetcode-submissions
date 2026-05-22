@@ -63,6 +63,14 @@ i=7 (73): 73<76 → Stack=[6,7]
 Final result: [1,1,4,2,1,1,0,0]
 ```
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Brute Force** | $O(n^2)$ | $O(1)$ | Simple to implement | Too slow for $n=10^5$ |
+| **Monotonic Stack** | $O(n)$ | $O(n)$ | Standard optimal solution, very clean | Extra space for stack |
+| **DP (Optimized Scan)** | $O(n)$ | $O(1)$ | Optimal time and space (in-place) | More complex pointer logic |
+
 ## Key Insight
 
 The monotonic stack eliminates redundant comparisons by:

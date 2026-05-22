@@ -74,11 +74,20 @@ class Solution {
 2. For each i, use two pointers (left, right) for the remaining elements
 3. Skip duplicates to avoid duplicate triplets
 
-## Complexity
+## Complexity Analysis
 
-- **Brute Force**: O(n³) - very slow
-- **Optimal**: O(n²) - much faster
-- **Space**: O(1) extra (ignoring output)
+- **Time Complexity**: O(n²) - sorting takes O(n log n), and the nested loops (i and two pointers) take O(n²).
+- **Space Complexity**: O(1) or O(n) depending on the sorting implementation.
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Notes |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n³) | O(k) | Inefficient, hard to handle duplicates |
+| **Hash Map** | O(n²) | O(n) | Faster but uses extra space |
+| **Two Pointers** | O(n²) | O(1) | Optimal time and space, handles duplicates easily |
+
+The **Sort + Two Pointers** approach is the standard optimal solution as it handles duplicates efficiently without additional space.
 
 ## Walkthrough
 

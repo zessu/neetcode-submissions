@@ -19,6 +19,20 @@ Output: [0,0,9,0,0]
 - Array
 - Prefix Sum
 
-## Solution: Prefix and Suffix Products
+## Solution Approaches
 
-Compute products to the left and right of each index, then multiply.
+### 1. Brute Force
+- For each index `i`, iterate through the entire array and multiply all elements where `j !== i`.
+- **Time Complexity**: O(n²)
+- **Space Complexity**: O(1) (ignoring output)
+
+### 2. Division (Not allowed if 0 exists)
+- Calculate total product of all elements.
+- For each index `i`, `result[i] = totalProduct / nums[i]`.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(1)
+
+### 3. Prefix and Suffix Products (Optimal)
+- Compute products to the left and right of each index, then multiply.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(1) extra (ignoring output)

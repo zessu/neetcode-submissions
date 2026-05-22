@@ -20,6 +20,14 @@ Output: 1
 - Two Pointers
 - Greedy
 
-## Solution: Two Pointers
+## Solution Approaches
 
-Start with widest container, always move the shorter line inward.
+### 1. Brute Force
+- Check every possible pair of lines and calculate the water trapped between them.
+- **Time Complexity**: O(n²)
+- **Space Complexity**: O(1)
+
+### 2. Two Pointers (Optimal)
+- Start with pointers at both ends and move the pointer pointing to the shorter line inward.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(1)

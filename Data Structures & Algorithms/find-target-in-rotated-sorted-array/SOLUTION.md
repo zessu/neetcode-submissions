@@ -87,6 +87,17 @@ Iteration 3:
 Output: 4
 ```
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| Brute Force | O(n) | O(1) | Simple linear scan. Reliable but slow for large arrays. |
+| Modified Binary Search | O(log n) | O(1) | Optimal approach utilizing the sorted property (even when rotated). |
+
+**Trade-offs**:
+- **Brute Force**: Extremely simple to implement and doesn't require any special conditions on the input array. However, it's inefficient for large datasets with a linear time complexity.
+- **Modified Binary Search**: Significantly faster for large datasets, providing logarithmic time complexity. It requires a more complex implementation to correctly identify which half of the array is sorted and whether the target lies within it.
+
 ## Key Insights
 
 1. **Why this works**: At least one half is always sorted in a rotated array

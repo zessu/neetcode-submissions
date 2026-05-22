@@ -86,6 +86,14 @@ class Solution {
 }
 ```
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Linear Search** | $O(n)$ | $O(1)$ | Simple, works on unsorted arrays | Very slow for large $n$ |
+| **Iterative Binary Search** | $O(\log n)$ | $O(1)$ | Most efficient space usage | Requires sorted array |
+| **Recursive Binary Search** | $O(\log n)$ | $O(\log n)$ | Often easier to reason about | Stack overhead ($O(\log n)$ space) |
+
 ## Key Insights
 
 1. **Why binary search works**: The array is sorted, so we can eliminate half the search space with each comparison

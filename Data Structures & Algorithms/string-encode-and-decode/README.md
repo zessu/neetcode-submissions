@@ -16,6 +16,14 @@ Output: "neet#code" (or similar format)
 - String
 - Design
 
-## Solution: Length Prefix
+## Solution Approaches
 
-Format: `length#string` for each string.
+### 1. Special Delimiter
+- Join strings with a character that doesn't appear in the strings (difficult if all ASCII is allowed).
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(k) for delimiter
+
+### 2. Length Prefix (Optimal)
+- For each string, store its length followed by a delimiter and the string itself: `4#neet4#code`.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(1) additional per string

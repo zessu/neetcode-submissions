@@ -38,30 +38,29 @@ Explanation: merged array = [1,2,3,4] and median is (2 + 3) / 2 = 2.5.
 - Divide and Conquer
 
 ## Company Tags
+## Topics
 
-- Google
-- Amazon
-- Microsoft
-- Apple
+- Array
+- Binary Search
+- Divide and Conquer
 
 ## Solution Approaches
 
-### Binary Search (Partitioning)
+### 1. Merge and Sort
+- Combine both arrays into one, sort it, and find the median.
+- **Time Complexity**: O((m+n) log (m+n))
+- **Space Complexity**: O(m+n)
 
-**Intuition**: Instead of merging the arrays, we can find a partition point in both arrays such that the elements on the left side are smaller than the elements on the right side. Since both arrays are sorted, we can use binary search to find this partition.
+### 2. Two Pointers (Linear Merge)
+- Use two pointers to simulate the merge process and stop at the middle element(s).
+- **Time Complexity**: O(m+n)
+- **Space Complexity**: O(1)
 
-**Algorithm**:
-1. Ensure `nums1` is the smaller array to minimize the binary search range.
-2. Define a search space `[0, m]` on the smaller array.
-3. Partition both arrays such that the total number of elements on the left is `(m + n + 1) / 2`.
-4. Check if the partition is valid:
-   - `maxLeft1 <= minRight2`
-   - `maxLeft2 <= minRight1`
-5. If valid, calculate the median based on whether the total length is even or odd.
-6. If not valid, adjust the binary search range.
+### 3. Binary Search (Partitioning) (Optimal)
+- Find a partition point such that elements on the left side are smaller than those on the right.
+- **Time Complexity**: O(log(min(m, n)))
+- **Space Complexity**: O(1)
 
-**Time Complexity**: O(log(min(m, n)))
-**Space Complexity**: O(1) (ignoring slice operations if used)
 
 ## Visual Explanation
 

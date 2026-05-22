@@ -26,6 +26,14 @@ Output: false
 - String
 - Stack
 
-## Solution: Stack
+## Solution Approaches
 
-Push opening brackets, match with closing.
+### 1. String Replacement (Brute Force)
+- Repeatedly replace `()`, `[]`, and `{}` with an empty string until none remain. If the final string is empty, it's valid.
+- **Time Complexity**: O(n²)
+- **Space Complexity**: O(1) or O(n) depending on string implementation
+
+### 2. Stack (Optimal)
+- Use a stack to push opening brackets and pop/match when a closing bracket is encountered.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(n)

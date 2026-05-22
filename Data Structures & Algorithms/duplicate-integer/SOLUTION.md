@@ -61,9 +61,16 @@ class Solution {
 }
 ```
 
-**Complexity**:
 - Time: `O(n log n)` - dominated by sorting
 - Space: `O(1)` if in-place sort, `O(n)` otherwise
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Brute Force** | $O(n^2)$ | $O(1)$ | No extra space | Extremely slow for large arrays |
+| **Sorting** | $O(n \log n)$ | $O(1)$ | Space efficient | Slower than hashing, modifies input |
+| **Hash Set** | $O(n)$ | $O(n)$ | Fast, single pass | Uses extra memory |
 
 ## Key Insights
 

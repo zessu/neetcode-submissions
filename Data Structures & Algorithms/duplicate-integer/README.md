@@ -55,11 +55,36 @@ Use a HashSet to check for duplicates in O(n) time.
 
 ## Solution Approaches
 
-### 1. HashSet Approach
-- Iterate through array, add each element to a Set
-- If element already exists in Set, return true
-- Otherwise, return false
+### 1. Brute Force
 
-### 2. Sorting Approach
-- Sort the array
-- Check if any adjacent elements are equal
+**Intuition**: Compare every pair of elements to check for duplicates.
+
+**Time Complexity**: `O(n²)`
+**Space Complexity**: `O(1)`
+
+### 2. Sorting
+
+**Intuition**: Sorting the array brings duplicates together as adjacent elements.
+
+**Algorithm**:
+1. Sort the input array `nums`.
+2. Iterate from `i = 1` to `n-1`:
+   - If `nums[i] == nums[i-1]`, return `true`.
+3. Return `false`.
+
+**Time Complexity**: `O(n log n)` due to sorting.
+**Space Complexity**: `O(1)` or `O(n)` depending on the sorting implementation.
+
+### 3. Hash Set (Optimal)
+
+**Intuition**: Use a hash set to store elements we've seen so far. Hash sets provide average `O(1)` lookup time.
+
+**Algorithm**:
+1. Initialize an empty hash set.
+2. For each number in `nums`:
+   - If number is in the set, return `true`.
+   - Add number to the set.
+3. Return `false`.
+
+**Time Complexity**: `O(n)`
+**Space Complexity**: `O(n)` to store elements in the set.

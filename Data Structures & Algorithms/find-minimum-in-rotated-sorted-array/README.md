@@ -50,8 +50,19 @@ Output: 11
 
 ## Solution Approaches
 
-### Binary Search
+### 1. Brute Force
+**Intuition**: Iterate through the entire array and track the minimum element found.
 
+**Algorithm**:
+1. Initialize `min = nums[0]`.
+2. Iterate through `nums` from index 1 to `n-1`.
+3. If `nums[i] < min`, update `min = nums[i]`.
+4. Return `min`.
+
+**Time Complexity**: O(n)
+**Space Complexity**: O(1)
+
+### 2. Binary Search (Optimal)
 **Intuition**: In a rotated sorted array, one half is sorted and the other contains the minimum. Use binary search to find the pivot point.
 
 **Algorithm**:

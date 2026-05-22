@@ -60,9 +60,23 @@ The implementation uses a `Map` to store keys. Each key maps to an object contai
 ## Complexity Analysis
 
 - **Time Complexity**:
-  - `set`: O(N) where N is the number of entries for the key (due to array spreading `[...existing.keys, timestamp]`).
-  - `get`: O(T * N) in the worst case, where T is the timestamp value and N is the number of entries (due to the loop and `findIndex`).
-- **Space Complexity**: O(M + N) where M is the number of keys and N is the total number of entries.
+  - `set`: O(N) in this implementation (due to array spreading `[...existing.keys, timestamp]`).
+  - `get`: O(T * N) in this implementation (due to linear scan).
+- **Optimal Time Complexity**:
+  - `set`: O(1) (using `push`).
+  - `get`: O(log N) (using binary search).
+- **Space Complexity**: O(M + N)
+
+## Comparison
+
+| Approach | set() Complexity | get() Complexity | Space |
+| :--- | :--- | :--- | :--- |
+| **Linear Scan** | O(1)* | O(n) | O(n) |
+| **Binary Search** | O(1)* | O(log n) | O(n) |
+
+\* Assuming efficient array appending.
+
+The **Binary Search** approach is the optimal choice for this problem because timestamps are added in strictly increasing order, making the values naturally sorted and searchable in logarithmic time.
 
 ## Walkthrough
 

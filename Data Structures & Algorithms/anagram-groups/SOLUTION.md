@@ -91,3 +91,12 @@ class Solution {
 This approach has:
 - **Time Complexity**: `O(m * n)` - no sorting needed
 - **Space Complexity**: `O(m * n)`
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Sorting** | $O(m \cdot n \log n)$ | $O(m \cdot n)$ | Simple to implement, works for any character set | Slower for long strings due to $n \log n$ sorting |
+| **Char Count Signature** | $O(m \cdot n)$ | $O(m \cdot n)$ | Theoretically faster, linear time relative to total characters | Slightly more complex key generation |
+
+**Key Insight**: While the character count approach is asymptotically faster, the sorting approach is often sufficient given the constraints (string length $\le 100$) and is more straightforward to implement. The choice often depends on whether $n \log n$ is significantly larger than the character set size.

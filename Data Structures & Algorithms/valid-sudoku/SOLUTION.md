@@ -64,10 +64,20 @@ Validate three independent conditions:
 2. **Columns**: Each column contains no duplicate 1-9  
 3. **3x3 Grids**: Each sub-box contains no duplicate 1-9
 
-## Complexity
+## Complexity Analysis
 
-- **Time**: O(81) = O(1) - fixed 9x9 board
-- **Space**: O(1) - fixed hash maps
+- **Time**: O(81) = O(1) - The board size is fixed at 9x9, so the operations are constant.
+- **Space**: O(1) - We use a fixed amount of extra space for hash maps.
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n³) | O(1) | Triple scan for every cell |
+| **Three-Pass Scan** | O(1) | O(1) | Check rows, then cols, then boxes |
+| **Single-Pass Hash**| O(1) | O(1) | Track all three in one loop |
+
+The **Three-Pass Scan** is very readable and straightforward, while a **Single-Pass** approach with optimized indexing is often slightly faster in practice.
 
 ## Walkthrough
 

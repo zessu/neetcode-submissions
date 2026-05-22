@@ -32,11 +32,19 @@ Output: 9
 - Hash Table
 - Union Find
 
-## Solution Approach (HashSet)
+## Solution Approaches
 
-**Core Insight**: A number only starts a sequence if `num-1` is NOT in the set.
+### 1. Brute Force
+- For each number, check if the next consecutive number exists by scanning the entire array.
+- **Time Complexity**: O(n³)
+- **Space Complexity**: O(1)
 
-1. Add all numbers to a HashSet
-2. For each number, check if it's a sequence starter
-3. If yes, count forward to find the full sequence
-4. Track the maximum length
+### 2. Sorting
+- Sort the array and iterate through to find the longest consecutive sequence.
+- **Time Complexity**: O(n log n)
+- **Space Complexity**: O(1) or O(n)
+
+### 3. HashSet (Optimal)
+- Store all numbers in a HashSet and only start counting from a number if `num - 1` is not in the set.
+- **Time Complexity**: O(n)
+- **Space Complexity**: O(n)

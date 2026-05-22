@@ -64,7 +64,15 @@ The solution uses a **Stack** to evaluate Reverse Polish Notation:
 - **Time Complexity**: `O(n)` - each token processed once
 - **Space Complexity**: `O(n)` - stack stores at most n/2 numbers
 
-## Walkthrough
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Pros | Cons |
+| :--- | :--- | :--- | :--- | :--- |
+| **Iterative Stack** | $O(n)$ | $O(n)$ | Very efficient, easy to follow | Requires manual stack management |
+| **Recursive** | $O(n)$ | $O(n)$ | Clean functional approach | Can hit recursion depth limits for large inputs |
+
+## Key Insights
+
 
 ```
 Input: tokens = ["2","1","+","3","*"]

@@ -97,6 +97,16 @@ The solution attempts to find the median by partitioning the two sorted arrays.
 - **Time Complexity**: O(log(min(m, n))) due to binary search on the smaller array.
 - **Space Complexity**: O(m + n) in this specific implementation because of `slice` operations.
 
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Notes |
+| :--- | :--- | :--- | :--- |
+| **Merge and Sort** | O((m+n) log (m+n)) | O(m+n) | Simplest to implement |
+| **Two Pointers** | O(m+n) | O(1) | Linear time, very intuitive |
+| **Binary Search** | O(log(min(m, n)))| O(1) | Most efficient, requires careful implementation |
+
+The **Binary Search (Partitioning)** approach is the most efficient, especially when dealing with massive datasets, as it scales logarithmically rather than linearly.
+
 ## Walkthrough
 
 ```

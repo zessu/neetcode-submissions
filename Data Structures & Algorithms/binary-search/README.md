@@ -53,7 +53,14 @@ Before attempting this problem, you should be comfortable with:
 
 ## Solution Approaches
 
-### 1. Iterative Binary Search
+### 1. Brute Force (Linear Search)
+
+**Intuition**: Scan every element in the array one by one until the target is found. This doesn't take advantage of the sorted property.
+
+**Time Complexity**: `O(n)`
+**Space Complexity**: `O(1)`
+
+### 2. Iterative Binary Search (Optimal)
 
 **Intuition**: Binary search works by repeatedly cutting the search space in half. Check the middle element and decide which half to search next.
 

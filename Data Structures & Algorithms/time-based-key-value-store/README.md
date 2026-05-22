@@ -45,28 +45,25 @@ timeMap.get("foo", 5);         // return "bar2"
 - Binary Search
 - Design
 
-## Company Tags
+## Topics
 
-- Google
-- Amazon
-- Netflix
-- Microsoft
+- Hash Table
+- String
+- Binary Search
+- Design
 
 ## Solution Approaches
 
-### Hash Map with Binary Search
+### 1. Hash Map + Linear Scan
+- Store `(timestamp, value)` pairs in a list for each key. Use linear scan to find the latest valid timestamp.
+- **Time Complexity**: `set`: O(1), `get`: O(n)
+- **Space Complexity**: O(n)
 
-**Intuition**: Use a hash map where the key is the input key and the value is a list of `(timestamp, value)` pairs. Since `set` calls are strictly increasing in timestamp, the list will be sorted by timestamp, allowing for efficient retrieval using binary search.
+### 2. Hash Map + Binary Search (Optimal)
+- Use a hash map with lists of `(timestamp, value)` pairs. Since timestamps are strictly increasing, use binary search for retrieval.
+- **Time Complexity**: `set`: O(1), `get`: O(log n)
+- **Space Complexity**: O(n)
 
-**Algorithm**:
-1. `set(key, value, timestamp)`: Append `(timestamp, value)` to the list associated with `key`.
-2. `get(key, timestamp)`: Use binary search to find the largest timestamp in the list that is less than or equal to the target timestamp.
-
-**Time Complexity**:
-- `set`: O(1)
-- `get`: O(log N) where N is the number of values stored for the key.
-
-**Space Complexity**: O(M + N) where M is the number of keys and N is the total number of key-value pairs.
 
 ## Common Pitfalls
 

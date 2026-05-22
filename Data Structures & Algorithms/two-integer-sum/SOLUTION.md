@@ -27,10 +27,20 @@ class Solution {
 3. If complement exists in map, we found the pair
 4. Otherwise, add current num and index to map
 
-## Complexity
+## Complexity Analysis
 
-- **Time**: O(n) - single pass
-- **Space**: O(n) - map stores elements
+- **Time**: O(n) - single pass through the array.
+- **Space**: O(n) - to store the elements in the hash map.
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Notes |
+| :--- | :--- | :--- | :--- |
+| **Brute Force** | O(n²) | O(1) | Simplest but slowest |
+| **Sorting** | O(n log n) | O(n) | Requires tracking original indices |
+| **Hash Map** | O(n) | O(n) | Most efficient for unsorted arrays |
+
+The **Hash Map** approach is the industry standard for this problem when the input is unsorted, as it provides linear time performance.
 
 ## Walkthrough
 

@@ -42,7 +42,32 @@ Output: 22
 
 ## Solution Approaches
 
-### Stack Approach
-- Push numbers onto stack
-- When encountering an operator, pop two operands, apply operation, push result
-- Final result is the only item left on the stack
+### 1. Stack (Iterative)
+
+**Intuition**: Reverse Polish Notation is designed to be evaluated using a stack. Numbers are pushed onto the stack, and when an operator is encountered, the top two numbers are popped, the operation is performed, and the result is pushed back.
+
+**Algorithm**:
+1. Initialize an empty stack.
+2. For each token in the input:
+   - If the token is an operand (number), convert it to an integer and push it onto the stack.
+   - If the token is an operator (+, -, *, /):
+     - Pop the top two elements from the stack (let them be `b` and `a`, where `a` was pushed before `b`).
+     - Perform the operation `a operator b`.
+     - Push the result back onto the stack.
+3. Return the final element remaining in the stack.
+
+**Time Complexity**: `O(n)` where `n` is the number of tokens. Each token is processed once.
+**Space Complexity**: `O(n)` for the stack.
+
+### 2. Recursion (Functional)
+
+**Intuition**: RPN can also be viewed as a post-order traversal of an expression tree. We can evaluate it recursively by processing tokens from right to left.
+
+**Algorithm**:
+1. Define a recursive function that takes the token list.
+2. Pop the last token.
+3. If it's a number, return it.
+4. If it's an operator, recursively evaluate the right operand then the left operand, then apply the operator.
+
+**Time Complexity**: `O(n)`
+**Space Complexity**: `O(n)` for the recursion stack.

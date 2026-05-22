@@ -42,10 +42,20 @@ Use **two stacks**:
 
 For each push, we record what the minimum would be AFTER this push.
 
-## Complexity
+## Complexity Analysis
 
 - **All operations**: O(1) time
 - **Space**: O(n) for minStack
+
+## Comparison
+
+| Approach | Time Complexity | Space Complexity | Description |
+| :--- | :--- | :--- | :--- |
+| **Auxiliary Min Stack** | O(1) | O(n) | Synchronized second stack for mins |
+| **Single Stack (Pairs)** | O(1) | O(n) | Each stack entry is `[value, min]` |
+| **Variable with Math** | O(1) | O(1)* | Store differences (complex to implement) |
+
+The **Auxiliary Min Stack** is the most intuitive and readable implementation while maintaining O(1) performance for all operations.
 
 ## Walkthrough
 

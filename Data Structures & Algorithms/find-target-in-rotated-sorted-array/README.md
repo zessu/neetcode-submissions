@@ -53,8 +53,18 @@ Output: -1
 
 ## Solution Approaches
 
-### Modified Binary Search
+### 1. Brute Force
+**Intuition**: Iterate through the entire array and check if any element matches the target.
 
+**Algorithm**:
+1. Iterate through `nums` from index 0 to `n-1`.
+2. If `nums[i] === target`, return `i`.
+3. If the loop completes without finding the target, return `-1`.
+
+**Time Complexity**: O(n)
+**Space Complexity**: O(1)
+
+### 2. Modified Binary Search (Optimal)
 **Intuition**: At each step, determine which half is properly sorted, then check if target lies within that sorted half.
 
 **Algorithm**:
@@ -79,46 +89,19 @@ Output: -1
 nums = [4,5,6,7,0,1,2], target = 0
 
 Step 1: left=0, right=6, mid=3
-        nums[mid]=7 > nums[right]=2
-        Right half sorted [0,1,2]
-        target=0 in [0,1,2]? Yes → left = mid + 1 = 4
+        nums[mid]=7, nums[right]=2
+        Left half [4,5,6,7] is sorted (nums[0] <= nums[3])
+        Target 0 is not in [4, 7] → Search right half
+        left = mid + 1 = 4
 
 Step 2: left=4, right=6, mid=5
-        nums[mid]=1 < nums[right]=2
-        Right half sorted [0,1,2]
-        target=0 in [0,1]? Yes → left = mid + 1 = 6
+        nums[mid]=1, nums[right]=2
+        Right half [1,2] is sorted (nums[5] <= nums[6])
+        Target 0 is not in [1, 2] → Search left half
+        right = mid - 1 = 4
 
-Step 3: left=6, right=6, mid=6
-        nums[mid]=2 === target → Return 6 ???
-
-Wait, let me recalculate...
-
-Actually:
-Step 1: left=0, right=6, mid=3
-        7 > 2, right half sorted [0,1,2]
-        target=0 in [0,1,2]? Yes → left = 4
-
-Step 2: left=4, right=6, mid=5
-        1 < 2, right half sorted [0,1,2]
-        target=0 in [0,1]? Yes → left = 6
-
-Step 3: left=6, right=6, mid=6
-        2 === 0? No
-        1 < 2, right half sorted [0,1,2]
-        target=0 in [0,1]? Yes → left = 7
-
-left > right, Return -1 ???
-
-Let me trace through the actual code more carefully...
-
-In the actual submission:
-mid = floor((4+6)/2) = 5, nums[5]=1
-nums[5] < nums[6]? 1 < 2 Yes
-target >= nums[4] && target < nums[5]? 0 >= 0 && 0 < 1 Yes
-right = mid - 1 = 4
-
-Now left=4, right=4, mid=4
-nums[4] = 0 === target → return 4 ✓
+Step 3: left=4, right=4, mid=4
+        nums[mid]=0 === target → Return 4
 ```
 
 ## Common Pitfalls
