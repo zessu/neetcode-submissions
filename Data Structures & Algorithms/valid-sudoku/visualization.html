@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Sudoku - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #636e72; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #dfe6e9;
+        }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .sudoku-board {
+            display: inline-grid;
+            grid-template-columns: repeat(9, 40px);
+            gap: 1px;
+            background: #dfe6e9;
+            border: 3px solid #2d3436;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+        .sudoku-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            font-weight: 700;
+            font-size: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .sudoku-cell.empty { color: #dfe6e9; }
+        .sudoku-cell.highlight-row { background: #ffffd8; }
+        .sudoku-cell.highlight-col { background: #ffd3b6; }
+        .sudoku-cell.highlight-box { background: #b5ead7; }
+        .sudoku-cell.border-right { border-right: 2px solid #2d3436; }
+        .sudoku-cell.border-bottom { border-bottom: 2px solid #2d3436; }
+        .board-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+        .board-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .rule-cards {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .rule-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .rule-card.row-rule { background: #ffffd8; }
+        .rule-card.col-rule { background: #ffd3b6; }
+        .rule-card.box-rule { background: #b5ead7; }
+        .rule-card h4 { font-size: 15px; margin-bottom: 6px; }
+        .rule-card p { font-size: 13px; margin: 0; }
+        .pointer-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .pointer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .pointer-left { background: #b5ead7; color: #2d3436; }
+        .pointer-right { background: #ffd3b6; color: #2d3436; }
+        .pointer-purple { background: #aa96da; color: #fff; }
+        .step-list { list-style: none; padding: 0; }
+        .step-list li {
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            font-size: 14px;
+            border-left: 3px solid #a8d8ea;
+        }
+        .step-list li.active { border-left-color: #ffd3b6; background: #fff8f0; }
+        .highlight { background: #ffffd8; padding: 2px 6px; border-radius: 4px; }
+        .success { color: #2d3436; background: #b5ead7; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .error-tag { color: #2d3436; background: #ff9aa2; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .resources-list { list-style: none; padding: 0; }
+        .resources-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #dfe6e9;
+            font-size: 14px;
+        }
+        .resources-list li:last-child { border-bottom: none; }
+        .formula-box {
+            background: #ffffd8;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Valid Sudoku</h1>
+            <p>LeetCode 36 &mdash; Medium</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Table</span>
+                <span class="tag">Matrix</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Determine if a 9&times;9 Sudoku board is valid. Only filled cells need to be validated according to three rules.</p>
+            <h3>Three Validation Rules</h3>
+            <div class="rule-cards">
+                <div class="rule-card row-rule">
+                    <h4>Rows</h4>
+                    <p>Each row must have digits 1-9 without repetition</p>
+                </div>
+                <div class="rule-card col-rule">
+                    <h4>Columns</h4>
+                    <p>Each column must have digits 1-9 without repetition</p>
+                </div>
+                <div class="rule-card box-rule">
+                    <h4>3&times;3 Boxes</h4>
+                    <p>Each 3&times;3 sub-box must have digits 1-9 without repetition</p>
+                </div>
+            </div>
+            <h3>Example Board</h3>
+            <div class="sudoku-board">
+                <div class="sudoku-cell">5</div><div class="sudoku-cell">3</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">7</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell">.</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">9</div><div class="sudoku-cell border-right">8</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">6</div><div class="sudoku-cell">.</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">2</div>
+                <div class="sudoku-cell">1</div><div class="sudoku-cell">5</div><div class="sudoku-cell border-right">4</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">7</div><div class="sudoku-cell border-bottom">.</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">6</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">1</div><div class="sudoku-cell border-right">3</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">9</div><div class="sudoku-cell border-bottom">4</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">8</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">9</div><div class="sudoku-cell">7</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-bottom">.</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-bottom">.</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">7</div>
+                <div class="sudoku-cell">6</div><div class="sudoku-cell">1</div><div class="sudoku-cell border-right">5</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">2</div><div class="sudoku-cell">3</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">1</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">5</div><div class="sudoku-cell">.</div><div class="sudoku-cell">.</div>
+
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell border-right">.</div>
+                <div class="sudoku-cell">9</div><div class="sudoku-cell">8</div><div class="sudoku-cell border-right">6</div>
+                <div class="sudoku-cell">.</div><div class="sudoku-cell">.</div><div class="sudoku-cell">.</div>
+            </div>
+            <p>Output: <span class="success">true</span></p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p>For every filled cell, scan its entire row, column, and 3&times;3 box to check for duplicates.</p>
+            <ul class="step-list">
+                <li class="active">For each cell (r, c) with a value, scan all 9 cells in row r</li>
+                <li>Scan all 9 cells in column c</li>
+                <li>Scan all 9 cells in the 3&times;3 box containing (r, c)</li>
+                <li>If any duplicate found, return <span class="error-tag">false</span></li>
+            </ul>
+            <p><strong>Time:</strong> O(n&sup3;) where n=9 &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Three-Pass Scan (Implemented)</h2>
+            <p>Validate rows, then columns, then 3&times;3 boxes in three separate passes using hash maps to detect duplicates.</p>
+            <h3>Visual: Three Validation Passes</h3>
+            <div class="pointer-diagram">
+                <div class="pointer pointer-left">Pass 1: Rows</div>
+                <div class="pointer pointer-right">Pass 2: Columns</div>
+                <div class="pointer pointer-purple">Pass 3: 3&times;3 Boxes</div>
+            </div>
+            <h3>Row Validation</h3>
+            <div class="code-block">for (const item in board) {
+    const rowVals = new Map();
+    for (let i = 0; i &lt; 9; i++) {
+        const current = board[item][i];
+        if (rowVals.has(current) &amp;&amp; current !== ".") return false;
+        rowVals.set(current, 1);
+    }
+}</div>
+            <h3>Column Validation</h3>
+            <div class="code-block">for (const item in board) {
+    const colVals = new Map();
+    for (let i = 0; i &lt; 9; i++) {
+        const current = board[i][item];
+        if (colVals.has(current) &amp;&amp; current !== ".") return false;
+        colVals.set(current, 1);
+    }
+}</div>
+            <h3>3&times;3 Box Validation</h3>
+            <div class="code-block">for (let i = 0; i &lt; 9; i += 3) {
+    for (let j = 0; j &lt; 9; j += 3) {
+        const gridVals = new Map();
+        for (let r = i; r &lt; i + 3; r++) {
+            for (let c = j; c &lt; j + 3; c++) {
+                const current = board[r][c];
+                if (gridVals.has(current) &amp;&amp; current !== ".") return false;
+                gridVals.set(current, 1);
+            }
+        }
+    }
+}</div>
+            <p><strong>Time:</strong> O(81) = O(1) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Single-Pass Hash Set</h2>
+            <p>Use three arrays of sets (for rows, columns, and boxes) and validate everything in a single pass through the board.</p>
+            <h3>Visual: Box Index Formula</h3>
+            <div class="formula-box">
+                boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3)
+            </div>
+            <div class="code-block">const rows = Array.from({length: 9}, () =&gt; new Set());
+const cols = Array.from({length: 9}, () =&gt; new Set());
+const boxes = Array.from({length: 9}, () =&gt; new Set());
+
+for (let r = 0; r &lt; 9; r++) {
+    for (let c = 0; c &lt; 9; c++) {
+        const val = board[r][c];
+        if (val === '.') continue;
+        const boxIdx = Math.floor(r / 3) * 3 + Math.floor(c / 3);
+        if (rows[r].has(val) || cols[c].has(val) || boxes[boxIdx].has(val))
+            return false;
+        rows[r].add(val);
+        cols[c].add(val);
+        boxes[boxIdx].add(val);
+    }
+}</div>
+            <p><strong>Time:</strong> O(81) = O(1) &nbsp;|&nbsp; <strong>Space:</strong> O(81) = O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr>
+                    <th>Approach</th>
+                    <th>Time</th>
+                    <th>Space</th>
+                    <th>Notes</th>
+                </tr>
+                <tr>
+                    <td>Brute Force</td>
+                    <td>O(n&sup3;)</td>
+                    <td>O(1)</td>
+                    <td>Triple scan for every cell</td>
+                </tr>
+                <tr>
+                    <td><strong>Three-Pass Scan</strong></td>
+                    <td><span class="success">O(1)</span></td>
+                    <td><span class="success">O(1)</span></td>
+                    <td>Readable, check rows/cols/boxes separately</td>
+                </tr>
+                <tr>
+                    <td>Single-Pass Hash</td>
+                    <td><span class="success">O(1)</span></td>
+                    <td>O(1)</td>
+                    <td>All three checks in one loop</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resources-list">
+                <li><a href="https://leetcode.com/problems/valid-sudoku/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=TjFXEUCMqI8" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sudoku" target="_blank">Sudoku (Wikipedia)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">Hash Table (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

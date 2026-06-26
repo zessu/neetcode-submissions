@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked List Cycle Detection - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; }
+        h3 { font-size: 18px; margin-bottom: 12px; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .linked-list { display: flex; align-items: center; justify-content: center; gap: 0; padding: 20px; margin: 16px 0; flex-wrap: wrap; }
+        .ll-node { display: flex; align-items: center; }
+        .node-box { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; border: 3px solid #a8d8ea; background: #fff; }
+        .node-arrow { font-size: 20px; color: #636e72; margin: 0 4px; }
+        .node-label { font-size: 11px; text-align: center; margin-top: 4px; font-weight: 600; }
+        .highlight-blue { border-color: #a8d8ea; background: #a8d8ea; }
+        .highlight-purple { border-color: #aa96da; background: #aa96da; color: #fff; }
+        .highlight-green { border-color: #b5ead7; background: #b5ead7; }
+        .highlight-orange { border-color: #ffd3b6; background: #ffd3b6; }
+        .highlight-red { border-color: #ff9aa2; background: #ff9aa2; }
+        .cycle-arrow { color: #ff9aa2; font-weight: 700; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        .set-vis { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+        .set-item { background: #aa96da; color: #fff; padding: 4px 10px; border-radius: 16px; font-size: 13px; font-weight: 600; }
+        .pointer-badges { display: flex; gap: 4px; margin-top: 4px; }
+        .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Linked List Cycle Detection</h1>
+            <p>LeetCode 141 &mdash; Determine if a linked list contains a cycle.</p>
+            <div class="tags">
+                <span class="tag">Linked List</span>
+                <span class="tag">Hash Table</span>
+                <span class="tag">Two Pointers</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given the head of a linked list, determine if there is a cycle &mdash; a node reachable again by following next pointers.</p>
+            <div class="linked-list">
+                <div class="ll-node" style="flex-direction:column">
+                    <div class="node-box">3</div>
+                    <div class="node-label">head</div>
+                </div>
+                <span class="node-arrow">&rarr;</span>
+                <div class="ll-node" style="flex-direction:column">
+                    <div class="node-box highlight-orange" id="cycle-target">2</div>
+                    <div class="node-label">cycle start</div>
+                </div>
+                <span class="node-arrow">&rarr;</span>
+                <div class="ll-node" style="flex-direction:column"><div class="node-box">0</div></div>
+                <span class="node-arrow">&rarr;</span>
+                <div class="ll-node" style="flex-direction:column"><div class="node-box">-4</div></div>
+                <span class="cycle-arrow">&circlearrowleft;</span>
+            </div>
+            <div class="code-block">Input:  head = [3, 2, 0, -4], pos = 1
+Output: true  (tail connects back to node at index 1)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: HashSet</h2>
+            <h3>Track Visited Nodes</h3>
+            <p>Store each visited node in a set. If we encounter a node already in the set, a cycle exists.</p>
+
+            <div class="step-card">
+                <div class="step-title">Iteration 1: Visit node 3</div>
+                <div class="linked-list" style="padding:8px">
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-blue">3</div><div class="pointer-badges"><span class="badge" style="background:#a8d8ea">curr</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">2</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">0</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">-4</div></div>
+                </div>
+                <div class="set-vis"><span style="font-size:13px;color:#636e72">Seen:</span><span class="set-item">3</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Iteration 2-4: Visit nodes 2, 0, -4</div>
+                <div class="set-vis"><span style="font-size:13px;color:#636e72">Seen:</span><span class="set-item">3</span><span class="set-item">2</span><span class="set-item">0</span><span class="set-item">-4</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Iteration 5: Visit node 2 again &mdash; already in set!</div>
+                <div class="linked-list" style="padding:8px">
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">3</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-red">2</div><div class="pointer-badges"><span class="badge" style="background:#ff9aa2">CYCLE!</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">0</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">-4</div></div>
+                </div>
+                <p><strong>Return true</strong></p>
+            </div>
+
+            <div class="code-block">seen = new Set()
+curr = head
+while curr:
+    if seen.has(curr): return true
+    seen.add(curr)
+    curr = curr.next
+return false</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Floyd's Tortoise and Hare (Optimal)</h2>
+            <h3>Two Pointers at Different Speeds</h3>
+            <p>Slow pointer moves 1 step, fast pointer moves 2 steps. If there's a cycle, they will eventually meet.</p>
+
+            <div class="step-card">
+                <div class="step-title">Step 1: slow=3, fast=3</div>
+                <div class="linked-list" style="padding:8px">
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-green">3</div><div class="pointer-badges"><span class="badge" style="background:#b5ead7">S</span><span class="badge" style="background:#ffd3b6">F</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">2</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">0</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">-4</div></div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 2: slow=2, fast=0</div>
+                <div class="linked-list" style="padding:8px">
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">3</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-green">2</div><div class="pointer-badges"><span class="badge" style="background:#b5ead7">S</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-orange">0</div><div class="pointer-badges"><span class="badge" style="background:#ffd3b6">F</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">-4</div></div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 3: slow=0, fast=2</div>
+                <div class="linked-list" style="padding:8px">
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">3</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-orange">2</div><div class="pointer-badges"><span class="badge" style="background:#ffd3b6">F</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-green">0</div><div class="pointer-badges"><span class="badge" style="background:#b5ead7">S</span></div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">-4</div></div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 4: slow=-4, fast=-4 &mdash; They meet!</div>
+                <div class="linked-list" style="padding:8px">
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">3</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">2</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box">0</div></div>
+                    <span class="node-arrow">&rarr;</span>
+                    <div class="ll-node" style="flex-direction:column"><div class="node-box highlight-red">-4</div><div class="pointer-badges"><span class="badge" style="background:#b5ead7">S</span><span class="badge" style="background:#ffd3b6">F</span><span class="badge" style="background:#ff9aa2">MEET</span></div></div>
+                </div>
+                <p><strong>slow === fast &rarr; Return true</strong></p>
+            </div>
+
+            <div class="code-block">slow = head, fast = head
+while fast &amp;&amp; fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    if slow === fast: return true
+return false</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Pros</th><th>Cons</th></tr>
+                <tr><td>HashSet</td><td>O(n)</td><td>O(n)</td><td>Simple and intuitive</td><td>Uses extra space</td></tr>
+                <tr><td>Floyd's (Two Pointers)</td><td>O(n)</td><td>O(1)</td><td>No extra space, elegant</td><td>Less intuitive</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/linked-list-cycle/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+linked+list+cycle" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Cycle_detection" target="_blank">Floyd's Cycle Detection (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

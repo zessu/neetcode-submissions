@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Consecutive Sequence - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; }
+        h3 { font-size: 18px; margin-bottom: 12px; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .diagram { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 16px; margin: 12px 0; flex-wrap: wrap; }
+        .num-box { width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+        .highlight-blue { background: #a8d8ea; }
+        .highlight-purple { background: #aa96da; color: #fff; }
+        .highlight-green { background: #b5ead7; }
+        .highlight-orange { background: #ffd3b6; }
+        .highlight-red { background: #ff9aa2; }
+        .highlight-yellow { background: #ffffd8; }
+        .dimmed { background: #dfe6e9; color: #b2bec3; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        .sequence-line { display: flex; align-items: center; gap: 4px; margin: 8px 0; }
+        .seq-num { background: #b5ead7; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 15px; }
+        .seq-arrow { color: #636e72; font-size: 18px; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Longest Consecutive Sequence</h1>
+            <p>LeetCode 128 &mdash; Find the length of the longest consecutive elements sequence in an unsorted array in O(n) time.</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Table</span>
+                <span class="tag">Union Find</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an unsorted array, find the length of the longest sequence of consecutive integers.</p>
+            <div class="code-block">Input:  nums = [100, 4, 200, 1, 3, 2]
+Output: 4  (sequence: 1, 2, 3, 4)</div>
+            <div class="diagram">
+                <div class="num-box highlight-blue">100</div>
+                <div class="num-box highlight-blue">4</div>
+                <div class="num-box highlight-blue">200</div>
+                <div class="num-box highlight-blue">1</div>
+                <div class="num-box highlight-blue">3</div>
+                <div class="num-box highlight-blue">2</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <h3>Check Every Number as a Potential Start</h3>
+            <p>For each number, scan the entire array to check if the next consecutive number exists.</p>
+            <div class="step-card">
+                <div class="step-title">For each num, linearly search for num+1, num+2, ...</div>
+                <div class="diagram">
+                    <div class="num-box highlight-orange">100</div>
+                    <span style="color:#636e72">&rarr; search for 101? No. Length = 1</span>
+                </div>
+                <div class="diagram">
+                    <div class="num-box highlight-orange">1</div>
+                    <span style="color:#636e72">&rarr; search for 2? Yes &rarr; 3? Yes &rarr; 4? Yes &rarr; 5? No. Length = 4</span>
+                </div>
+            </div>
+            <p><strong>Time:</strong> O(n&sup3;) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Sorting</h2>
+            <h3>Sort, Then Count Consecutive</h3>
+            <p>Sort the array and iterate through to find the longest run of consecutive numbers.</p>
+            <div class="step-card">
+                <div class="step-title">Sort and remove duplicates</div>
+                <div class="diagram">
+                    <div class="num-box highlight-green">1</div>
+                    <div class="num-box highlight-green">2</div>
+                    <div class="num-box highlight-green">3</div>
+                    <div class="num-box highlight-green">4</div>
+                    <div class="num-box dimmed">100</div>
+                    <div class="num-box dimmed">200</div>
+                </div>
+                <div class="sequence-line">
+                    <span class="seq-num">1</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num">2</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num">3</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num">4</span>
+                    <span style="margin-left:8px;color:#b5ead7;font-weight:700">length = 4</span>
+                </div>
+            </div>
+            <p><strong>Time:</strong> O(n log n) &nbsp;|&nbsp; <strong>Space:</strong> O(1) or O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: HashSet (Optimal)</h2>
+            <h3>Only Start Counting from Sequence Beginnings</h3>
+            <p>Put all numbers in a set. For each number, only start counting if <code>num - 1</code> is NOT in the set (meaning it's the start of a sequence).</p>
+
+            <div class="step-card">
+                <div class="step-title">Build set: {100, 4, 200, 1, 3, 2}</div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Check 100: has 99? No &rarr; sequence start</div>
+                <div class="diagram">
+                    <div class="num-box highlight-orange">100</div>
+                    <span style="color:#636e72">&rarr; has 101? No. Length = 1</span>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Check 4: has 3? Yes &rarr; NOT a start (skip)</div>
+                <div class="diagram"><div class="num-box dimmed">4</div><span style="color:#636e72">&rarr; skip</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Check 200: has 199? No &rarr; sequence start</div>
+                <div class="diagram">
+                    <div class="num-box highlight-orange">200</div>
+                    <span style="color:#636e72">&rarr; has 201? No. Length = 1</span>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Check 1: has 0? No &rarr; sequence start!</div>
+                <div class="sequence-line">
+                    <span class="seq-num" style="background:#b5ead7">1</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num" style="background:#b5ead7">2</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num" style="background:#b5ead7">3</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num" style="background:#b5ead7">4</span><span class="seq-arrow">&rarr;</span>
+                    <span class="seq-num dimmed">5?</span>
+                    <span style="margin-left:8px;color:#b5ead7;font-weight:700">length = 4</span>
+                </div>
+            </div>
+
+            <div class="code-block">numSet = new Set(nums)
+longest = 0
+for num of nums:
+    if !numSet.has(num - 1):       // sequence start
+        length = 0
+        while numSet.has(num + length):
+            length++
+        longest = max(longest, length)
+return longest</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Description</th></tr>
+                <tr><td>Brute Force</td><td>O(n&sup3;)</td><td>O(1)</td><td>Scan array for each number</td></tr>
+                <tr><td>Sorting</td><td>O(n log n)</td><td>O(1)/O(n)</td><td>Sort then count consecutive</td></tr>
+                <tr><td>HashSet</td><td>O(n)</td><td>O(n)</td><td>Optimal, O(1) lookups in set</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/longest-consecutive-sequence/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+longest+consecutive+sequence" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">Hash Table (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

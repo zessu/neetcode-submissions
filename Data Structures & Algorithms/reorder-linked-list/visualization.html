@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reorder Linked List - LeetCode 143</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #2d3436; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 1.15rem; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; color: #2d3436; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .linked-list {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .node {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid #dfe6e9;
+            background: #ffffff;
+            color: #2d3436;
+        }
+        .node.highlight { background: #a8d8ea; border-color: #a8d8ea; }
+        .node.active { background: #ffd3b6; border-color: #ffd3b6; }
+        .node.success { background: #b5ead7; border-color: #b5ead7; }
+        .node.error { background: #ff9aa2; border-color: #ff9aa2; }
+        .arrow { font-size: 20px; color: #636e72; }
+        .step-label {
+            font-weight: 600;
+            color: #aa96da;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .resources a {
+            color: #aa96da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .resources a:hover { text-decoration: underline; }
+        .resources li { margin-bottom: 8px; color: #636e72; }
+        ul { padding-left: 20px; }
+        li { color: #636e72; margin-bottom: 6px; }
+        .complexity { display: flex; gap: 16px; margin: 8px 0; }
+        .complexity span {
+            background: #ffffd8;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reorder Linked List</h1>
+        <div class="tags">
+            <span class="tag">Linked List</span>
+            <span class="tag">Two Pointers</span>
+            <span class="tag">Stack</span>
+            <span class="tag">LeetCode 143</span>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given the head of a singly linked-list, reorder it to:</p>
+            <div class="code-block">L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → ...</div>
+            <p>You may not modify the values in the list's nodes. Only nodes themselves may be changed.</p>
+            <div class="code-block">Input:  [1, 2, 3, 4, 5]
+Output: [1, 5, 2, 4, 3]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Find Middle + Reverse + Merge (Optimal)</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(1)</span>
+            </div>
+            <p>Split the list in half, reverse the second half, then merge the two halves alternately.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Input</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node">3</div><span class="arrow">→</span>
+                        <div class="node">4</div><span class="arrow">→</span>
+                        <div class="node">5</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Step 1 — Find Middle (slow/fast pointers)</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node highlight">3</div><span class="arrow">→</span>
+                        <div class="node">4</div><span class="arrow">→</span>
+                        <div class="node active">5</div>
+                    </div>
+                    <p style="font-size:13px;">slow = <strong>3</strong> (middle), fast = <strong>5</strong> (end)</p>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Step 2 — Split &amp; Reverse Second Half</span>
+                    <div class="linked-list">
+                        <span style="font-size:13px;margin-right:8px;">1st half:</span>
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node">3</div>
+                    </div>
+                    <div class="linked-list">
+                        <span style="font-size:13px;margin-right:8px;">2nd half reversed:</span>
+                        <div class="node success">5</div><span class="arrow">→</span>
+                        <div class="node success">4</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Step 3 — Merge Alternately</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node success">5</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node success">4</div><span class="arrow">→</span>
+                        <div class="node">3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Stack-Based</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(n)</span>
+            </div>
+            <p>Push all nodes onto a stack, then pop from the stack while iterating from the front to interleave nodes.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Push all nodes to stack</span>
+                    <div style="display:flex;flex-direction:column-reverse;align-items:center;gap:2px;">
+                        <div class="node" style="width:80px;border-radius:4px;">1 (bottom)</div>
+                        <div class="node" style="width:80px;border-radius:4px;">2</div>
+                        <div class="node" style="width:80px;border-radius:4px;">3</div>
+                        <div class="node" style="width:80px;border-radius:4px;">4</div>
+                        <div class="node active" style="width:80px;border-radius:4px;">5 (top)</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <span class="step-label">Pop &amp; interleave</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node active">5</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node active">4</div><span class="arrow">→</span>
+                        <div class="node">3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Array-Based</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(n)</span>
+            </div>
+            <p>Store all nodes in an array, then use two pointers (start and end) to rebuild the list.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Store in array</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="node" style="border-radius:4px 0 0 4px;">1</div>
+                        <div class="node" style="border-radius:0;">2</div>
+                        <div class="node" style="border-radius:0;">3</div>
+                        <div class="node" style="border-radius:0;">4</div>
+                        <div class="node" style="border-radius:0 4px 4px 0;">5</div>
+                    </div>
+                    <p style="font-size:13px;">↑ start &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↑ end</p>
+                </div>
+                <div class="step-row">
+                    <span class="step-label">Rebuild: alternate start++ and end--</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node active">5</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node active">4</div><span class="arrow">→</span>
+                        <div class="node">3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Mid + Reverse + Merge</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Optimal space, in-place</td>
+                        <td>Multiple passes, more code</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stack-Based</strong></td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                        <td>Simple logic</td>
+                        <td>Extra space for stack</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Array-Based</strong></td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                        <td>Easy to implement</td>
+                        <td>Extra space for array</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/reorder-list/">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+reorder+list">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Linked_list">Linked List Data Structure</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Two-pointer_algorithm">Two Pointer Technique</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

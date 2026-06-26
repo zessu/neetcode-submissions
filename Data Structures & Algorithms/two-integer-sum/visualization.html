@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Sum - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #636e72; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #dfe6e9;
+        }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .array-diagram {
+            display: flex;
+            gap: 4px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+        .array-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .array-val {
+            width: 56px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 18px;
+            background: #ffffff;
+        }
+        .array-val.active { border-color: #ffd3b6; background: #fff8f0; }
+        .array-val.found { border-color: #b5ead7; background: #f0faf5; }
+        .array-idx {
+            font-size: 11px;
+            color: #636e72;
+            margin-top: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .hashmap-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .hashmap-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hashmap-key {
+            background: #aa96da;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 60px;
+            text-align: center;
+        }
+        .hashmap-arrow { color: #636e72; font-size: 18px; }
+        .hashmap-value {
+            background: #a8d8ea;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 60px;
+            text-align: center;
+        }
+        .pointer-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .pointer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .pointer-left { background: #b5ead7; color: #2d3436; }
+        .pointer-right { background: #ffd3b6; color: #2d3436; }
+        .step-list { list-style: none; padding: 0; }
+        .step-list li {
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            font-size: 14px;
+            border-left: 3px solid #a8d8ea;
+        }
+        .step-list li.active { border-left-color: #ffd3b6; background: #fff8f0; }
+        .highlight { background: #ffffd8; padding: 2px 6px; border-radius: 4px; }
+        .success { color: #2d3436; background: #b5ead7; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .error-tag { color: #2d3436; background: #ff9aa2; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .resources-list { list-style: none; padding: 0; }
+        .resources-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #dfe6e9;
+            font-size: 14px;
+        }
+        .resources-list li:last-child { border-bottom: none; }
+        .formula-box {
+            background: #ffffd8;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Two Sum</h1>
+            <p>LeetCode 1 &mdash; Easy</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Table</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return the <strong>indices</strong> of the two numbers that add up to <code>target</code>.</p>
+            <div class="formula-box">
+                Find i, j such that nums[i] + nums[j] == target
+            </div>
+            <h3>Example</h3>
+            <div class="array-diagram">
+                <div class="array-cell">
+                    <div class="array-val found">2</div>
+                    <span class="array-idx">0</span>
+                </div>
+                <div class="array-cell">
+                    <div class="array-val found">7</div>
+                    <span class="array-idx">1</span>
+                </div>
+                <div class="array-cell">
+                    <div class="array-val">11</div>
+                    <span class="array-idx">2</span>
+                </div>
+                <div class="array-cell">
+                    <div class="array-val">15</div>
+                    <span class="array-idx">3</span>
+                </div>
+            </div>
+            <p>target = 9 &rarr; Output: <span class="success">[0, 1]</span> because 2 + 7 = 9</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p>Check every possible pair of numbers to see if they sum to the target.</p>
+            <h3>Visual: Pair Checking</h3>
+            <div class="pointer-diagram">
+                <div class="pointer pointer-left">i &rarr;</div>
+                <div style="font-size:14px;color:#636e72;">Check all pairs (i, j) where j &gt; i</div>
+                <div class="pointer pointer-right">&larr; j</div>
+            </div>
+            <ul class="step-list">
+                <li class="active">Outer loop: pick each element as first number</li>
+                <li>Inner loop: pick each subsequent element as second number</li>
+                <li>If <span class="highlight">nums[i] + nums[j] == target</span>, return <span class="highlight">[i, j]</span></li>
+            </ul>
+            <h3>Code</h3>
+            <div class="code-block">for (let i = 0; i &lt; nums.length; i++) {
+    for (let j = i + 1; j &lt; nums.length; j++) {
+        if (nums[i] + nums[j] === target) {
+            return [i, j];
+        }
+    }
+}</div>
+            <p><strong>Time:</strong> O(n&sup2;) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Sorting + Two Pointers</h2>
+            <p>Sort the array and use two pointers from both ends. Requires tracking original indices.</p>
+            <h3>Visual: Two Pointers on Sorted Array</h3>
+            <div class="array-diagram">
+                <div class="array-cell">
+                    <div class="array-val active">2</div>
+                    <span class="array-idx">L</span>
+                </div>
+                <div class="array-cell">
+                    <div class="array-val">7</div>
+                    <span class="array-idx">1</span>
+                </div>
+                <div class="array-cell">
+                    <div class="array-val">11</div>
+                    <span class="array-idx">2</span>
+                </div>
+                <div class="array-cell">
+                    <div class="array-val active">15</div>
+                    <span class="array-idx">R</span>
+                </div>
+            </div>
+            <ul class="step-list">
+                <li class="active">2 + 15 = 17 &gt; 9 &rarr; move right pointer left</li>
+                <li class="active">2 + 11 = 13 &gt; 9 &rarr; move right pointer left</li>
+                <li>2 + 7 = 9 == 9 &rarr; <span class="success">Found!</span></li>
+            </ul>
+            <p><strong>Time:</strong> O(n log n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Hash Map - One Pass (Optimal)</h2>
+            <p>For each number, check if its complement (target - num) already exists in the hash map.</p>
+            <h3>Visual: Hash Map Building</h3>
+            <div class="hashmap-diagram">
+                <p style="margin-bottom:8px;"><strong>Step i=0:</strong> num=2, complement=7, map empty &rarr; store {2: 0}</p>
+                <div class="hashmap-row">
+                    <div class="hashmap-key">2</div>
+                    <span class="hashmap-arrow">&rarr;</span>
+                    <div class="hashmap-value">index 0</div>
+                </div>
+                <p style="margin-top:12px;margin-bottom:8px;"><strong>Step i=1:</strong> num=7, complement=2, map has 2! &rarr; <span class="success">return [0, 1]</span></p>
+                <div class="hashmap-row">
+                    <div class="hashmap-key">2</div>
+                    <span class="hashmap-arrow">&rarr;</span>
+                    <div class="hashmap-value">index 0</div>
+                    <span style="margin-left:12px;color:#b5ead7;font-weight:700;">&#10003; complement found!</span>
+                </div>
+            </div>
+            <h3>Code</h3>
+            <div class="code-block">const map = new Map();
+for (let i = 0; i &lt; nums.length; i++) {
+    const complement = target - nums[i];
+    if (map.has(complement)) {
+        return [map.get(complement), i];
+    }
+    map.set(nums[i], i);
+}</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr>
+                    <th>Approach</th>
+                    <th>Time</th>
+                    <th>Space</th>
+                    <th>Notes</th>
+                </tr>
+                <tr>
+                    <td>Brute Force</td>
+                    <td>O(n&sup2;)</td>
+                    <td>O(1)</td>
+                    <td>Simplest but slowest</td>
+                </tr>
+                <tr>
+                    <td>Sorting + Two Pointers</td>
+                    <td>O(n log n)</td>
+                    <td>O(n)</td>
+                    <td>Requires tracking original indices</td>
+                </tr>
+                <tr>
+                    <td><strong>Hash Map</strong></td>
+                    <td><span class="success">O(n)</span></td>
+                    <td>O(n)</td>
+                    <td>Most efficient for unsorted arrays</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resources-list">
+                <li><a href="https://leetcode.com/problems/two-sum/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=KLlXCFG5TnA" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank">Hash Table (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

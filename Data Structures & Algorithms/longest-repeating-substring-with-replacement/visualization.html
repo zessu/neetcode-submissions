@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Repeating Character Replacement - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; }
+        h3 { font-size: 18px; margin-bottom: 12px; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .diagram { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 16px; margin: 12px 0; flex-wrap: wrap; }
+        .char-box { width: 42px; height: 42px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; border: 2px solid transparent; }
+        .highlight-blue { background: #a8d8ea; }
+        .highlight-purple { background: #aa96da; color: #fff; }
+        .highlight-green { background: #b5ead7; }
+        .highlight-orange { background: #ffd3b6; }
+        .highlight-red { background: #ff9aa2; }
+        .highlight-yellow { background: #ffffd8; }
+        .dimmed { background: #dfe6e9; color: #b2bec3; }
+        .window-box { border: 3px solid #aa96da; border-radius: 8px; padding: 2px; display: flex; gap: 4px; }
+        .window-label { font-size: 12px; color: #aa96da; font-weight: 700; text-align: center; margin-top: 4px; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        .freq-row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+        .freq-badge { background: #f0eef6; border: 1px solid #dfe6e9; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+        .replace-indicator { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Longest Repeating Character Replacement</h1>
+            <p>LeetCode 424 &mdash; Find the longest substring of identical characters after at most k replacements.</p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag">Sliding Window</span>
+                <span class="tag">Hash Table</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a string <code>s</code> and integer <code>k</code>, you can replace at most <code>k</code> characters. Find the length of the longest substring with all identical characters.</p>
+            <div class="code-block">Input:  s = "AABABBA", k = 1
+Output: 4  (replace B at index 2 &rarr; "AAAABBA", longest uniform = "AAAA")</div>
+            <div class="diagram">
+                <div class="char-box highlight-blue">A</div>
+                <div class="char-box highlight-blue">A</div>
+                <div class="char-box highlight-orange">B</div>
+                <div class="char-box highlight-blue">A</div>
+                <div class="char-box highlight-blue">B</div>
+                <div class="char-box highlight-blue">B</div>
+                <div class="char-box highlight-blue">A</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <h3>Try Every Substring</h3>
+            <p>For every (i, j) pair, count character frequencies and check if <code>(windowLen - maxFreq) &le; k</code>.</p>
+            <div class="step-card">
+                <div class="step-title">Check all substrings</div>
+                <div class="diagram">
+                    <div style="text-align:left;width:100%">
+                        <p>"A" &rarr; rep=0 &le; 1 &check;</p>
+                        <p>"AA" &rarr; rep=0 &le; 1 &check;</p>
+                        <p>"AAB" &rarr; rep=1 &le; 1 &check;</p>
+                        <p>"AABA" &rarr; rep=1 &le; 1 &check; (length 4)</p>
+                        <p>"AABAB" &rarr; rep=2 &gt; 1 &cross;</p>
+                        <p>... and so on for all O(n&sup2;) pairs</p>
+                    </div>
+                </div>
+            </div>
+            <p><strong>Time:</strong> O(n&sup3;) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Sliding Window (Optimal)</h2>
+            <h3>Expand Right, Shrink Left When Invalid</h3>
+            <p>Maintain window [l, r] with a frequency map. If <code>windowLen - maxFreq &gt; k</code>, shrink from the left.</p>
+
+            <div class="step-card">
+                <div class="step-title">r=0: "A" &rarr; {A:1}, maxFreq=1, rep=0 &le; 1</div>
+                <div class="diagram">
+                    <div class="window-box">
+                        <div class="char-box highlight-green">A</div>
+                    </div>
+                </div>
+                <div class="freq-row"><span class="freq-badge">A:1</span><span class="replace-indicator highlight-green">rep=0</span><span>result=1</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">r=1: "AA" &rarr; {A:2}, maxFreq=2, rep=0 &le; 1</div>
+                <div class="diagram">
+                    <div class="window-box">
+                        <div class="char-box highlight-green">A</div>
+                        <div class="char-box highlight-green">A</div>
+                    </div>
+                </div>
+                <div class="freq-row"><span class="freq-badge">A:2</span><span class="replace-indicator highlight-green">rep=0</span><span>result=2</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">r=2: "AAB" &rarr; {A:2,B:1}, maxFreq=2, rep=1 &le; 1</div>
+                <div class="diagram">
+                    <div class="window-box">
+                        <div class="char-box highlight-green">A</div>
+                        <div class="char-box highlight-green">A</div>
+                        <div class="char-box highlight-yellow">B</div>
+                    </div>
+                </div>
+                <div class="freq-row"><span class="freq-badge">A:2</span><span class="freq-badge">B:1</span><span class="replace-indicator highlight-green">rep=1</span><span>result=3</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">r=3: "AABA" &rarr; {A:3,B:1}, maxFreq=3, rep=1 &le; 1</div>
+                <div class="diagram">
+                    <div class="window-box">
+                        <div class="char-box highlight-green">A</div>
+                        <div class="char-box highlight-green">A</div>
+                        <div class="char-box highlight-yellow">B</div>
+                        <div class="char-box highlight-green">A</div>
+                    </div>
+                </div>
+                <div class="freq-row"><span class="freq-badge">A:3</span><span class="freq-badge">B:1</span><span class="replace-indicator highlight-green">rep=1</span><span>result=4</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">r=4: "AABAB" &rarr; {A:3,B:2}, rep=2 &gt; 1 &rarr; shrink!</div>
+                <div class="diagram">
+                    <div class="char-box dimmed">A</div>
+                    <div class="window-box">
+                        <div class="char-box highlight-orange">A</div>
+                        <div class="char-box highlight-yellow">B</div>
+                        <div class="char-box highlight-orange">A</div>
+                        <div class="char-box highlight-yellow">B</div>
+                    </div>
+                </div>
+                <p>l moves from 0 to 1. Still rep=2 &gt; 1, l moves to 2.</p>
+                <div class="diagram">
+                    <div class="char-box dimmed">A</div>
+                    <div class="char-box dimmed">A</div>
+                    <div class="window-box">
+                        <div class="char-box highlight-yellow">B</div>
+                        <div class="char-box highlight-orange">A</div>
+                        <div class="char-box highlight-yellow">B</div>
+                    </div>
+                </div>
+                <div class="freq-row"><span class="freq-badge">A:1</span><span class="freq-badge">B:2</span><span class="replace-indicator highlight-green">rep=1</span><span>result=4</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">r=5: "BAB" + "B" &rarr; {A:1,B:3}, rep=1 &le; 1</div>
+                <div class="diagram">
+                    <div class="char-box dimmed">A</div>
+                    <div class="char-box dimmed">A</div>
+                    <div class="window-box">
+                        <div class="char-box highlight-yellow">B</div>
+                        <div class="char-box highlight-orange">A</div>
+                        <div class="char-box highlight-green">B</div>
+                        <div class="char-box highlight-green">B</div>
+                    </div>
+                </div>
+                <div class="freq-row"><span class="freq-badge">A:1</span><span class="freq-badge">B:3</span><span class="replace-indicator highlight-green">rep=1</span><span>result=4</span></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">r=6: "BABBA" &rarr; rep=2 &gt; 1 &rarr; shrink to "BBA", result stays 4</div>
+                <p style="font-weight:700;color:#b5ead7">Final answer: 4</p>
+            </div>
+
+            <div class="code-block">count = new Array(26).fill(0)
+l = 0, maxFreq = 0, result = 0
+for r = 0 to n-1:
+    count[s[r] - 'A']++
+    maxFreq = max(maxFreq, count[s[r] - 'A'])
+    while (r - l + 1) - maxFreq &gt; k:
+        count[s[l] - 'A']--
+        l++
+    result = max(result, r - l + 1)
+return result</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Description</th></tr>
+                <tr><td>Brute Force</td><td>O(n&sup3;)</td><td>O(1)</td><td>Try every substring pair</td></tr>
+                <tr><td>Substring + Map</td><td>O(n&sup2;)</td><td>O(1)</td><td>Sliding window with rebuilt map</td></tr>
+                <tr><td>Sliding Window + Freq Array</td><td>O(n)</td><td>O(1)</td><td>Optimal, single pass with running counts</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/longest-repeating-character-replacement/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+longest+repeating+character+replacement" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" target="_blank">Sliding Window Technique (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

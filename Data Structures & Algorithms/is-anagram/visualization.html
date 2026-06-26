@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Anagram - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; }
+        h3 { font-size: 18px; margin-bottom: 12px; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .diagram { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 20px; margin: 16px 0; flex-wrap: wrap; }
+        .char-box { width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+        .highlight-blue { background: #a8d8ea; }
+        .highlight-purple { background: #aa96da; color: #fff; }
+        .highlight-green { background: #b5ead7; }
+        .highlight-orange { background: #ffd3b6; }
+        .highlight-red { background: #ff9aa2; }
+        .highlight-yellow { background: #ffffd8; }
+        .freq-table { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 12px 0; }
+        .freq-item { display: flex; flex-direction: column; align-items: center; background: #fdf6f0; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 12px; min-width: 50px; }
+        .freq-char { font-weight: 700; font-size: 18px; }
+        .freq-count { font-size: 13px; color: #636e72; }
+        .arrow { font-size: 24px; color: #aa96da; margin: 0 8px; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Valid Anagram</h1>
+            <p>LeetCode 242 &mdash; Determine if two strings are anagrams of each other.</p>
+            <div class="tags">
+                <span class="tag">Hash Table</span>
+                <span class="tag">String</span>
+                <span class="tag">Sorting</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given two strings <code>s</code> and <code>t</code>, return true if <code>t</code> is an anagram of <code>s</code>. An anagram uses all the original letters exactly once.</p>
+            <div class="code-block">Input:  s = "anagram", t = "nagaram"
+Output: true</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <h3>Search and Remove</h3>
+            <p>For each character in <code>s</code>, find and remove it from a copy of <code>t</code>.</p>
+            <div class="step-card">
+                <div class="step-title">Match each character from s against t</div>
+                <div class="diagram">
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box highlight-blue">n</div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box highlight-blue">g</div>
+                    <div class="char-box highlight-blue">r</div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box highlight-blue">m</div>
+                    <span class="arrow">&harr;</span>
+                    <div class="char-box highlight-orange">n</div>
+                    <div class="char-box highlight-orange">a</div>
+                    <div class="char-box highlight-orange">g</div>
+                    <div class="char-box highlight-orange">a</div>
+                    <div class="char-box highlight-orange">r</div>
+                    <div class="char-box highlight-orange">a</div>
+                    <div class="char-box highlight-orange">m</div>
+                </div>
+            </div>
+            <p><strong>Time:</strong> O(n&sup2;) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Sorting</h2>
+            <h3>Sort and Compare</h3>
+            <p>Sort both strings. If the sorted results are identical, they are anagrams.</p>
+            <div class="step-card">
+                <div class="step-title">Sort both strings</div>
+                <div class="diagram">
+                    <div style="text-align:center">
+                        <p>"anagram" &rarr; sort &rarr;</p>
+                        <div class="diagram" style="padding:8px">
+                            <div class="char-box highlight-green">a</div>
+                            <div class="char-box highlight-green">a</div>
+                            <div class="char-box highlight-green">a</div>
+                            <div class="char-box highlight-green">g</div>
+                            <div class="char-box highlight-green">m</div>
+                            <div class="char-box highlight-green">n</div>
+                            <div class="char-box highlight-green">r</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="diagram">
+                    <div style="text-align:center">
+                        <p>"nagaram" &rarr; sort &rarr;</p>
+                        <div class="diagram" style="padding:8px">
+                            <div class="char-box highlight-green">a</div>
+                            <div class="char-box highlight-green">a</div>
+                            <div class="char-box highlight-green">a</div>
+                            <div class="char-box highlight-green">g</div>
+                            <div class="char-box highlight-green">m</div>
+                            <div class="char-box highlight-green">n</div>
+                            <div class="char-box highlight-green">r</div>
+                        </div>
+                    </div>
+                </div>
+                <p style="text-align:center"><strong>Equal &rarr; true</strong></p>
+            </div>
+            <p><strong>Time:</strong> O(n log n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Frequency Counter (Optimal)</h2>
+            <h3>Count Characters</h3>
+            <p>Count the frequency of each character. Increment for <code>s</code>, decrement for <code>t</code>. All zeros means anagram.</p>
+            <div class="step-card">
+                <div class="step-title">Count characters in s = "anagram"</div>
+                <div class="freq-table">
+                    <div class="freq-item"><span class="freq-char">a</span><span class="freq-count">3</span></div>
+                    <div class="freq-item"><span class="freq-char">n</span><span class="freq-count">1</span></div>
+                    <div class="freq-item"><span class="freq-char">g</span><span class="freq-count">1</span></div>
+                    <div class="freq-item"><span class="freq-char">r</span><span class="freq-count">1</span></div>
+                    <div class="freq-item"><span class="freq-char">m</span><span class="freq-count">1</span></div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-title">Subtract characters in t = "nagaram"</div>
+                <div class="freq-table">
+                    <div class="freq-item" style="border-color:#b5ead7"><span class="freq-char">a</span><span class="freq-count" style="color:#b5ead7">0</span></div>
+                    <div class="freq-item" style="border-color:#b5ead7"><span class="freq-char">n</span><span class="freq-count" style="color:#b5ead7">0</span></div>
+                    <div class="freq-item" style="border-color:#b5ead7"><span class="freq-char">g</span><span class="freq-count" style="color:#b5ead7">0</span></div>
+                    <div class="freq-item" style="border-color:#b5ead7"><span class="freq-char">r</span><span class="freq-count" style="color:#b5ead7">0</span></div>
+                    <div class="freq-item" style="border-color:#b5ead7"><span class="freq-char">m</span><span class="freq-count" style="color:#b5ead7">0</span></div>
+                </div>
+                <p style="text-align:center"><strong>All counts are 0 &rarr; true</strong></p>
+            </div>
+            <div class="code-block">count = new Array(26).fill(0)
+for c in s: count[c - 'a']++
+for c in t: count[c - 'a']--
+return count.every(c =&gt; c === 0)</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1) (fixed 26-element array)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Description</th></tr>
+                <tr><td>Brute Force</td><td>O(n&sup2;)</td><td>O(n)</td><td>Search and remove each character</td></tr>
+                <tr><td>Sorting</td><td>O(n log n)</td><td>O(n)</td><td>Sort both strings, compare</td></tr>
+                <tr><td>Frequency Counter</td><td>O(n)</td><td>O(1)</td><td>Optimal, fixed-size frequency array</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/valid-anagram/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+valid+anagram" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Anagram" target="_blank">Anagram (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

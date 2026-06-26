@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy and Sell Crypto - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 12px; color: #636e72; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .price-chart { display: flex; align-items: flex-end; gap: 8px; height: 180px; padding: 12px 0; }
+        .price-bar-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .price-bar { width: 100%; max-width: 60px; border-radius: 6px 6px 0 0; display: flex; align-items: flex-start; justify-content: center; padding-top: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; color: #2d3436; transition: height 0.3s; }
+        .price-bar.buy { background: #b5ead7; border: 2px solid #81c784; }
+        .price-bar.sell { background: #ffd3b6; border: 2px solid #ffb74d; }
+        .price-bar.normal { background: #ffffff; border: 2px solid #dfe6e9; }
+        .price-bar.peak { background: #ff9aa2; border: 2px solid #e57373; }
+        .price-label { margin-top: 6px; font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.buy { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.sell { background: #ffd3b6; border-color: #ffd3b6; }
+        .flow-box.profit { background: #ffffd8; border-color: #ffffd8; font-weight: 600; }
+        .flow-box.highlight { background: #a8d8ea; border-color: #a8d8ea; }
+        .arrow { color: #636e72; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .pointer-row { display: flex; gap: 8px; margin: 6px 0; align-items: center; flex-wrap: wrap; }
+        .ptr-tag { padding: 4px 10px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; font-weight: 600; }
+        .ptr-tag.l { background: #b5ead7; }
+        .ptr-tag.r { background: #ffd3b6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Buy and Sell Crypto</h1>
+            <p class="subtitle">LeetCode 121 &mdash; Best Time to Buy and Sell Stock</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Two Pointers</span>
+                <span class="tag">Sliding Window</span>
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag">Greedy</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array <code>prices</code> where <code>prices[i]</code> is the price on day <code>i</code>, find the maximum profit from one buy and one sell transaction. You must buy before you sell.</p>
+            <div class="code-block">Input:  prices = [7, 1, 5, 3, 6, 4]
+Output: 5  (buy at 1, sell at 6)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p><strong>Intuition:</strong> Check every possible (buy, sell) pair and track the maximum profit.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Checking all pairs for prices = [7, 1, 5, 3, 6, 4]</div>
+                <div class="flow-row">
+                    <span class="flow-box">buy=7, sell=1</span><span class="arrow">&rarr;</span><span class="flow-box" style="background:#ff9aa2;">-6</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">buy=1, sell=5</span><span class="arrow">&rarr;</span><span class="flow-box profit">+4</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">buy=1, sell=6</span><span class="arrow">&rarr;</span><span class="flow-box profit">+5 (max)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">buy=3, sell=6</span><span class="arrow">&rarr;</span><span class="flow-box profit">+3</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Checks all n(n-1)/2 pairs &mdash; too slow for large inputs.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Two Pointers / Sliding Window (Optimal)</h2>
+            <p><strong>Intuition:</strong> Track the cheapest buy price seen so far. At each day, compute profit against that minimum. When a new lower price is found, update the buy pointer.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Price chart with buy/sell pointers</div>
+                <div class="price-chart">
+                    <div class="price-bar-container">
+                        <div class="price-bar peak" style="height: 116px;">7</div>
+                        <div class="price-label">Day 0</div>
+                    </div>
+                    <div class="price-bar-container">
+                        <div class="price-bar buy" style="height: 16px;">1</div>
+                        <div class="price-label">Day 1</div>
+                    </div>
+                    <div class="price-bar-container">
+                        <div class="price-bar normal" style="height: 83px;">5</div>
+                        <div class="price-label">Day 2</div>
+                    </div>
+                    <div class="price-bar-container">
+                        <div class="price-bar normal" style="height: 50px;">3</div>
+                        <div class="price-label">Day 3</div>
+                    </div>
+                    <div class="price-bar-container">
+                        <div class="price-bar sell" style="height: 100px;">6</div>
+                        <div class="price-label">Day 4</div>
+                    </div>
+                    <div class="price-bar-container">
+                        <div class="price-bar normal" style="height: 66px;">4</div>
+                        <div class="price-label">Day 5</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <span class="ptr-tag l">BUY = Day 1 (price 1)</span>
+                    <span class="ptr-tag r">SELL = Day 4 (price 6)</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Two-pointer walkthrough</div>
+                <div class="pointer-row">
+                    <span class="ptr-tag l">L=0</span>
+                    <span class="ptr-tag r">R=1</span>
+                    <span class="flow-box">1 &lt; 7 &rarr; L moves to 1</span>
+                </div>
+                <div class="pointer-row">
+                    <span class="ptr-tag l">L=1</span>
+                    <span class="ptr-tag r">R=2</span>
+                    <span class="flow-box profit">5 &gt; 1 &rarr; profit=4, max=4</span>
+                </div>
+                <div class="pointer-row">
+                    <span class="ptr-tag l">L=1</span>
+                    <span class="ptr-tag r">R=3</span>
+                    <span class="flow-box">3 &gt; 1 &rarr; profit=2, max=4</span>
+                </div>
+                <div class="pointer-row">
+                    <span class="ptr-tag l">L=1</span>
+                    <span class="ptr-tag r">R=4</span>
+                    <span class="flow-box profit">6 &gt; 1 &rarr; profit=5, max=5</span>
+                </div>
+                <div class="pointer-row">
+                    <span class="ptr-tag l">L=1</span>
+                    <span class="ptr-tag r">R=5</span>
+                    <span class="flow-box">4 &gt; 1 &rarr; profit=3, max=5</span>
+                </div>
+            </div>
+
+            <ol class="step-list">
+                <li>Set leftPtr = 0, rightPtr = 1, maxProfit = 0</li>
+                <li>If prices[right] &gt; prices[left], update maxProfit</li>
+                <li>Else, a new valley found: leftPtr = rightPtr</li>
+                <li>Advance rightPtr, repeat until end</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Kadane's Algorithm (Max Subarray)</h2>
+            <p><strong>Intuition:</strong> Convert prices to daily differences. Maximum profit = maximum subarray sum of differences.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Differences: d[i] = prices[i] - prices[i-1]</div>
+                <div class="flow-row">
+                    <span class="flow-box">prices: [7, 1, 5, 3, 6, 4]</span>
+                </div>
+                <div class="flow-row" style="margin-top: 8px;">
+                    <span class="flow-box">diffs: [-, -6, +4, -2, +3, -2]</span>
+                </div>
+                <div class="flow-row" style="margin-top: 8px;">
+                    <span class="flow-box profit">Max subarray sum: -6 + 4 + (-2) + 3 = 5 &rarr; but Kadane skips -6, starts at +4: 4 + (-2) + 3 = 5</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n&sup2;)</td>
+                        <td>O(1)</td>
+                        <td>Trivial to write</td>
+                        <td>TLE for n &ge; 10&sup4;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Two Pointers</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Single pass, intuitive</td>
+                        <td>Slightly tricky leftPtr update</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kadane's</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Elegant DP perspective</td>
+                        <td>Less obvious from problem statement</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank">LeetCode 121: Best Time to Buy and Sell Stock</a></li>
+                <li><a href="https://www.youtube.com/watch?v=1pkOgXD63yU" target="_blank">NeetCode YouTube: Buy and Sell Crypto</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" target="_blank">Concept: Sliding Window (Wikipedia)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Maximum_subarray_problem" target="_blank">Concept: Kadane's Algorithm (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Temperatures - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 12px; color: #636e72; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .temp-row { display: flex; gap: 4px; margin: 8px 0; align-items: center; flex-wrap: wrap; }
+        .temp-cell { width: 52px; height: 44px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; background: #ffffff; flex-direction: column; }
+        .temp-cell .day { font-size: 10px; color: #636e72; font-weight: 400; }
+        .temp-cell.current { border-color: #ffd3b6; background: #ffd3b6; }
+        .temp-cell.in-stack { border-color: #a8d8ea; background: #a8d8ea; }
+        .temp-cell.resolved { border-color: #b5ead7; background: #b5ead7; }
+        .temp-cell.waiting { border-color: #ff9aa2; background: #ff9aa2; }
+        .stack-vis { display: flex; flex-direction: column-reverse; gap: 4px; margin: 12px 0; min-height: 40px; }
+        .stack-item { background: #a8d8ea; border: 1px solid #81d4fa; border-radius: 6px; padding: 6px 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; text-align: center; }
+        .result-row { display: flex; gap: 4px; margin: 8px 0; flex-wrap: wrap; }
+        .result-cell { width: 52px; height: 36px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; background: #ffffff; }
+        .result-cell.filled { background: #b5ead7; border-color: #b5ead7; }
+        .result-cell.zero { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.pop { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.push { background: #a8d8ea; border-color: #a8d8ea; }
+        .flow-box.result { background: #b5ead7; border-color: #b5ead7; }
+        .arrow { color: #636e72; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Temperatures</h1>
+            <p class="subtitle">LeetCode 739 &mdash; Days to wait for a warmer temperature</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Stack</span>
+                <span class="tag">Monotonic Stack</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array of <code>temperatures</code>, return an array where <code>answer[i]</code> is the number of days you must wait after day <code>i</code> for a warmer temperature. If none, answer is 0.</p>
+            <div class="code-block">Input:  [73, 74, 75, 71, 69, 72, 76, 73]
+Output: [1,  1,  4,  2,  1,  1,  0,  0]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p><strong>Intuition:</strong> For each day, scan forward until a warmer day is found.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">For each day, scan right for warmer temp</div>
+                <div class="flow-row">
+                    <span class="flow-box">Day 0 (73)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">check 74 &gt; 73?</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">Yes! answer=1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Day 2 (75)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">71, 69, 72...</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">76 &gt; 75, answer=4</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Too slow for n = 10&sup5; &mdash; O(n&sup2;) comparisons.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Monotonic Stack (Optimal)</h2>
+            <p><strong>Intuition:</strong> Maintain a stack of indices waiting for a warmer day. When a warmer day arrives, pop and resolve all waiting days.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Input temperatures</div>
+                <div class="temp-row">
+                    <div class="temp-cell">73<span class="day">0</span></div>
+                    <div class="temp-cell">74<span class="day">1</span></div>
+                    <div class="temp-cell">75<span class="day">2</span></div>
+                    <div class="temp-cell">71<span class="day">3</span></div>
+                    <div class="temp-cell">69<span class="day">4</span></div>
+                    <div class="temp-cell">72<span class="day">5</span></div>
+                    <div class="temp-cell">76<span class="day">6</span></div>
+                    <div class="temp-cell">73<span class="day">7</span></div>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Stack walkthrough (stores indices of unresolved days)</div>
+
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=0 (73):</strong>
+                    <span class="flow-box push">Push 0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span>Stack: [0]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=1 (74):</strong>
+                    <span class="flow-box pop">74 &gt; 73, Pop 0</span>
+                    <span class="flow-box result">ans[0] = 1-0 = 1</span>
+                    <span class="flow-box push">Push 1</span>
+                    <span>Stack: [1]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=2 (75):</strong>
+                    <span class="flow-box pop">75 &gt; 74, Pop 1</span>
+                    <span class="flow-box result">ans[1] = 2-1 = 1</span>
+                    <span class="flow-box push">Push 2</span>
+                    <span>Stack: [2]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=3 (71):</strong>
+                    <span class="flow-box push">71 &lt; 75, Push 3</span>
+                    <span>Stack: [2, 3]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=4 (69):</strong>
+                    <span class="flow-box push">69 &lt; 71, Push 4</span>
+                    <span>Stack: [2, 3, 4]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=5 (72):</strong>
+                    <span class="flow-box pop">72 &gt; 69, Pop 4</span>
+                    <span class="flow-box result">ans[4] = 1</span>
+                    <span class="flow-box pop">72 &gt; 71, Pop 3</span>
+                    <span class="flow-box result">ans[3] = 2</span>
+                    <span class="flow-box push">Push 5</span>
+                    <span>Stack: [2, 5]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=6 (76):</strong>
+                    <span class="flow-box pop">76 &gt; 72, Pop 5</span>
+                    <span class="flow-box result">ans[5] = 1</span>
+                    <span class="flow-box pop">76 &gt; 75, Pop 2</span>
+                    <span class="flow-box result">ans[2] = 4</span>
+                    <span class="flow-box push">Push 6</span>
+                    <span>Stack: [6]</span>
+                </div>
+                <div class="flow-row">
+                    <strong style="min-width: 60px;">i=7 (73):</strong>
+                    <span class="flow-box push">73 &lt; 76, Push 7</span>
+                    <span>Stack: [6, 7]</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Remaining in stack (indices 6, 7) have no warmer day &rarr; answer = 0</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Final Result</div>
+                <div class="result-row">
+                    <div class="result-cell filled">1</div>
+                    <div class="result-cell filled">1</div>
+                    <div class="result-cell filled">4</div>
+                    <div class="result-cell filled">2</div>
+                    <div class="result-cell filled">1</div>
+                    <div class="result-cell filled">1</div>
+                    <div class="result-cell zero">0</div>
+                    <div class="result-cell zero">0</div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> In stack (waiting)</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2;"></div> Popped (resolved)</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Result filled</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2;"></div> No warmer day (0)</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Create result array initialized to 0, and an empty stack</li>
+                <li>For each day i, while current temp &gt; temp at stack top: pop and set result[popped] = i - popped</li>
+                <li>Push current index i onto stack</li>
+                <li>Remaining indices in stack already have result = 0</li>
+            </ol>
+
+            <div class="code-block">const result = new Array(n).fill(0);
+const stack = [];  // stores indices
+
+for (let i = 0; i &lt; n; i++) {
+    while (stack.length &gt; 0 &amp;&amp; temps[i] &gt; temps[stack.top()]) {
+        const prev = stack.pop();
+        result[prev] = i - prev;
+    }
+    stack.push(i);
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: DP (Optimized Forward Scan)</h2>
+            <p><strong>Intuition:</strong> Iterate right-to-left. Use previously computed answers to jump ahead, skipping days that are cooler.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1) extra</span>
+
+            <div class="code-block">for (let i = n - 2; i &gt;= 0; i--) {
+    let j = i + 1;
+    while (j &lt; n &amp;&amp; temps[j] &lt;= temps[i]) {
+        if (result[j] === 0) { j = n; break; }
+        j += result[j];
+    }
+    result[i] = j &lt; n ? j - i : 0;
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n&sup2;)</td>
+                        <td>O(1)</td>
+                        <td>Simple to implement</td>
+                        <td>Too slow for n = 10&sup5;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Monotonic Stack</strong></td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                        <td>Clean, standard optimal solution</td>
+                        <td>Extra space for stack</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DP (Optimized)</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>In-place, optimal time and space</td>
+                        <td>More complex pointer logic</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/daily-temperatures/" target="_blank">LeetCode 739: Daily Temperatures</a></li>
+                <li><a href="https://www.youtube.com/watch?v=cTBiBSnjO3w" target="_blank">NeetCode YouTube: Daily Temperatures</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)" target="_blank">Concept: Monotonic Stack (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

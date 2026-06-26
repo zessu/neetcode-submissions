@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Min Stack</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .diagram {
+            background: #fdf6f0;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .stacks-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 16px 0;
+        }
+        .stack-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stack-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #636e72;
+            margin-bottom: 8px;
+        }
+        .stack-items {
+            display: flex;
+            flex-direction: column-reverse;
+            border: 2px solid #dfe6e9;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            min-width: 80px;
+            background: #ffffff;
+        }
+        .stack-item {
+            padding: 10px 16px;
+            text-align: center;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 15px;
+            font-weight: 600;
+            border-top: 1px solid #dfe6e9;
+        }
+        .stack-item.main { background: #a8d8ea; }
+        .stack-item.min { background: #aa96da; color: #ffffff; }
+        .stack-item.top-item { border-top: 3px solid #2d3436; }
+        .stack-top-label {
+            font-size: 11px;
+            color: #636e72;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        .operation-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 4px;
+        }
+        .op-push { background: #b5ead7; }
+        .op-pop { background: #ff9aa2; }
+        .op-getmin { background: #aa96da; color: #fff; }
+        .op-top { background: #ffd3b6; }
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #dfe6e9;
+        }
+        .step-label { font-size: 13px; font-weight: 600; min-width: 90px; color: #aa96da; }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .result-badge {
+            display: inline-block;
+            background: #b5ead7;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .approach-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .approach-badge { background: #ffd3b6; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+        .complexity { display: inline-flex; gap: 16px; margin: 8px 0; }
+        .complexity span { font-size: 13px; color: #636e72; }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; font-size: 14px; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Min Stack</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 155</p>
+            <div class="tags">
+                <span class="tag">Stack</span>
+                <span class="tag purple">Design</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Design a stack that supports <code>push</code>, <code>pop</code>, <code>top</code>, and <code>getMin</code> in constant O(1) time.</p>
+            <div class="code-block">Operations: ["MinStack","push","push","push","getMin","pop","top","getMin"]
+            [[],[-2],[0],[-3],[],[],[],[]]
+Output:   [null, null, null, null, -3,  null, 0,   -2]</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Brute Force getMin</h2>
+                <span class="approach-badge">getMin: O(n)</span>
+            </div>
+            <p>Use a single stack. For every <code>getMin</code> call, scan the entire stack to find the minimum.</p>
+            <div class="complexity">
+                <span><strong>push/pop:</strong> O(1)</span>
+                <span><strong>getMin:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(n)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Single Stack &mdash; getMin scans all elements</h3>
+                <div class="stacks-container">
+                    <div class="stack-column">
+                        <div class="stack-title">Stack</div>
+                        <div class="stack-items">
+                            <div class="stack-item main">-2</div>
+                            <div class="stack-item main">0</div>
+                            <div class="stack-item main top-item">-3</div>
+                        </div>
+                        <div class="stack-top-label">&larr; top</div>
+                    </div>
+                </div>
+                <p style="font-size:13px;color:#636e72;margin-top:8px;">getMin() scans: -2, 0, -3 &rarr; min = <span class="result-badge">-3</span> (O(n) scan)</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Auxiliary Min Stack</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; All O(1)</span>
+            </div>
+            <p>Maintain a second stack (<code>minStack</code>) that records the minimum value at each level of the main stack. Both stacks grow and shrink in sync.</p>
+            <div class="complexity">
+                <span><strong>All ops:</strong> O(1)</span>
+                <span><strong>Space:</strong> O(n)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Two-Stack Walkthrough</h3>
+
+                <div style="margin: 16px 0;">
+                    <span class="operation-badge op-push">push(-2)</span>
+                    <div class="stacks-container">
+                        <div class="stack-column">
+                            <div class="stack-title">stack</div>
+                            <div class="stack-items">
+                                <div class="stack-item main top-item">-2</div>
+                            </div>
+                        </div>
+                        <div class="stack-column">
+                            <div class="stack-title">minStack</div>
+                            <div class="stack-items">
+                                <div class="stack-item min top-item">-2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <span class="operation-badge op-push">push(0)</span>
+                    <div class="stacks-container">
+                        <div class="stack-column">
+                            <div class="stack-title">stack</div>
+                            <div class="stack-items">
+                                <div class="stack-item main">-2</div>
+                                <div class="stack-item main top-item">0</div>
+                            </div>
+                        </div>
+                        <div class="stack-column">
+                            <div class="stack-title">minStack</div>
+                            <div class="stack-items">
+                                <div class="stack-item min">-2</div>
+                                <div class="stack-item min top-item">-2</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size:12px;color:#636e72;">0 &gt; -2, so minStack pushes previous min (-2) again</p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <span class="operation-badge op-push">push(-3)</span>
+                    <div class="stacks-container">
+                        <div class="stack-column">
+                            <div class="stack-title">stack</div>
+                            <div class="stack-items">
+                                <div class="stack-item main">-2</div>
+                                <div class="stack-item main">0</div>
+                                <div class="stack-item main top-item">-3</div>
+                            </div>
+                        </div>
+                        <div class="stack-column">
+                            <div class="stack-title">minStack</div>
+                            <div class="stack-items">
+                                <div class="stack-item min">-2</div>
+                                <div class="stack-item min">-2</div>
+                                <div class="stack-item min top-item">-3</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size:12px;color:#636e72;">-3 &le; -2, so minStack pushes -3 (new minimum)</p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <span class="operation-badge op-getmin">getMin()</span>
+                    <p style="font-size:14px;margin-top:8px;">minStack top = <span class="result-badge">-3</span></p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <span class="operation-badge op-pop">pop()</span>
+                    <div class="stacks-container">
+                        <div class="stack-column">
+                            <div class="stack-title">stack</div>
+                            <div class="stack-items">
+                                <div class="stack-item main">-2</div>
+                                <div class="stack-item main top-item">0</div>
+                            </div>
+                        </div>
+                        <div class="stack-column">
+                            <div class="stack-title">minStack</div>
+                            <div class="stack-items">
+                                <div class="stack-item min">-2</div>
+                                <div class="stack-item min top-item">-2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <span class="operation-badge op-top">top()</span> &nbsp;
+                    <span class="operation-badge op-getmin">getMin()</span>
+                    <p style="font-size:14px;margin-top:8px;">top = <span class="result-badge">0</span>, getMin = <span class="result-badge">-2</span></p>
+                </div>
+            </div>
+
+            <div class="code-block">class MinStack {
+    constructor() {
+        this.stack = [];
+        this.minStack = [];
+    }
+
+    push(val) {
+        this.stack.push(val);
+        if (this.minStack.length === 0 || val &lt;= this.minStack[this.minStack.length - 1]) {
+            this.minStack.push(val);
+        } else {
+            this.minStack.push(this.minStack[this.minStack.length - 1]);
+        }
+    }
+
+    pop() {
+        this.stack.pop();
+        this.minStack.pop();
+    }
+
+    top() {
+        return this.stack[this.stack.length - 1];
+    }
+
+    getMin() {
+        return this.minStack[this.minStack.length - 1];
+    }
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time (all ops)</th>
+                        <th>Space</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>getMin: O(n)</td>
+                        <td>O(n)</td>
+                        <td>Scan stack for min on each getMin call</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auxiliary Min Stack</strong></td>
+                        <td>All O(1)</td>
+                        <td>O(n)</td>
+                        <td>Synchronized second stack tracking mins</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Single Stack (Pairs)</strong></td>
+                        <td>All O(1)</td>
+                        <td>O(n)</td>
+                        <td>Each entry stores [value, currentMin]</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Variable with Math</strong></td>
+                        <td>All O(1)</td>
+                        <td>O(1)*</td>
+                        <td>Store differences (complex to implement)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/min-stack/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=qkLl7nAwDPo" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)" target="_blank">Stack Data Structure</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

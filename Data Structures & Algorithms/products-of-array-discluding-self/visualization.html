@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product of Array Except Self</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; overflow-x: auto; white-space: pre; }
+        .diagram { background: #fdf6f0; border: 1px solid #dfe6e9; border-radius: 8px; padding: 20px; margin: 16px 0; text-align: center; }
+        .array-row { display: flex; justify-content: center; gap: 4px; margin: 8px 0; }
+        .arr-box { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 16px; font-weight: 600; background: #ffffff; }
+        .arr-box.prefix { background: #a8d8ea; border-color: #7bc0d8; }
+        .arr-box.suffix { background: #ffd3b6; border-color: #e6b99c; }
+        .arr-box.result { background: #b5ead7; border-color: #8fd4b8; }
+        .arr-box.current { background: #ffffd8; border-color: #e6d97a; }
+        .arr-box.excluded { background: #ff9aa2; border-color: #e87a82; color: #fff; }
+        .arr-label { font-size: 12px; font-weight: 600; color: #636e72; margin: 4px 0; }
+        .step-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 8px 12px; background: #ffffff; border-radius: 6px; border: 1px solid #dfe6e9; }
+        .step-label { font-size: 13px; font-weight: 600; min-width: 60px; color: #aa96da; }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .result-badge { display: inline-block; background: #b5ead7; padding: 4px 12px; border-radius: 16px; font-size: 14px; font-weight: 600; }
+        .approach-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .approach-badge { background: #ffd3b6; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+        .complexity { display: inline-flex; gap: 16px; margin: 8px 0; }
+        .complexity span { font-size: 13px; color: #636e72; }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; font-size: 14px; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Product of Array Except Self</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 238</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag purple">Prefix Sum</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an integer array <code>nums</code>, return an array where <code>answer[i]</code> is the product of all elements except <code>nums[i]</code>.</p>
+            <div class="code-block">Input:  nums = [1, 2, 3, 4]
+Output: [24, 12, 8, 6]
+
+Input:  nums = [-1, 1, 0, -3, 3]
+Output: [0, 0, 9, 0, 0]</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Brute Force</h2>
+                <span class="approach-badge">O(n&sup2;)</span>
+            </div>
+            <p>For each index i, iterate through the entire array and multiply all elements where j &ne; i.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n&sup2;)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Brute Force: nums = [1, 2, 3, 4]</h3>
+                <div style="text-align:left;max-width:450px;margin:0 auto;">
+                    <div class="step-row">
+                        <span class="step-label">i=0</span>
+                        <span class="step-desc">2 &times; 3 &times; 4 = <strong>24</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=1</span>
+                        <span class="step-desc">1 &times; 3 &times; 4 = <strong>12</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=2</span>
+                        <span class="step-desc">1 &times; 2 &times; 4 = <strong>8</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=3</span>
+                        <span class="step-desc">1 &times; 2 &times; 3 = <strong>6</strong></span>
+                    </div>
+                </div>
+                <div class="arr-label" style="margin-top:12px;">For each i, skip nums[i] and multiply the rest</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Division</h2>
+                <span class="approach-badge">O(n) &mdash; fails with zeros</span>
+            </div>
+            <p>Calculate total product, then <code>result[i] = totalProduct / nums[i]</code>.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+            <p style="font-size:13px;color:#ff9aa2;">Fails if the array contains zero (division by zero). Not allowed per problem constraints.</p>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 3: Prefix and Suffix Products</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(n)</span>
+            </div>
+            <p>For each index, the answer is: (product of all elements to the LEFT) &times; (product of all elements to the RIGHT). Compute in two passes.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(1) extra</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Prefix + Suffix: nums = [1, 2, 3, 4]</h3>
+
+                <div style="margin: 16px 0;">
+                    <div class="arr-label">Input</div>
+                    <div class="array-row">
+                        <div class="arr-box">1</div>
+                        <div class="arr-box">2</div>
+                        <div class="arr-box">3</div>
+                        <div class="arr-box">4</div>
+                    </div>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <div class="arr-label" style="color:#7bc0d8;">Pass 1: Prefix products (left to right)</div>
+                    <div class="array-row">
+                        <div class="arr-box prefix">1</div>
+                        <div class="arr-box prefix">1</div>
+                        <div class="arr-box prefix">2</div>
+                        <div class="arr-box prefix">6</div>
+                    </div>
+                    <div style="text-align:left;max-width:400px;margin:8px auto 0;">
+                        <div class="step-row">
+                            <span class="step-label">i=0</span>
+                            <span class="step-desc">result[0] = 1 (nothing to left), prefix = 1</span>
+                        </div>
+                        <div class="step-row">
+                            <span class="step-label">i=1</span>
+                            <span class="step-desc">result[1] = 1, prefix = 1&times;1 = 1... wait, prefix becomes 1&times;nums[0]=1</span>
+                        </div>
+                        <div class="step-row">
+                            <span class="step-label">i=2</span>
+                            <span class="step-desc">result[2] = 1&times;2 = 2, prefix = 2&times;nums[1]=2... = 2</span>
+                        </div>
+                        <div class="step-row">
+                            <span class="step-label">i=3</span>
+                            <span class="step-desc">result[3] = 2&times;3 = 6, prefix = 6&times;nums[2]=6... = 6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <div class="arr-label" style="color:#e6b99c;">Pass 2: Suffix products (right to left), multiply into result</div>
+                    <div class="array-row">
+                        <div class="arr-box result">24</div>
+                        <div class="arr-box result">12</div>
+                        <div class="arr-box result">8</div>
+                        <div class="arr-box result">6</div>
+                    </div>
+                    <div style="text-align:left;max-width:400px;margin:8px auto 0;">
+                        <div class="step-row">
+                            <span class="step-label">i=3</span>
+                            <span class="step-desc">result[3] = 6 &times; 1 = <strong>6</strong>, suffix = 4</span>
+                        </div>
+                        <div class="step-row">
+                            <span class="step-label">i=2</span>
+                            <span class="step-desc">result[2] = 2 &times; 4 = <strong>8</strong>, suffix = 12</span>
+                        </div>
+                        <div class="step-row">
+                            <span class="step-label">i=1</span>
+                            <span class="step-desc">result[1] = 1 &times; 12 = <strong>12</strong>, suffix = 24</span>
+                        </div>
+                        <div class="step-row">
+                            <span class="step-label">i=0</span>
+                            <span class="step-desc">result[0] = 1 &times; 24 = <strong>24</strong>, suffix = 24</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 16px; font-weight: 600;">Result: <span class="result-badge">[24, 12, 8, 6]</span></p>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <h3>Visual: answer[i] = left_product &times; right_product</h3>
+                <div style="margin: 16px 0;">
+                    <p style="font-size:13px;color:#636e72;margin-bottom:8px;">For i=2, nums[2]=3 is excluded:</p>
+                    <div class="array-row">
+                        <div class="arr-box prefix">1</div>
+                        <div class="arr-box prefix">2</div>
+                        <div class="arr-box excluded">3</div>
+                        <div class="arr-box suffix">4</div>
+                    </div>
+                    <p style="font-size:13px;margin-top:8px;">
+                        <span style="color:#7bc0d8;font-weight:600;">left = 1&times;2 = 2</span>
+                        &nbsp;&times;&nbsp;
+                        <span style="color:#e6b99c;font-weight:600;">right = 4</span>
+                        &nbsp;=&nbsp;
+                        <span class="result-badge">8</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="code-block">const n = nums.length;
+const result = new Array(n).fill(1);
+
+let prefix = 1;
+for (let i = 0; i &lt; n; i++) {
+    result[i] = prefix;
+    prefix *= nums[i];
+}
+
+let suffix = 1;
+for (let i = n - 1; i &gt;= 0; i--) {
+    result[i] *= suffix;
+    suffix *= nums[i];
+}
+
+return result;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n&sup2;)</td>
+                        <td>O(1)</td>
+                        <td>Too slow for large inputs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Division</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Fails if array contains zero</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prefix/Suffix</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Handles zeros, no division needed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/product-of-array-except-self/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=bNvIQI2wAjk" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Prefix_sum" target="_blank">Prefix Sum / Prefix Product</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

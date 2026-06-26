@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Two Sorted Linked Lists</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .diagram {
+            background: #fdf6f0;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .linked-list {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+        .ll-node {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .ll-val {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 15px;
+            font-weight: 600;
+            background: #ffffff;
+        }
+        .ll-val.list1 { background: #a8d8ea; border-color: #7bc0d8; }
+        .ll-val.list2 { background: #ffd3b6; border-color: #e6b99c; }
+        .ll-val.merged { background: #b5ead7; border-color: #8fd4b8; }
+        .ll-val.picked { background: #ffffd8; border-color: #e6d97a; }
+        .ll-arrow {
+            font-size: 18px;
+            color: #636e72;
+            margin: 0 4px;
+        }
+        .ll-null {
+            font-size: 13px;
+            color: #636e72;
+            font-style: italic;
+            margin-left: 4px;
+        }
+        .list-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #636e72;
+            margin: 4px 0;
+        }
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #dfe6e9;
+        }
+        .step-label { font-size: 13px; font-weight: 600; min-width: 70px; color: #aa96da; }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .result-badge {
+            display: inline-block;
+            background: #b5ead7;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .approach-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .approach-badge { background: #ffd3b6; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+        .complexity { display: inline-flex; gap: 16px; margin: 8px 0; }
+        .complexity span { font-size: 13px; color: #636e72; }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; font-size: 14px; }
+        .resource-list li:last-child { border-bottom: none; }
+        .recursion-tree {
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+        }
+        .recursion-tree .call {
+            padding: 6px 12px;
+            margin: 4px 0;
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 6px;
+        }
+        .recursion-tree .call .pick { color: #aa96da; font-weight: 600; }
+        .recursion-tree .indent-1 { margin-left: 20px; }
+        .recursion-tree .indent-2 { margin-left: 40px; }
+        .recursion-tree .indent-3 { margin-left: 60px; }
+        .recursion-tree .indent-4 { margin-left: 80px; }
+        .recursion-tree .indent-5 { margin-left: 100px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Merge Two Sorted Linked Lists</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 21</p>
+            <div class="tags">
+                <span class="tag">Linked List</span>
+                <span class="tag purple">Recursion</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Merge two sorted linked lists into one sorted list by splicing together the nodes.</p>
+            <div class="diagram">
+                <div class="list-label">list1</div>
+                <div class="linked-list">
+                    <div class="ll-node"><div class="ll-val list1">1</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val list1">2</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val list1">4</div></div>
+                    <span class="ll-null">&rarr; null</span>
+                </div>
+                <div class="list-label">list2</div>
+                <div class="linked-list">
+                    <div class="ll-node"><div class="ll-val list2">1</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val list2">3</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val list2">4</div></div>
+                    <span class="ll-null">&rarr; null</span>
+                </div>
+                <div style="font-size:24px;color:#aa96da;margin:12px 0;">&darr; merge</div>
+                <div class="list-label">result</div>
+                <div class="linked-list">
+                    <div class="ll-node"><div class="ll-val merged">1</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val merged">1</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val merged">2</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val merged">3</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val merged">4</div><span class="ll-arrow">&rarr;</span></div>
+                    <div class="ll-node"><div class="ll-val merged">4</div></div>
+                    <span class="ll-null">&rarr; null</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Recursive</h2>
+                <span class="approach-badge">O(n+m) time, O(n+m) space</span>
+            </div>
+            <p>Compare the heads of both lists. The smaller head becomes the current node, and recursively merge the rest.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n+m)</span>
+                <span><strong>Space:</strong> O(n+m) recursion stack</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Recursion Tree</h3>
+                <div class="recursion-tree">
+                    <div class="call"><span class="pick">Call 1:</span> merge(<span style="color:#a8d8ea;">1&rarr;2&rarr;4</span>, <span style="color:#ffd3b6;">1&rarr;3&rarr;4</span>) &rarr; 1&le;1, pick list1(1)</div>
+                    <div class="call indent-1"><span class="pick">Call 2:</span> merge(<span style="color:#a8d8ea;">2&rarr;4</span>, <span style="color:#ffd3b6;">1&rarr;3&rarr;4</span>) &rarr; 2&gt;1, pick list2(1)</div>
+                    <div class="call indent-2"><span class="pick">Call 3:</span> merge(<span style="color:#a8d8ea;">2&rarr;4</span>, <span style="color:#ffd3b6;">3&rarr;4</span>) &rarr; 2&le;3, pick list1(2)</div>
+                    <div class="call indent-3"><span class="pick">Call 4:</span> merge(<span style="color:#a8d8ea;">4</span>, <span style="color:#ffd3b6;">3&rarr;4</span>) &rarr; 4&gt;3, pick list2(3)</div>
+                    <div class="call indent-4"><span class="pick">Call 5:</span> merge(<span style="color:#a8d8ea;">4</span>, <span style="color:#ffd3b6;">4</span>) &rarr; 4&le;4, pick list1(4)</div>
+                    <div class="call indent-5"><span class="pick">Call 6:</span> merge(null, <span style="color:#ffd3b6;">4</span>) &rarr; base case, return 4</div>
+                </div>
+                <p style="font-size:12px;margin-top:12px;color:#636e72;">Stack unwinds: 1 &rarr; 1 &rarr; 2 &rarr; 3 &rarr; 4 &rarr; 4</p>
+            </div>
+
+            <div class="code-block">mergeTwoLists(list1, list2) {
+    if (!list1) return list2;
+    if (!list2) return list1;
+
+    if (list1.val &lt;= list2.val) {
+        list1.next = this.mergeTwoLists(list1.next, list2);
+        return list1;
+    } else {
+        list2.next = this.mergeTwoLists(list1, list2.next);
+        return list2;
+    }
+}</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Iterative with Dummy Node</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(1) space</span>
+            </div>
+            <p>Use a dummy node and a tail pointer. Always attach the smaller current node and advance that list's pointer.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n+m)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Iterative Merge Step-by-Step</h3>
+                <div style="text-align:left;max-width:550px;margin:0 auto;">
+                    <div class="step-row">
+                        <span class="step-label">Init</span>
+                        <span class="step-desc">dummy &rarr; null, tail = dummy</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Step 1</span>
+                        <span class="step-desc">1 &le; 1 &rarr; attach list1(1), tail&rarr;1, advance list1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Step 2</span>
+                        <span class="step-desc">2 &gt; 1 &rarr; attach list2(1), tail&rarr;1, advance list2</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Step 3</span>
+                        <span class="step-desc">2 &le; 3 &rarr; attach list1(2), tail&rarr;2, advance list1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Step 4</span>
+                        <span class="step-desc">4 &gt; 3 &rarr; attach list2(3), tail&rarr;3, advance list2</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Step 5</span>
+                        <span class="step-desc">4 &le; 4 &rarr; attach list1(4), tail&rarr;4, advance list1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Step 6</span>
+                        <span class="step-desc">list1=null &rarr; attach remaining list2(4)</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <div class="list-label">Result: dummy.next</div>
+                    <div class="linked-list">
+                        <div class="ll-node"><div class="ll-val merged">1</div><span class="ll-arrow">&rarr;</span></div>
+                        <div class="ll-node"><div class="ll-val merged">1</div><span class="ll-arrow">&rarr;</span></div>
+                        <div class="ll-node"><div class="ll-val merged">2</div><span class="ll-arrow">&rarr;</span></div>
+                        <div class="ll-node"><div class="ll-val merged">3</div><span class="ll-arrow">&rarr;</span></div>
+                        <div class="ll-node"><div class="ll-val merged">4</div><span class="ll-arrow">&rarr;</span></div>
+                        <div class="ll-node"><div class="ll-val merged">4</div></div>
+                        <span class="ll-null">&rarr; null</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">const dummy = new ListNode();
+let tail = dummy;
+
+while (list1 &amp;&amp; list2) {
+    if (list1.val &lt;= list2.val) {
+        tail.next = list1;
+        list1 = list1.next;
+    } else {
+        tail.next = list2;
+        list2 = list2.next;
+    }
+    tail = tail.next;
+}
+tail.next = list1 || list2;
+return dummy.next;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Recursive</strong></td>
+                        <td>O(n+m)</td>
+                        <td>O(n+m)</td>
+                        <td>Clean, elegant code</td>
+                        <td>Stack overflow for large lists</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Iterative</strong></td>
+                        <td>O(n+m)</td>
+                        <td>O(1)</td>
+                        <td>No extra space, safe for large inputs</td>
+                        <td>Slightly more verbose</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/merge-two-sorted-lists/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=XIdigk956u0" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Linked_list" target="_blank">Linked List Data Structure</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

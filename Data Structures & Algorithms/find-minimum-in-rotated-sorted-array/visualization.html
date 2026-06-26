@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Minimum in Rotated Sorted Array - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .diagram { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 20px; margin: 16px 0; flex-wrap: wrap; }
+        .bar { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .bar-value { font-size: 13px; font-weight: 600; color: #2d3436; }
+        .bar-box { width: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #2d3436; }
+        .highlight-blue { background: #a8d8ea; }
+        .highlight-purple { background: #aa96da; color: #fff; }
+        .highlight-green { background: #b5ead7; }
+        .highlight-orange { background: #ffd3b6; }
+        .highlight-red { background: #ff9aa2; }
+        .highlight-yellow { background: #ffffd8; }
+        .pointer-label { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Find Minimum in Rotated Sorted Array</h1>
+            <p>LeetCode 153 &mdash; Find the minimum element in a rotated sorted array.</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Binary Search</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a sorted array that has been rotated between 1 and n times, find the minimum element. The array was originally sorted in ascending order before rotation.</p>
+            <div class="code-block">Input:  nums = [4, 5, 6, 7, 0, 1, 2]
+Output: 0</div>
+            <p>The key insight is that the minimum element sits at the "pivot point" where the rotation wraps around. In a non-rotated array, the minimum is simply the first element.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <h3>Linear Scan</h3>
+            <p>Iterate through the entire array and track the minimum element found.</p>
+            <div class="diagram">
+                <div class="bar"><div class="bar-value">4</div><div class="bar-box highlight-blue">4</div><div class="pointer-label highlight-orange">min</div></div>
+                <div class="bar"><div class="bar-value">5</div><div class="bar-box highlight-blue">5</div></div>
+                <div class="bar"><div class="bar-value">6</div><div class="bar-box highlight-blue">6</div></div>
+                <div class="bar"><div class="bar-value">7</div><div class="bar-box highlight-blue">7</div></div>
+                <div class="bar"><div class="bar-value">0</div><div class="bar-box highlight-green">0</div><div class="pointer-label highlight-green">new min</div></div>
+                <div class="bar"><div class="bar-value">1</div><div class="bar-box highlight-blue">1</div></div>
+                <div class="bar"><div class="bar-value">2</div><div class="bar-box highlight-blue">2</div></div>
+            </div>
+            <div class="code-block">min = nums[0]  // 4
+for i = 1 to n-1:
+    if nums[i] < min:
+        min = nums[i]
+return min  // 0</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Binary Search (Optimal)</h2>
+            <h3>Find the Pivot Point</h3>
+            <p>Use binary search to find where the array "wraps." Compare <code>nums[mid]</code> with <code>nums[right]</code> to determine which half contains the minimum.</p>
+
+            <div class="step-card">
+                <div class="step-title">Step 1: mid=3, nums[3]=7 &gt; nums[6]=2</div>
+                <div class="diagram">
+                    <div class="bar"><div class="bar-box highlight-blue">4</div><div class="pointer-label" style="background:#a8d8ea">L</div></div>
+                    <div class="bar"><div class="bar-box highlight-blue">5</div></div>
+                    <div class="bar"><div class="bar-box highlight-blue">6</div></div>
+                    <div class="bar"><div class="bar-box highlight-orange">7</div><div class="pointer-label" style="background:#ffd3b6">mid</div></div>
+                    <div class="bar"><div class="bar-box highlight-yellow">0</div></div>
+                    <div class="bar"><div class="bar-box highlight-yellow">1</div></div>
+                    <div class="bar"><div class="bar-box highlight-purple">2</div><div class="pointer-label" style="background:#aa96da;color:#fff">R</div></div>
+                </div>
+                <p>nums[mid] &gt; nums[right] &rarr; min is in right half &rarr; left = mid + 1 = 4</p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 2: mid=5, nums[5]=1 &lt; nums[6]=2</div>
+                <div class="diagram">
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">4</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">5</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">6</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">7</div></div>
+                    <div class="bar"><div class="bar-box highlight-blue">0</div><div class="pointer-label" style="background:#a8d8ea">L</div></div>
+                    <div class="bar"><div class="bar-box highlight-orange">1</div><div class="pointer-label" style="background:#ffd3b6">mid</div></div>
+                    <div class="bar"><div class="bar-box highlight-purple">2</div><div class="pointer-label" style="background:#aa96da;color:#fff">R</div></div>
+                </div>
+                <p>nums[mid] &lt; nums[right] &rarr; min is in left half &rarr; right = mid = 5</p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 3: mid=4, nums[4]=0 &lt; nums[5]=1</div>
+                <div class="diagram">
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">4</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">5</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">6</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">7</div></div>
+                    <div class="bar"><div class="bar-box highlight-green">0</div><div class="pointer-label" style="background:#b5ead7">L=mid</div></div>
+                    <div class="bar"><div class="bar-box highlight-orange">1</div><div class="pointer-label" style="background:#ffd3b6">R</div></div>
+                    <div class="bar"><div class="bar-box" style="background:#dfe6e9">2</div></div>
+                </div>
+                <p>nums[mid] &lt; nums[right] &rarr; right = mid = 4. Now left == right &rarr; <strong>nums[4] = 0</strong></p>
+            </div>
+
+            <div class="code-block">while (start &lt; end):
+    mid = floor((start + end) / 2)
+    if nums[mid] &gt; nums[end]:
+        start = mid + 1    // min is right
+    else:
+        end = mid          // min is left (including mid)
+return nums[start]</div>
+            <p><strong>Time:</strong> O(log n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Description</th></tr>
+                <tr><td>Brute Force</td><td>O(n)</td><td>O(1)</td><td>Simple linear scan</td></tr>
+                <tr><td>Binary Search</td><td>O(log n)</td><td>O(1)</td><td>Optimal, uses sorted property</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+find+minimum+in+rotated+sorted+array" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" target="_blank">Binary Search Algorithm (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Palindrome - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; }
+        h3 { font-size: 18px; margin-bottom: 12px; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .diagram { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 16px; margin: 12px 0; flex-wrap: wrap; }
+        .char-box { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+        .highlight-blue { background: #a8d8ea; }
+        .highlight-purple { background: #aa96da; color: #fff; }
+        .highlight-green { background: #b5ead7; }
+        .highlight-orange { background: #ffd3b6; }
+        .highlight-red { background: #ff9aa2; }
+        .highlight-yellow { background: #ffffd8; }
+        .dimmed { background: #dfe6e9; color: #b2bec3; }
+        .pointer-row { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 4px 0; }
+        .pointer-label { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; width: 36px; text-align: center; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        .match-indicator { display: inline-block; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; font-weight: 700; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Valid Palindrome</h1>
+            <p>LeetCode 125 &mdash; Check if a string is a palindrome, ignoring non-alphanumeric characters and case.</p>
+            <div class="tags">
+                <span class="tag">Two Pointers</span>
+                <span class="tag">String</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Determine if a string reads the same forward and backward after converting to lowercase and removing non-alphanumeric characters.</p>
+            <div class="code-block">Input:  "A man, a plan, a canal: Panama"
+Clean:  "amanaplanacanalpanama"
+Output: true</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Clean and Reverse</h2>
+            <h3>Filter, Lowercase, Compare with Reverse</h3>
+            <p>Strip non-alphanumeric characters, convert to lowercase, then compare the result with its reverse.</p>
+            <div class="step-card">
+                <div class="step-title">Step 1: Filter to alphanumeric</div>
+                <div class="diagram">
+                    <div class="char-box highlight-blue">A</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">m</div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box highlight-blue">n</div>
+                    <div class="char-box dimmed">,</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">p</div>
+                    <div class="char-box dimmed">...</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-title">Step 2: Compare cleaned with reversed</div>
+                <div class="diagram">
+                    <div style="text-align:center;width:100%">
+                        <p>cleaned:&nbsp;&nbsp; "amanaplanacanalpanama"</p>
+                        <p>reversed: "amanaplanacanalpanama"</p>
+                        <p style="color:#b5ead7;font-weight:700;margin-top:8px">Equal &rarr; true</p>
+                    </div>
+                </div>
+            </div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Two Pointers (Optimal)</h2>
+            <h3>Compare from Both Ends In-Place</h3>
+            <p>Use left and right pointers that skip non-alphanumeric characters and compare case-insensitively.</p>
+
+            <div class="step-card">
+                <div class="step-title">Step 1: Compare s[left] with s[right]</div>
+                <div class="diagram">
+                    <div class="char-box highlight-orange">A</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">m</div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box highlight-blue">n</div>
+                    <div class="char-box dimmed">,</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">p</div>
+                    <div class="char-box dimmed">...</div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-orange">a</div>
+                </div>
+                <div class="pointer-row">
+                    <span class="pointer-label highlight-orange">L</span>
+                    <span style="width:36px"></span>
+                    <span style="flex:1"></span>
+                    <span style="width:36px"></span>
+                    <span class="pointer-label highlight-purple">R</span>
+                </div>
+                <p>'A' vs 'a' &rarr; match (case-insensitive) <span class="match-indicator highlight-green">&check;</span></p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 2: Move pointers inward, skip non-alphanumeric</div>
+                <div class="diagram">
+                    <div class="char-box dimmed">A</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-orange">m</div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box highlight-blue">n</div>
+                    <div class="char-box dimmed">,</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-blue">a</div>
+                    <div class="char-box dimmed">...</div>
+                    <div class="char-box highlight-blue">m</div>
+                    <div class="char-box dimmed"> </div>
+                    <div class="char-box highlight-orange">a</div>
+                </div>
+                <p>'m' vs 'm' &rarr; match <span class="match-indicator highlight-green">&check;</span></p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Continue until left &ge; right</div>
+                <p>Each pair matches &rarr; the string is a palindrome.</p>
+            </div>
+
+            <div class="code-block">left = 0, right = s.length - 1
+while left &lt; right:
+    while left &lt; right &amp;&amp; !isAlphanumeric(s[left]): left++
+    while left &lt; right &amp;&amp; !isAlphanumeric(s[right]): right--
+    if s[left].toLowerCase() !== s[right].toLowerCase():
+        return false
+    left++, right--
+return true</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Description</th></tr>
+                <tr><td>Clean and Reverse</td><td>O(n)</td><td>O(n)</td><td>Easy to implement, uses extra memory</td></tr>
+                <tr><td>Two Pointers</td><td>O(n)</td><td>O(1)</td><td>Optimal, single pass, no extra space</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/valid-palindrome/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+valid+palindrome" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Palindrome" target="_blank">Palindrome (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

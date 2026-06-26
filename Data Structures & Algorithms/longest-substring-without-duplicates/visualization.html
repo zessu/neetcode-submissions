@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Substring Without Repeating Characters</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .tag.orange { background: #ffd3b6; }
+        .tag.yellow { background: #ffffd8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .diagram {
+            background: #fdf6f0;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .window-container {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+        .char-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            background: #ffffff;
+        }
+        .char-box.in-window { background: #a8d8ea; border-color: #7bc0d8; }
+        .char-box.duplicate { background: #ff9aa2; border-color: #e87a82; }
+        .char-box.checked { background: #b5ead7; border-color: #8fd4b8; }
+        .pointer-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #636e72;
+            margin-top: 2px;
+        }
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #dfe6e9;
+        }
+        .step-label {
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 60px;
+            color: #aa96da;
+        }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .set-display {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            background: #f0eef6;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+        }
+        .result-badge {
+            display: inline-block;
+            background: #b5ead7;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .approach-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .approach-badge {
+            background: #ffd3b6;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .complexity {
+            display: inline-flex;
+            gap: 16px;
+            margin: 8px 0;
+        }
+        .complexity span {
+            font-size: 13px;
+            color: #636e72;
+        }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #dfe6e9;
+            font-size: 14px;
+        }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Longest Substring Without Repeating Characters</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 3</p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag purple">Sliding Window</span>
+                <span class="tag green">Hash Table</span>
+                <span class="tag orange">Two Pointers</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a string <code>s</code>, find the length of the <strong>longest substring</strong> without repeating characters.</p>
+            <div class="code-block">Input:  s = "abcabcbb"
+Output: 3
+Explanation: The longest substring is "abc", with length 3.</div>
+            <p><strong>Constraints:</strong> 0 &lt;= s.length &lt;= 5 &times; 10<sup>4</sup>, consists of English letters, digits, symbols, and spaces.</p>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Brute Force</h2>
+                <span class="approach-badge">O(n&sup2;)</span>
+            </div>
+            <p>For every starting index <code>i</code> and ending index <code>j</code>, check whether <code>s[i..j]</code> has any duplicate characters. Track the maximum valid length.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n&sup2;)</span>
+                <span><strong>Space:</strong> O(min(n, &sigma;))</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Checking every substring</h3>
+                <div class="window-container">
+                    <div class="char-box">a</div>
+                    <div class="char-box">b</div>
+                    <div class="char-box">c</div>
+                    <div class="char-box">a</div>
+                    <div class="char-box">b</div>
+                    <div class="char-box">c</div>
+                    <div class="char-box">b</div>
+                    <div class="char-box">b</div>
+                </div>
+                <div style="margin-top: 16px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <div class="step-row">
+                        <span class="step-label">i=0,j=0</span>
+                        <span class="step-desc">"a" &rarr; valid, len=1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=0,j=1</span>
+                        <span class="step-desc">"ab" &rarr; valid, len=2</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=0,j=2</span>
+                        <span class="step-desc">"abc" &rarr; valid, len=3</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=0,j=3</span>
+                        <span class="step-desc">"abca" &rarr; <span style="color:#ff9aa2;font-weight:600;">duplicate 'a'</span>, break</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">i=1,j=1</span>
+                        <span class="step-desc">"b" &rarr; valid, len=1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">...</span>
+                        <span class="step-desc">continues for all pairs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Sliding Window with Set</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(n)</span>
+            </div>
+            <p>Maintain a window <code>[left, right]</code> and a set of characters currently inside it. Expand the right end; if the new character is already in the set, shrink from the left until it isn't.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(min(n, &sigma;))</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Sliding Window Walkthrough: s = "abcabcbb"</h3>
+
+                <div style="margin: 16px 0;">
+                    <p style="font-size: 13px; margin-bottom: 4px; color: #636e72;">r=0, char='a'</p>
+                    <div class="window-container">
+                        <div class="char-box in-window">a</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">b</div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;max-width:340px;margin:0 auto;">
+                        <span class="pointer-label" style="color:#aa96da;">L=0</span>
+                        <span class="pointer-label" style="color:#a8d8ea;">R=0</span>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">Set: <span class="set-display">{a}</span> &nbsp; Result: <span class="result-badge">1</span></p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <p style="font-size: 13px; margin-bottom: 4px; color: #636e72;">r=1, char='b'</p>
+                    <div class="window-container">
+                        <div class="char-box in-window">a</div>
+                        <div class="char-box in-window">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">b</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">Set: <span class="set-display">{a,b}</span> &nbsp; Result: <span class="result-badge">2</span></p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <p style="font-size: 13px; margin-bottom: 4px; color: #636e72;">r=2, char='c'</p>
+                    <div class="window-container">
+                        <div class="char-box in-window">a</div>
+                        <div class="char-box in-window">b</div>
+                        <div class="char-box in-window">c</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">b</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">Set: <span class="set-display">{a,b,c}</span> &nbsp; Result: <span class="result-badge">3</span></p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <p style="font-size: 13px; margin-bottom: 4px; color: #636e72;">r=3, char='a' &mdash; <span style="color:#ff9aa2;font-weight:600;">duplicate!</span> shrink left</p>
+                    <div class="window-container">
+                        <div class="char-box" style="background:#ffffd8;border-color:#e6d97a;">a</div>
+                        <div class="char-box" style="background:#ffffd8;border-color:#e6d97a;">b</div>
+                        <div class="char-box" style="background:#ffffd8;border-color:#e6d97a;">c</div>
+                        <div class="char-box duplicate">a</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">b</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">Remove a,b,c from set &rarr; add 'a' &rarr; Set: <span class="set-display">{a}</span> &nbsp; L=3 &nbsp; Result: <span class="result-badge">3</span></p>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <p style="font-size: 13px; margin-bottom: 4px; color: #636e72;">r=4..7 &mdash; continue sliding</p>
+                    <div class="window-container">
+                        <div class="char-box">a</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">c</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box in-window">b</div>
+                        <div class="char-box in-window">c</div>
+                        <div class="char-box in-window">b</div>
+                        <div class="char-box">b</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">Window keeps shifting; max length never exceeds 3</p>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 16px; font-weight: 600;">Final Result: <span class="result-badge">3</span></p>
+                </div>
+            </div>
+
+            <div class="code-block">const charSet = new Set();
+let leftPtr = 0, res = 0;
+
+for (let rightPtr = 0; rightPtr &lt; s.length; rightPtr++) {
+    while (charSet.has(s[rightPtr])) {
+        charSet.delete(s[leftPtr]);
+        leftPtr++;
+    }
+    charSet.add(s[rightPtr]);
+    res = Math.max(res, rightPtr - leftPtr + 1);
+}
+return res;</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 3: Sliding Window with Last-Seen Map</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(n)</span>
+            </div>
+            <p>Instead of removing characters one at a time, jump <code>leftPtr</code> directly to one past the previous occurrence of <code>s[rightPtr]</code>.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(min(n, &sigma;))</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Last-Seen Jump: s = "abcabcbb"</h3>
+                <div class="window-container">
+                    <div class="char-box">a</div>
+                    <div class="char-box">b</div>
+                    <div class="char-box">c</div>
+                    <div class="char-box">a</div>
+                    <div class="char-box">b</div>
+                    <div class="char-box">c</div>
+                    <div class="char-box">b</div>
+                    <div class="char-box">b</div>
+                </div>
+                <div style="margin-top: 16px; text-align: left; max-width: 440px; margin-left: auto; margin-right: auto;">
+                    <div class="step-row">
+                        <span class="step-label">r=3 'a'</span>
+                        <span class="step-desc">lastSeen['a']=0 &ge; L=0 &rarr; jump L to <strong>1</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">r=4 'b'</span>
+                        <span class="step-desc">lastSeen['b']=1 &ge; L=1 &rarr; jump L to <strong>2</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">r=5 'c'</span>
+                        <span class="step-desc">lastSeen['c']=2 &ge; L=2 &rarr; jump L to <strong>3</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">r=6 'b'</span>
+                        <span class="step-desc">lastSeen['b']=4 &ge; L=3 &rarr; jump L to <strong>5</strong></span>
+                    </div>
+                </div>
+                <p style="font-size:12px;margin-top:8px;color:#636e72;">No inner while loop needed &mdash; direct jump to valid position.</p>
+            </div>
+
+            <div class="code-block">const lastSeen = new Map();
+let leftPtr = 0, res = 0;
+
+for (let rightPtr = 0; rightPtr &lt; s.length; rightPtr++) {
+    const c = s[rightPtr];
+    if (lastSeen.has(c) &amp;&amp; lastSeen.get(c) &gt;= leftPtr) {
+        leftPtr = lastSeen.get(c) + 1;
+    }
+    lastSeen.set(c, rightPtr);
+    res = Math.max(res, rightPtr - leftPtr + 1);
+}
+return res;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n&sup2;)</td>
+                        <td>O(min(n,&sigma;))</td>
+                        <td>Easiest to write</td>
+                        <td>Slow for n = 5&times;10<sup>4</sup></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sliding Window + Set</strong></td>
+                        <td>O(n)</td>
+                        <td>O(min(n,&sigma;))</td>
+                        <td>Single pass, standard pattern</td>
+                        <td>Inner while loop can iterate many times</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sliding Window + Map</strong></td>
+                        <td>O(n)</td>
+                        <td>O(min(n,&sigma;))</td>
+                        <td>No inner while &mdash; direct jump</td>
+                        <td>Slightly more bookkeeping</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=wiGpQwVHdE0" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" target="_blank">Sliding Window Technique</a></li>
+                <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set" target="_blank">MDN: JavaScript Set</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

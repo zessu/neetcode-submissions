@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container With Most Water</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .diagram {
+            background: #fdf6f0;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: 200px;
+            margin: 16px 0;
+            padding: 0 20px;
+        }
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar {
+            width: 40px;
+            border-radius: 4px 4px 0 0;
+            background: #a8d8ea;
+            border: 1px solid #7bc0d8;
+            transition: background 0.2s;
+        }
+        .bar.left-ptr { background: #aa96da; border-color: #8a76ba; }
+        .bar.right-ptr { background: #ffd3b6; border-color: #e6b99c; }
+        .bar.water { background: #b5ead7; border-color: #8fd4b8; }
+        .bar-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #636e72;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .bar-index {
+            font-size: 11px;
+            color: #636e72;
+        }
+        .water-area {
+            position: relative;
+            background: rgba(168, 216, 234, 0.3);
+            border: 2px dashed #a8d8ea;
+            border-radius: 4px;
+            margin: 8px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #dfe6e9;
+        }
+        .step-label {
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 80px;
+            color: #aa96da;
+        }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .result-badge {
+            display: inline-block;
+            background: #b5ead7;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .approach-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .approach-badge {
+            background: #ffd3b6;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .complexity {
+            display: inline-flex;
+            gap: 16px;
+            margin: 8px 0;
+        }
+        .complexity span { font-size: 13px; color: #636e72; }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; font-size: 14px; }
+        .resource-list li:last-child { border-bottom: none; }
+        .pointer-legend {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        .pointer-legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Container With Most Water</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 11</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag purple">Two Pointers</span>
+                <span class="tag green">Greedy</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array <code>height</code> of n non-negative integers, find two lines that together with the x-axis form a container that holds the most water.</p>
+            <div class="code-block">Input:  height = [1,8,6,2,5,4,8,3,7]
+Output: 49
+Explanation: Lines at index 1 (height=8) and index 8 (height=7)
+             Area = (8-1) &times; min(8,7) = 7 &times; 7 = 49</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Brute Force</h2>
+                <span class="approach-badge">O(n&sup2;)</span>
+            </div>
+            <p>Check every possible pair of lines and calculate the water trapped between them.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n&sup2;)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Checking all pairs</h3>
+                <div class="bar-chart">
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:20px;"></div>
+                        <span class="bar-label">1</span>
+                        <span class="bar-index">0</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:160px;"></div>
+                        <span class="bar-label">8</span>
+                        <span class="bar-index">1</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:120px;"></div>
+                        <span class="bar-label">6</span>
+                        <span class="bar-index">2</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:40px;"></div>
+                        <span class="bar-label">2</span>
+                        <span class="bar-index">3</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:100px;"></div>
+                        <span class="bar-label">5</span>
+                        <span class="bar-index">4</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:80px;"></div>
+                        <span class="bar-label">4</span>
+                        <span class="bar-index">5</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:160px;"></div>
+                        <span class="bar-label">8</span>
+                        <span class="bar-index">6</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:60px;"></div>
+                        <span class="bar-label">3</span>
+                        <span class="bar-index">7</span>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height:140px;"></div>
+                        <span class="bar-label">7</span>
+                        <span class="bar-index">8</span>
+                    </div>
+                </div>
+                <div style="text-align:left;max-width:400px;margin:12px auto 0;">
+                    <div class="step-row">
+                        <span class="step-label">(0,1)</span>
+                        <span class="step-desc">w=1, h=min(1,8)=1, area=1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">(0,2)</span>
+                        <span class="step-desc">w=2, h=min(1,6)=1, area=2</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">(1,8)</span>
+                        <span class="step-desc">w=7, h=min(8,7)=7, area=<strong>49</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">...</span>
+                        <span class="step-desc">36 total pairs checked</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Two Pointers</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(n)</span>
+            </div>
+            <p>Start with pointers at both ends. Always move the pointer pointing to the shorter line inward. Width decreases each step, so we can only improve if the shorter side gets taller.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Two Pointers Walkthrough</h3>
+                <div class="pointer-legend">
+                    <span><span class="legend-dot" style="background:#aa96da;"></span> Left pointer</span>
+                    <span><span class="legend-dot" style="background:#ffd3b6;"></span> Right pointer</span>
+                    <span><span class="legend-dot" style="background:#b5ead7;"></span> Water area</span>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 8px;">Step 1: L=0, R=8 &rarr; area = 8 &times; 1 = 8. Move L (shorter).</p>
+                    <div class="bar-chart" style="height:180px;">
+                        <div class="bar-wrapper"><div class="bar left-ptr" style="height:20px;"></div><span class="bar-label">1</span><span class="bar-index">L</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:160px;"></div><span class="bar-label">8</span><span class="bar-index">1</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:120px;"></div><span class="bar-label">6</span><span class="bar-index">2</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:40px;"></div><span class="bar-label">2</span><span class="bar-index">3</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:100px;"></div><span class="bar-label">5</span><span class="bar-index">4</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:80px;"></div><span class="bar-label">4</span><span class="bar-index">5</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:160px;"></div><span class="bar-label">8</span><span class="bar-index">6</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:60px;"></div><span class="bar-label">3</span><span class="bar-index">7</span></div>
+                        <div class="bar-wrapper"><div class="bar right-ptr" style="height:140px;"></div><span class="bar-label">7</span><span class="bar-index">R</span></div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 8px;">Step 2: L=1, R=8 &rarr; area = 7 &times; 7 = <strong>49</strong>! Move R (shorter).</p>
+                    <div class="bar-chart" style="height:180px;">
+                        <div class="bar-wrapper"><div class="bar" style="height:20px;"></div><span class="bar-label">1</span><span class="bar-index">0</span></div>
+                        <div class="bar-wrapper"><div class="bar left-ptr" style="height:160px;"></div><span class="bar-label">8</span><span class="bar-index">L</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:120px;"></div><span class="bar-label">6</span><span class="bar-index">2</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:40px;"></div><span class="bar-label">2</span><span class="bar-index">3</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:100px;"></div><span class="bar-label">5</span><span class="bar-index">4</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:80px;"></div><span class="bar-label">4</span><span class="bar-index">5</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:160px;"></div><span class="bar-label">8</span><span class="bar-index">6</span></div>
+                        <div class="bar-wrapper"><div class="bar" style="height:60px;"></div><span class="bar-label">3</span><span class="bar-index">7</span></div>
+                        <div class="bar-wrapper"><div class="bar right-ptr" style="height:140px;"></div><span class="bar-label">7</span><span class="bar-index">R</span></div>
+                    </div>
+                    <div class="water-area" style="width:70%;height:30px;">Area = 7 &times; 7 = 49</div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 8px;">Steps 3-7: Continue moving shorter pointer inward. No area exceeds 49.</p>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 16px; font-weight: 600;">Final Result: <span class="result-badge">49</span></p>
+                </div>
+            </div>
+
+            <div class="code-block">let maxWater = 0;
+let left = 0, right = heights.length - 1;
+
+while (left &lt; right) {
+    const width = right - left;
+    const height = Math.min(heights[left], heights[right]);
+    maxWater = Math.max(maxWater, width * height);
+
+    if (heights[left] &lt; heights[right]) {
+        left++;
+    } else {
+        right--;
+    }
+}
+return maxWater;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n&sup2;)</td>
+                        <td>O(1)</td>
+                        <td>Check every possible pair of lines</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Two Pointers</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Single pass, greedy &mdash; move shorter pointer</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/container-with-most-water/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=UuiTKBwPgAo" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Two_pointer_technique" target="_blank">Two Pointer Technique</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

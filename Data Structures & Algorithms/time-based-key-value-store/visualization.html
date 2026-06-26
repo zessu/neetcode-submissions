@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Based Key-Value Store - LeetCode 981</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #2d3436; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 1.15rem; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; color: #2d3436; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .step-label {
+            font-weight: 600;
+            color: #aa96da;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .kv-store {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .kv-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #ffffff;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+        }
+        .kv-row.highlight { border-color: #a8d8ea; background: #f0f9fc; }
+        .kv-row.active { border-color: #ffd3b6; background: #fff8f3; }
+        .kv-row.success { border-color: #b5ead7; background: #f2fdf8; }
+        .kv-key {
+            font-weight: 700;
+            font-size: 14px;
+            min-width: 60px;
+            color: #aa96da;
+        }
+        .kv-pairs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .kv-pair {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #f0eef6;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .kv-pair .ts { color: #636e72; font-weight: 600; }
+        .kv-pair .val { color: #2d3436; font-weight: 700; }
+        .kv-pair.found { background: #b5ead7; }
+        .kv-pair.searching { background: #ffffd8; }
+        .operation {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .op-set { background: #ffd3b6; color: #2d3436; }
+        .op-get { background: #a8d8ea; color: #2d3436; }
+        .op-result { background: #b5ead7; color: #2d3436; }
+        .timeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        .timeline-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #a8d8ea;
+            border: 2px solid #ffffff;
+        }
+        .timeline-dot.active { background: #ffd3b6; }
+        .timeline-dot.success { background: #b5ead7; }
+        .timeline-label {
+            font-size: 12px;
+            color: #636e72;
+            font-weight: 600;
+        }
+        .timeline-line {
+            height: 3px;
+            flex: 1;
+            background: #dfe6e9;
+            margin: 0 -4px;
+            margin-bottom: 20px;
+        }
+        .resources a {
+            color: #aa96da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .resources a:hover { text-decoration: underline; }
+        .resources li { margin-bottom: 8px; color: #636e72; }
+        ul { padding-left: 20px; }
+        li { color: #636e72; margin-bottom: 6px; }
+        .complexity { display: flex; gap: 16px; margin: 8px 0; }
+        .complexity span {
+            background: #ffffd8;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .binary-search-row {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+        }
+        .bs-cell {
+            width: 56px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            background: #ffffff;
+            border: 2px solid #dfe6e9;
+            border-radius: 4px;
+        }
+        .bs-cell.highlight { background: #a8d8ea; border-color: #a8d8ea; }
+        .bs-cell.active { background: #ffd3b6; border-color: #ffd3b6; }
+        .bs-cell.success { background: #b5ead7; border-color: #b5ead7; }
+        .bs-cell.dim { background: #fdf6f0; color: #b2bec3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Time Based Key-Value Store</h1>
+        <div class="tags">
+            <span class="tag">Hash Table</span>
+            <span class="tag">String</span>
+            <span class="tag">Binary Search</span>
+            <span class="tag">Design</span>
+            <span class="tag">LeetCode 981</span>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Design a time-based key-value data structure that stores multiple values for the same key at different timestamps and retrieves the key's value at a given timestamp (or the latest timestamp before it).</p>
+            <div class="code-block">set("foo", "bar", 1)   → stores "bar" at timestamp 1
+get("foo", 1)          → "bar"
+get("foo", 3)          → "bar" (latest ≤ 3)
+set("foo", "bar2", 4)  → stores "bar2" at timestamp 4
+get("foo", 4)          → "bar2"
+get("foo", 5)          → "bar2" (latest ≤ 5)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Hash Map + Linear Scan</h2>
+            <div class="complexity">
+                <span>set: O(1)</span>
+                <span>get: O(n)</span>
+                <span>Space: O(n)</span>
+            </div>
+            <p>Store (timestamp, value) pairs in a list for each key. Use linear scan to find the latest valid timestamp ≤ the query timestamp.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">After set("foo", "bar", 1) and set("foo", "bar2", 4)</span>
+                    <div class="kv-store">
+                        <div class="kv-row highlight">
+                            <span class="kv-key">"foo"</span>
+                            <div class="kv-pairs">
+                                <div class="kv-pair"><span class="ts">t=1</span> → <span class="val">"bar"</span></div>
+                                <div class="kv-pair"><span class="ts">t=4</span> → <span class="val">"bar2"</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">get("foo", 3) — Linear scan backwards</span>
+                    <div class="kv-store">
+                        <div class="kv-row active">
+                            <span class="kv-key">"foo"</span>
+                            <div class="kv-pairs">
+                                <div class="kv-pair searching"><span class="ts">t=1</span> → <span class="val">"bar"</span></div>
+                                <div class="kv-pair"><span class="ts">t=4</span> → <span class="val">"bar2" (skip, 4&gt;3)</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="op-result">→ "bar" (t=1 is largest ≤ 3)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Hash Map + Binary Search (Optimal)</h2>
+            <div class="complexity">
+                <span>set: O(1)</span>
+                <span>get: O(log n)</span>
+                <span>Space: O(n)</span>
+            </div>
+            <p>Since timestamps are strictly increasing, the values are naturally sorted. Use binary search to find the largest timestamp ≤ the query timestamp.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Internal structure: timestamps are sorted</span>
+                    <div class="kv-store">
+                        <div class="kv-row highlight">
+                            <span class="kv-key">"foo"</span>
+                            <div class="kv-pairs">
+                                <div class="kv-pair"><span class="ts">t=1</span> → <span class="val">"bar"</span></div>
+                                <div class="kv-pair"><span class="ts">t=4</span> → <span class="val">"bar2"</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">get("foo", 3) — Binary search on timestamps [1, 4]</span>
+                    <div class="binary-search-row">
+                        <div class="bs-cell highlight">1</div>
+                        <div class="bs-cell active">4</div>
+                    </div>
+                    <p style="font-size:13px;">mid=1 (val=4) &gt; 3 → right=0. mid=0 (val=1) ≤ 3 → result=t=1</p>
+                    <span class="op-result">→ "bar"</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">get("foo", 5) — Binary search on timestamps [1, 4]</span>
+                    <div class="binary-search-row">
+                        <div class="bs-cell dim">1</div>
+                        <div class="bs-cell success">4</div>
+                    </div>
+                    <p style="font-size:13px;">mid=0 (val=1) ≤ 5 → result=t=1. mid=1 (val=4) ≤ 5 → result=t=4</p>
+                    <span class="op-result">→ "bar2"</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Timeline visualization</span>
+                    <div class="timeline">
+                        <div class="timeline-point">
+                            <div class="timeline-dot success"></div>
+                            <span class="timeline-label">t=1 "bar"</span>
+                        </div>
+                        <div class="timeline-line"></div>
+                        <div class="timeline-point">
+                            <div class="timeline-dot"></div>
+                            <span class="timeline-label">t=3 get→"bar"</span>
+                        </div>
+                        <div class="timeline-line"></div>
+                        <div class="timeline-point">
+                            <div class="timeline-dot active"></div>
+                            <span class="timeline-label">t=4 "bar2"</span>
+                        </div>
+                        <div class="timeline-line"></div>
+                        <div class="timeline-point">
+                            <div class="timeline-dot"></div>
+                            <span class="timeline-label">t=5 get→"bar2"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>set()</th>
+                        <th>get()</th>
+                        <th>Space</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Linear Scan</strong></td>
+                        <td>O(1)</td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Binary Search</strong></td>
+                        <td>O(1)</td>
+                        <td>O(log n)</td>
+                        <td>O(n)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/time-based-key-value-store/">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+time+based+key+value+store">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_algorithm">Binary Search Algorithm</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Hash_table">Hash Table Data Structure</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reverse a Linked List - LeetCode 206</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #2d3436; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 1.15rem; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; color: #2d3436; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .linked-list {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .node {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            border: 2px solid #dfe6e9;
+            background: #ffffff;
+            color: #2d3436;
+        }
+        .node.highlight { background: #a8d8ea; border-color: #a8d8ea; }
+        .node.active { background: #ffd3b6; border-color: #ffd3b6; }
+        .node.success { background: #b5ead7; border-color: #b5ead7; }
+        .node.error { background: #ff9aa2; border-color: #ff9aa2; }
+        .node.null-node {
+            width: 48px;
+            font-size: 12px;
+            color: #636e72;
+            background: #fdf6f0;
+            border-style: dashed;
+        }
+        .arrow { font-size: 20px; color: #636e72; }
+        .arrow-reverse { font-size: 20px; color: #aa96da; }
+        .step-label {
+            font-weight: 600;
+            color: #aa96da;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .resources a {
+            color: #aa96da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .resources a:hover { text-decoration: underline; }
+        .resources li { margin-bottom: 8px; color: #636e72; }
+        ul { padding-left: 20px; }
+        li { color: #636e72; margin-bottom: 6px; }
+        .complexity { display: flex; gap: 16px; margin: 8px 0; }
+        .complexity span {
+            background: #ffffd8;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .pointer-labels {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #636e72;
+        }
+        .pointer-labels span { font-weight: 600; }
+        .ptr-prev { color: #aa96da; }
+        .ptr-curr { color: #a8d8ea; }
+        .ptr-next { color: #ffd3b6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reverse a Linked List</h1>
+        <div class="tags">
+            <span class="tag">Linked List</span>
+            <span class="tag">Recursion</span>
+            <span class="tag">LeetCode 206</span>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given the head of a singly linked list, reverse the list, and return the reversed list.</p>
+            <div class="code-block">Input:  1 → 2 → 3 → 4 → 5 → null
+Output: 5 → 4 → 3 → 2 → 1 → null</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Iterative (Optimal)</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(1)</span>
+            </div>
+            <p>Use three pointers (prev, curr, next) to reverse each link one at a time as we traverse the list.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Input</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node">3</div><span class="arrow">→</span>
+                        <div class="node">4</div><span class="arrow">→</span>
+                        <div class="node">5</div><span class="arrow">→</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Iteration 1: prev=null, curr=1</span>
+                    <div class="pointer-labels">
+                        <span class="ptr-prev">prev = null</span>
+                        <span class="ptr-curr">curr = 1</span>
+                        <span class="ptr-next">next = 2</span>
+                    </div>
+                    <div class="linked-list">
+                        <div class="node highlight">1</div><span class="arrow-reverse">←</span>
+                        <div class="node null-node">null</div>
+                        <span style="margin: 0 12px; color:#636e72;">|</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node">3</div><span class="arrow">→</span>
+                        <div class="node">4</div><span class="arrow">→</span>
+                        <div class="node">5</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Iteration 2: prev=1, curr=2</span>
+                    <div class="pointer-labels">
+                        <span class="ptr-prev">prev = 1</span>
+                        <span class="ptr-curr">curr = 2</span>
+                        <span class="ptr-next">next = 3</span>
+                    </div>
+                    <div class="linked-list">
+                        <div class="node success">2</div><span class="arrow-reverse">←</span>
+                        <div class="node success">1</div><span class="arrow-reverse">←</span>
+                        <div class="node null-node">null</div>
+                        <span style="margin: 0 12px; color:#636e72;">|</span>
+                        <div class="node">3</div><span class="arrow">→</span>
+                        <div class="node">4</div><span class="arrow">→</span>
+                        <div class="node">5</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Iteration 3: prev=2, curr=3</span>
+                    <div class="linked-list">
+                        <div class="node success">3</div><span class="arrow-reverse">←</span>
+                        <div class="node success">2</div><span class="arrow-reverse">←</span>
+                        <div class="node success">1</div><span class="arrow-reverse">←</span>
+                        <div class="node null-node">null</div>
+                        <span style="margin: 0 12px; color:#636e72;">|</span>
+                        <div class="node">4</div><span class="arrow">→</span>
+                        <div class="node">5</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Iteration 4: prev=3, curr=4</span>
+                    <div class="linked-list">
+                        <div class="node success">4</div><span class="arrow-reverse">←</span>
+                        <div class="node success">3</div><span class="arrow-reverse">←</span>
+                        <div class="node success">2</div><span class="arrow-reverse">←</span>
+                        <div class="node success">1</div><span class="arrow-reverse">←</span>
+                        <div class="node null-node">null</div>
+                        <span style="margin: 0 12px; color:#636e72;">|</span>
+                        <div class="node">5</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Iteration 5: prev=4, curr=5</span>
+                    <div class="linked-list">
+                        <div class="node success">5</div><span class="arrow-reverse">←</span>
+                        <div class="node success">4</div><span class="arrow-reverse">←</span>
+                        <div class="node success">3</div><span class="arrow-reverse">←</span>
+                        <div class="node success">2</div><span class="arrow-reverse">←</span>
+                        <div class="node success">1</div><span class="arrow-reverse">←</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Result: return prev = 5</span>
+                    <div class="linked-list">
+                        <div class="node active">5</div><span class="arrow">→</span>
+                        <div class="node active">4</div><span class="arrow">→</span>
+                        <div class="node active">3</div><span class="arrow">→</span>
+                        <div class="node active">2</div><span class="arrow">→</span>
+                        <div class="node active">1</div><span class="arrow">→</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Recursive</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(n)</span>
+            </div>
+            <p>Recursively reverse the rest of the list, then attach the current node to the end.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Recursion unfolds bottom-up</span>
+                    <div class="linked-list">
+                        <div class="node">1</div><span class="arrow">→</span>
+                        <div class="node">2</div><span class="arrow">→</span>
+                        <div class="node">3</div><span class="arrow">→</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <span class="step-label">Base case: reverse(3) returns 3</span>
+                    <div class="linked-list">
+                        <div class="node highlight">3</div><span class="arrow">→</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <span class="step-label">reverse(2): 2.next.next = 2, 2.next = null</span>
+                    <div class="linked-list">
+                        <div class="node success">3</div><span class="arrow">→</span>
+                        <div class="node success">2</div><span class="arrow">→</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <span class="step-label">reverse(1): 1.next.next = 1, 1.next = null</span>
+                    <div class="linked-list">
+                        <div class="node active">3</div><span class="arrow">→</span>
+                        <div class="node active">2</div><span class="arrow">→</span>
+                        <div class="node active">1</div><span class="arrow">→</span>
+                        <div class="node null-node">null</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Iterative</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Optimal space, simple</td>
+                        <td>Slightly more code than recursive</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recursive</strong></td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                        <td>Elegant one-liner</td>
+                        <td>Stack overflow for large lists</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/reverse-linked-list/">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+reverse+linked+list">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Linked_list">Linked List Data Structure</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)">Recursion in Computer Science</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

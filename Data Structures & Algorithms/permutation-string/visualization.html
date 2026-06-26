@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permutation in String</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .tag.orange { background: #ffd3b6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; overflow-x: auto; white-space: pre; }
+        .diagram { background: #fdf6f0; border: 1px solid #dfe6e9; border-radius: 8px; padding: 20px; margin: 16px 0; text-align: center; }
+        .window-container { display: flex; justify-content: center; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+        .char-box { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 16px; font-weight: 600; background: #ffffff; }
+        .char-box.in-window { background: #a8d8ea; border-color: #7bc0d8; }
+        .char-box.match { background: #b5ead7; border-color: #8fd4b8; }
+        .char-box.no-match { background: #ff9aa2; border-color: #e87a82; color: #fff; }
+        .step-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 8px 12px; background: #ffffff; border-radius: 6px; border: 1px solid #dfe6e9; }
+        .step-label { font-size: 13px; font-weight: 600; min-width: 80px; color: #aa96da; }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .result-badge { display: inline-block; background: #b5ead7; padding: 4px 12px; border-radius: 16px; font-size: 14px; font-weight: 600; }
+        .result-badge.bad { background: #ff9aa2; }
+        .approach-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .approach-badge { background: #ffd3b6; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+        .complexity { display: inline-flex; gap: 16px; margin: 8px 0; }
+        .complexity span { font-size: 13px; color: #636e72; }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; font-size: 14px; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Permutation in String</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 567</p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag purple">Sliding Window</span>
+                <span class="tag green">Hash Table</span>
+                <span class="tag orange">Two Pointers</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given two strings <code>s1</code> and <code>s2</code>, return <code>true</code> if <code>s2</code> contains a permutation of <code>s1</code> as a substring.</p>
+            <div class="code-block">Input:  s1 = "ab", s2 = "eidbaooo"
+Output: true
+Explanation: s2 contains "ba", which is a permutation of "ab".</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Brute Force</h2>
+                <span class="approach-badge">O(|s1|! &middot; |s2|)</span>
+            </div>
+            <p>Generate every permutation of s1 and check if any is a substring of s2.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(|s1|! &middot; |s2|)</span>
+                <span><strong>Space:</strong> O(|s1| &middot; |s1|!)</span>
+            </div>
+            <p style="font-size:13px;color:#ff9aa2;">Unusable for |s1| &ge; 8.</p>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Sliding Window with Rebuilt Counts</h2>
+                <span class="approach-badge">O(|s1| &middot; |s2|)</span>
+            </div>
+            <p>Slide a fixed-size window of length |s1| across s2. At each position, rebuild a 26-element frequency count and compare against s1's count.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(|s1| &middot; |s2|)</span>
+                <span><strong>Space:</strong> O(1) (fixed 26 arrays)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Sliding Window: s1 = "ab", s2 = "eidbaooo"</h3>
+                <p style="font-size:13px;color:#636e72;margin-bottom:12px;">Target count: {a:1, b:1}</p>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Window at start=0: "ei"</p>
+                    <div class="window-container">
+                        <div class="char-box no-match">e</div>
+                        <div class="char-box no-match">i</div>
+                        <div class="char-box">d</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">{e:1, i:1} &ne; {a:1, b:1} <span class="result-badge bad">no match</span></p>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Window at start=1: "id"</p>
+                    <div class="window-container">
+                        <div class="char-box">e</div>
+                        <div class="char-box no-match">i</div>
+                        <div class="char-box no-match">d</div>
+                        <div class="char-box">b</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">{i:1, d:1} &ne; {a:1, b:1} <span class="result-badge bad">no match</span></p>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Window at start=2: "db"</p>
+                    <div class="window-container">
+                        <div class="char-box">e</div>
+                        <div class="char-box">i</div>
+                        <div class="char-box no-match">d</div>
+                        <div class="char-box no-match">b</div>
+                        <div class="char-box">a</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">{d:1, b:1} &ne; {a:1, b:1} <span class="result-badge bad">no match</span></p>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Window at start=3: "ba"</p>
+                    <div class="window-container">
+                        <div class="char-box">e</div>
+                        <div class="char-box">i</div>
+                        <div class="char-box">d</div>
+                        <div class="char-box match">b</div>
+                        <div class="char-box match">a</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                        <div class="char-box">o</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">{b:1, a:1} = {a:1, b:1} <span class="result-badge">match!</span></p>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 16px; font-weight: 600;">Result: <span class="result-badge">true</span></p>
+                </div>
+            </div>
+
+            <div class="code-block">const arr1 = Array.from({ length: 26 }).fill(0);
+for (let i = 0; i &lt; s1.length; i++) {
+    arr1[s1.charCodeAt(i) - 97]++;
+}
+
+let start = 0, end = start + s1.length;
+while (end &lt;= s2.length) {
+    const arr2 = Array.from({ length: 26 }).fill(0);
+    for (let i = 0; i &lt; s1.length; i++) {
+        arr2[s2.charCodeAt(start + i) - 97]++;
+    }
+    if (arr1.every((v, i) =&gt; v === arr2[i])) return true;
+    start++;
+    end = start + s1.length;
+}
+return false;</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 3: Sliding Window with Rolling Updates</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(|s2|)</span>
+            </div>
+            <p>Maintain the window count incrementally. On each slide, decrement the leaving character and increment the entering character. Track a <code>matches</code> counter across all 26 buckets.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(|s1| + |s2|)</span>
+                <span><strong>Space:</strong> O(1)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Rolling Update Concept</h3>
+                <div style="display:flex;justify-content:center;gap:24px;align-items:center;margin:16px 0;">
+                    <div style="text-align:center;">
+                        <div style="background:#ff9aa2;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;">Char leaving</div>
+                        <div style="font-size:12px;color:#636e72;margin-top:4px;">window[out]--</div>
+                    </div>
+                    <div style="font-size:24px;color:#aa96da;">&rarr;</div>
+                    <div style="text-align:center;">
+                        <div style="background:#a8d8ea;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;">Slide +1</div>
+                        <div style="font-size:12px;color:#636e72;margin-top:4px;">O(1) per step</div>
+                    </div>
+                    <div style="font-size:24px;color:#aa96da;">&rarr;</div>
+                    <div style="text-align:center;">
+                        <div style="background:#b5ead7;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;">Char entering</div>
+                        <div style="font-size:12px;color:#636e72;margin-top:4px;">window[in]++</div>
+                    </div>
+                </div>
+                <p style="font-size:12px;color:#636e72;">Only 2 indices change per slide. Update <code>matches</code> for those 2 buckets only.</p>
+                <p style="font-size:13px;margin-top:8px;">When <code>matches === 26</code>, all frequency buckets match &rarr; permutation found.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(|s1|! &middot; |s2|)</td>
+                        <td>O(|s1| &middot; |s1|!)</td>
+                        <td>Easiest to describe</td>
+                        <td>Unusable for |s1| &ge; 8</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sliding + Rebuild</strong></td>
+                        <td>O(|s1| &middot; |s2|)</td>
+                        <td>O(1)</td>
+                        <td>Clear, easy to follow</td>
+                        <td>Repeated work per slide</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sliding + Rolling</strong></td>
+                        <td>O(|s1| + |s2|)</td>
+                        <td>O(1)</td>
+                        <td>Strictly linear, no wasted work</td>
+                        <td>More bookkeeping for matches</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/permutation-in-string/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=UbyhOgBN834" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" target="_blank">Sliding Window Technique</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encode and Decode Strings - LeetCode 271</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #2d3436; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 1.15rem; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; color: #2d3436; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .step-label {
+            font-weight: 600;
+            color: #aa96da;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .string-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #ffffff;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .string-box.highlight { border-color: #a8d8ea; background: #f0f9fc; }
+        .string-box.active { border-color: #ffd3b6; background: #fff8f3; }
+        .string-box.success { border-color: #b5ead7; background: #f2fdf8; }
+        .encoded-string {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .enc-part {
+            padding: 10px 14px;
+            border-right: 1px solid #dfe6e9;
+        }
+        .enc-part:last-child { border-right: none; }
+        .enc-meta { background: #ffffd8; font-weight: 600; }
+        .enc-delimiter { background: #ff9aa2; color: #fff; font-weight: 700; }
+        .enc-data { background: #ffffff; }
+        .arrow-down {
+            font-size: 24px;
+            color: #aa96da;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #636e72;
+            font-size: 13px;
+        }
+        .resources a {
+            color: #aa96da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .resources a:hover { text-decoration: underline; }
+        .resources li { margin-bottom: 8px; color: #636e72; }
+        ul { padding-left: 20px; }
+        li { color: #636e72; margin-bottom: 6px; }
+        .complexity { display: flex; gap: 16px; margin: 8px 0; }
+        .complexity span {
+            background: #ffffd8;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Encode and Decode Strings</h1>
+        <div class="tags">
+            <span class="tag">String</span>
+            <span class="tag">Design</span>
+            <span class="tag">LeetCode 271</span>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Design an algorithm to encode a list of strings into a single string and decode it back. The encoded string is sent over the network.</p>
+            <div class="code-block">Input:  ["neet", "code"]
+Encode: "4,4,#neet code"
+Decode: ["neet", "code"]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Special Delimiter</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(k)</span>
+            </div>
+            <p>Join strings with a delimiter character that doesn't appear in the strings. Problematic if all ASCII characters are allowed in input.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Encode with delimiter "#"</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                        <div class="string-box">"neet"</div>
+                        <div class="string-box">"code"</div>
+                    </div>
+                    <span class="arrow-down">↓</span>
+                    <div class="encoded-string">
+                        <div class="enc-part enc-data">neet</div>
+                        <div class="enc-part enc-delimiter">#</div>
+                        <div class="enc-part enc-data">code</div>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <p style="font-size:13px;color:#ff9aa2;font-weight:600;">Fails if input contains "#": ["ne#et", "code"] → ambiguous!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Length Prefix (Optimal)</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(1) extra</span>
+            </div>
+            <p>For each string, store its length followed by a delimiter, then the string itself. This robustly handles any character in the input strings.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Encode: ["neet", "code"]</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                        <div class="string-box highlight">"neet" (len=4)</div>
+                        <div class="string-box highlight">"code" (len=4)</div>
+                    </div>
+                    <span class="arrow-down">↓</span>
+                    <div class="encoded-string">
+                        <div class="enc-part enc-meta">4,</div>
+                        <div class="enc-part enc-meta">4,</div>
+                        <div class="enc-part enc-delimiter">#</div>
+                        <div class="enc-part enc-data">neet code</div>
+                    </div>
+                    <p style="font-size:13px;">Format: <code>length1,length2,...,#content1 content2...</code></p>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Decode: "4,4,#neet code"</span>
+                    <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <div class="string-box active" style="font-size:13px;">Read "4,4" → sizes = [4, 4]</div>
+                        </div>
+                        <span class="arrow-down">↓</span>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <div class="string-box active" style="font-size:13px;">Skip "#", read 4 chars → "neet"</div>
+                        </div>
+                        <span class="arrow-down">↓</span>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <div class="string-box active" style="font-size:13px;">Skip space, read 4 chars → "code"</div>
+                        </div>
+                        <span class="arrow-down">↓</span>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                            <div class="string-box success">"neet"</div>
+                            <div class="string-box success">"code"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Handles any character including delimiters</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                        <div class="string-box highlight">"ne#et"</div>
+                        <div class="string-box highlight">"co,de"</div>
+                    </div>
+                    <span class="arrow-down">↓</span>
+                    <div class="encoded-string">
+                        <div class="enc-part enc-meta">5,</div>
+                        <div class="enc-part enc-meta">5,</div>
+                        <div class="enc-part enc-delimiter">#</div>
+                        <div class="enc-part enc-data">ne#et co,de</div>
+                    </div>
+                    <p style="font-size:13px;color:#b5ead7;font-weight:600;">Lengths tell us exactly how many chars to read — no ambiguity!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Reliability</th>
+                        <th>Efficiency</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Special Delimiter</strong></td>
+                        <td>Low</td>
+                        <td>High</td>
+                        <td>Fails if delimiter exists in input</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Length Prefix</strong></td>
+                        <td>High</td>
+                        <td>High</td>
+                        <td>Handles any character robustly</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/encode-and-decode-strings/">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+encode+decode+strings">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Character_encoding">Character Encoding</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Serialization">Serialization / Deserialization</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

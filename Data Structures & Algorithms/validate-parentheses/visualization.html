@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Parentheses - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #636e72; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #dfe6e9;
+        }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .string-diagram {
+            display: flex;
+            gap: 4px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .char-cell {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 20px;
+            background: #ffffff;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .char-cell.open { border-color: #b5ead7; background: #f0faf5; color: #2d8a5e; }
+        .char-cell.close { border-color: #ffd3b6; background: #fff8f0; color: #c47a3a; }
+        .char-cell.error { border-color: #ff9aa2; background: #fff0f0; color: #d63031; }
+        .stack-diagram {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 4px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            min-height: 100px;
+        }
+        .stack-item {
+            width: 80px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #aa96da;
+            color: #fff;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 20px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .stack-base {
+            width: 100px;
+            height: 4px;
+            background: #636e72;
+            border-radius: 2px;
+        }
+        .stack-label {
+            font-size: 12px;
+            color: #636e72;
+            margin-top: 4px;
+        }
+        .walkthrough {
+            margin-bottom: 16px;
+        }
+        .walk-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            border-left: 3px solid #a8d8ea;
+        }
+        .walk-step.success-step { border-left-color: #b5ead7; }
+        .walk-step.error-step { border-left-color: #ff9aa2; }
+        .walk-char {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 18px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .walk-char.open { background: #b5ead7; }
+        .walk-char.close { background: #ffd3b6; }
+        .walk-char.err { background: #ff9aa2; }
+        .walk-action { font-size: 14px; flex: 1; }
+        .walk-stack {
+            display: flex;
+            gap: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+        }
+        .walk-stack-item {
+            padding: 4px 8px;
+            background: #aa96da;
+            color: #fff;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .pointer-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .pointer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .pointer-left { background: #b5ead7; color: #2d3436; }
+        .pointer-right { background: #ffd3b6; color: #2d3436; }
+        .step-list { list-style: none; padding: 0; }
+        .step-list li {
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            font-size: 14px;
+            border-left: 3px solid #a8d8ea;
+        }
+        .step-list li.active { border-left-color: #ffd3b6; background: #fff8f0; }
+        .highlight { background: #ffffd8; padding: 2px 6px; border-radius: 4px; }
+        .success { color: #2d3436; background: #b5ead7; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .error-tag { color: #2d3436; background: #ff9aa2; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .resources-list { list-style: none; padding: 0; }
+        .resources-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #dfe6e9;
+            font-size: 14px;
+        }
+        .resources-list li:last-child { border-bottom: none; }
+        .formula-box {
+            background: #ffffd8;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            text-align: center;
+        }
+        .pair-mapping {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .pair-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #fdf6f0;
+            border-radius: 8px;
+        }
+        .pair-open {
+            background: #b5ead7;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 18px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .pair-close {
+            background: #ffd3b6;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 18px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .pair-arrow { color: #636e72; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Valid Parentheses</h1>
+            <p>LeetCode 20 &mdash; Easy</p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag">Stack</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a string <code>s</code> containing only <code>(</code>, <code>)</code>, <code>{</code>, <code>}</code>, <code>[</code>, and <code>]</code>, determine if the string is valid.</p>
+            <h3>Validity Rules</h3>
+            <ul class="step-list">
+                <li>Open brackets must be closed by the <strong>same type</strong> of bracket</li>
+                <li>Open brackets must be closed in the <strong>correct order</strong> (LIFO)</li>
+            </ul>
+            <h3>Bracket Pairs</h3>
+            <div class="pair-mapping">
+                <div class="pair-item">
+                    <span class="pair-open">(</span>
+                    <span class="pair-arrow">&harr;</span>
+                    <span class="pair-close">)</span>
+                </div>
+                <div class="pair-item">
+                    <span class="pair-open">{</span>
+                    <span class="pair-arrow">&harr;</span>
+                    <span class="pair-close">}</span>
+                </div>
+                <div class="pair-item">
+                    <span class="pair-open">[</span>
+                    <span class="pair-arrow">&harr;</span>
+                    <span class="pair-close">]</span>
+                </div>
+            </div>
+            <h3>Examples</h3>
+            <div class="string-diagram">
+                <div class="char-cell open">(</div>
+                <div class="char-cell close">)</div>
+            </div>
+            <p>&rarr; <span class="success">true</span></p>
+            <div class="string-diagram">
+                <div class="char-cell open">(</div>
+                <div class="char-cell close">]</div>
+            </div>
+            <p>&rarr; <span class="error-tag">false</span></p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: String Replacement (Brute Force)</h2>
+            <p>Repeatedly replace matching pairs with empty string until no more replacements can be made.</p>
+            <h3>Visual: Replacement Process</h3>
+            <div class="walkthrough">
+                <div class="walk-step">
+                    <span class="walk-action"><code>"()[]{}"</code></span>
+                </div>
+                <div class="walk-step">
+                    <span class="walk-action">Replace "()" &rarr; <code>"[]{}"</code></span>
+                </div>
+                <div class="walk-step">
+                    <span class="walk-action">Replace "[]" &rarr; <code>"{}"</code></span>
+                </div>
+                <div class="walk-step">
+                    <span class="walk-action">Replace "{}" &rarr; <code>""</code></span>
+                </div>
+                <div class="walk-step success-step">
+                    <span class="walk-action">Empty string &rarr; <span class="success">valid</span></span>
+                </div>
+            </div>
+            <h3>Code</h3>
+            <div class="code-block">while (s.includes("()") || s.includes("[]") || s.includes("{}")) {
+    s = s.replace("()", "").replace("[]", "").replace("{}", "");
+}
+return s.length === 0;</div>
+            <p><strong>Time:</strong> O(n&sup2;) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Stack (Optimal)</h2>
+            <p>Push opening brackets onto a stack. When a closing bracket is encountered, pop and compare.</p>
+            <h3>Algorithm</h3>
+            <ul class="step-list">
+                <li class="active">If <span class="highlight">opening bracket</span> &rarr; push onto stack</li>
+                <li>If <span class="highlight">closing bracket</span> &rarr; pop from stack and check if it matches</li>
+                <li>At end: stack must be <span class="highlight">empty</span> for valid string</li>
+            </ul>
+
+            <h3>Walkthrough: "()[]{}" (Valid)</h3>
+            <div class="walkthrough">
+                <div class="walk-step">
+                    <span class="walk-char open">(</span>
+                    <span class="walk-action">Push <code>(</code></span>
+                    <div class="walk-stack"><span class="walk-stack-item">(</span></div>
+                </div>
+                <div class="walk-step success-step">
+                    <span class="walk-char close">)</span>
+                    <span class="walk-action">Pop <code>(</code> matches <code>)</code></span>
+                    <div class="walk-stack"></div>
+                </div>
+                <div class="walk-step">
+                    <span class="walk-char open">[</span>
+                    <span class="walk-action">Push <code>[</code></span>
+                    <div class="walk-stack"><span class="walk-stack-item">[</span></div>
+                </div>
+                <div class="walk-step success-step">
+                    <span class="walk-char close">]</span>
+                    <span class="walk-action">Pop <code>[</code> matches <code>]</code></span>
+                    <div class="walk-stack"></div>
+                </div>
+                <div class="walk-step">
+                    <span class="walk-char open">{</span>
+                    <span class="walk-action">Push <code>{</code></span>
+                    <div class="walk-stack"><span class="walk-stack-item">{</span></div>
+                </div>
+                <div class="walk-step success-step">
+                    <span class="walk-char close">}</span>
+                    <span class="walk-action">Pop <code>{</code> matches <code>}</code></span>
+                    <div class="walk-stack"></div>
+                </div>
+            </div>
+            <p>Stack empty &rarr; <span class="success">true</span></p>
+
+            <h3>Walkthrough: "(]" (Invalid)</h3>
+            <div class="walkthrough">
+                <div class="walk-step">
+                    <span class="walk-char open">(</span>
+                    <span class="walk-action">Push <code>(</code></span>
+                    <div class="walk-stack"><span class="walk-stack-item">(</span></div>
+                </div>
+                <div class="walk-step error-step">
+                    <span class="walk-char err">]</span>
+                    <span class="walk-action">Pop <code>(</code> does NOT match <code>]</code> &rarr; <span class="error-tag">false</span></span>
+                    <div class="walk-stack"></div>
+                </div>
+            </div>
+
+            <h3>Stack Visualization</h3>
+            <div style="display:flex;gap:40px;justify-content:center;flex-wrap:wrap;">
+                <div>
+                    <p style="text-align:center;font-weight:600;margin-bottom:8px;">After pushing "([{"</p>
+                    <div class="stack-diagram">
+                        <div class="stack-item">{</div>
+                        <div class="stack-item">[</div>
+                        <div class="stack-item">(</div>
+                        <div class="stack-base"></div>
+                        <span class="stack-label">Stack (top &uarr;)</span>
+                    </div>
+                </div>
+                <div>
+                    <p style="text-align:center;font-weight:600;margin-bottom:8px;">After processing all</p>
+                    <div class="stack-diagram">
+                        <div class="stack-base"></div>
+                        <span class="stack-label">Empty = Valid!</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Code</h3>
+            <div class="code-block">const matchingPairs = { "}": "{", ")": "(", "]": "[" };
+const stack = [];
+
+if (s.length % 2) return false;
+
+for (const bracket of s) {
+    if ("({[".includes(bracket)) {
+        stack.push(bracket);
+    } else {
+        const top = stack.pop();
+        if (matchingPairs[bracket] !== top) return false;
+    }
+}
+return stack.length === 0;</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr>
+                    <th>Approach</th>
+                    <th>Time</th>
+                    <th>Space</th>
+                    <th>Pros</th>
+                    <th>Cons</th>
+                </tr>
+                <tr>
+                    <td>String Replacement</td>
+                    <td>O(n&sup2;)</td>
+                    <td>O(n)</td>
+                    <td>Easy to understand</td>
+                    <td>Slow for long strings</td>
+                </tr>
+                <tr>
+                    <td><strong>Stack</strong></td>
+                    <td><span class="success">O(n)</span></td>
+                    <td>O(n)</td>
+                    <td>Optimal performance</td>
+                    <td>Requires stack knowledge</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resources-list">
+                <li><a href="https://leetcode.com/problems/valid-parentheses/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=WTzjTskDFMg" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)" target="_blank">Stack Data Structure (Wikipedia)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/LIFO_(computing)" target="_blank">LIFO (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

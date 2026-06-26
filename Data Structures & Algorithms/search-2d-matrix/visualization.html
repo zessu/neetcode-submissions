@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search a 2D Matrix - LeetCode 74</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #2d3436; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 1.15rem; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; color: #2d3436; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .matrix {
+            display: inline-grid;
+            gap: 2px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .cell {
+            width: 56px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 14px;
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            color: #2d3436;
+        }
+        .cell.highlight { background: #a8d8ea; }
+        .cell.active { background: #ffd3b6; }
+        .cell.success { background: #b5ead7; }
+        .cell.error { background: #ff9aa2; }
+        .cell.dim { background: #fdf6f0; color: #b2bec3; }
+        .step-label {
+            font-weight: 600;
+            color: #aa96da;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .flat-array {
+            display: flex;
+            gap: 1px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .flat-cell {
+            width: 44px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            color: #2d3436;
+        }
+        .flat-cell.highlight { background: #a8d8ea; }
+        .flat-cell.active { background: #ffd3b6; }
+        .flat-cell.success { background: #b5ead7; }
+        .flat-cell.dim { background: #fdf6f0; color: #b2bec3; }
+        .flat-index {
+            display: flex;
+            gap: 1px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .flat-index span {
+            width: 44px;
+            text-align: center;
+            font-size: 10px;
+            color: #636e72;
+        }
+        .resources a {
+            color: #aa96da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .resources a:hover { text-decoration: underline; }
+        .resources li { margin-bottom: 8px; color: #636e72; }
+        ul { padding-left: 20px; }
+        li { color: #636e72; margin-bottom: 6px; }
+        .complexity { display: flex; gap: 16px; margin: 8px 0; }
+        .complexity span {
+            background: #ffffd8;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search a 2D Matrix</h1>
+        <div class="tags">
+            <span class="tag">Array</span>
+            <span class="tag">Binary Search</span>
+            <span class="tag">Matrix</span>
+            <span class="tag">LeetCode 74</span>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an m x n 2D matrix where each row is sorted in non-decreasing order and the first integer of every row is greater than the last integer of the previous row, determine if a target value exists in the matrix.</p>
+            <div class="code-block">matrix = [[1, 2, 4, 8],
+          [10,11,12,13],
+          [14,20,30,40]]
+target = 10
+Output: true</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <div class="complexity">
+                <span>Time: O(m * n)</span>
+                <span>Space: O(1)</span>
+            </div>
+            <p>Iterate through every element in the matrix and check if it equals the target.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Scan every cell</span>
+                    <div class="matrix" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="cell dim">1</div><div class="cell dim">2</div><div class="cell dim">4</div><div class="cell dim">8</div>
+                        <div class="cell success">10</div><div class="cell dim">11</div><div class="cell dim">12</div><div class="cell dim">13</div>
+                        <div class="cell dim">14</div><div class="cell dim">20</div><div class="cell dim">30</div><div class="cell dim">40</div>
+                    </div>
+                    <p style="font-size:13px;">Found 10 at row 1, col 0 (scanned 5 cells)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Two-Pass Binary Search</h2>
+            <div class="complexity">
+                <span>Time: O(log m + log n)</span>
+                <span>Space: O(1)</span>
+            </div>
+            <p>First binary search to find the correct row (compare target with row boundaries), then binary search within that row.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Pass 1 — Find the row (target=10, last elements: 8, 13, 40)</span>
+                    <div class="matrix" style="grid-template-columns: repeat(4, 1fr);">
+                        <div class="cell dim">1</div><div class="cell dim">2</div><div class="cell dim">4</div><div class="cell error">8</div>
+                        <div class="cell highlight">10</div><div class="cell highlight">11</div><div class="cell highlight">12</div><div class="cell highlight">13</div>
+                        <div class="cell dim">14</div><div class="cell dim">20</div><div class="cell dim">30</div><div class="cell dim">40</div>
+                    </div>
+                    <p style="font-size:13px;">Row 0 last = 8 &lt; 10, skip. Row 1 last = 13 ≥ 10, search this row.</p>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Pass 2 — Binary search row 1: [10, 11, 12, 13]</span>
+                    <div style="display:flex;gap:2px;">
+                        <div class="cell success" style="border-radius:4px 0 0 4px;">10</div>
+                        <div class="cell" style="border-radius:0;">11</div>
+                        <div class="cell" style="border-radius:0;">12</div>
+                        <div class="cell" style="border-radius:0 4px 4px 0;">13</div>
+                    </div>
+                    <p style="font-size:13px;">mid=1 (11) &gt; 10, go left. mid=0 (10) = target. Found!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: One-Pass Binary Search (Optimal)</h2>
+            <div class="complexity">
+                <span>Time: O(log(m * n))</span>
+                <span>Space: O(1)</span>
+            </div>
+            <p>Treat the 2D matrix as a virtual 1D sorted array. Convert 1D index to 2D coordinates: <code>row = index / n</code>, <code>col = index % n</code>.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Flattened view (12 elements, indices 0-11)</span>
+                    <div class="flat-index">
+                        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span>
+                    </div>
+                    <div class="flat-array">
+                        <div class="flat-cell dim">1</div><div class="flat-cell dim">2</div><div class="flat-cell dim">4</div><div class="flat-cell dim">8</div>
+                        <div class="flat-cell success">10</div><div class="flat-cell dim">11</div><div class="flat-cell dim">12</div><div class="flat-cell dim">13</div>
+                        <div class="flat-cell dim">14</div><div class="flat-cell dim">20</div><div class="flat-cell dim">30</div><div class="flat-cell dim">40</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Binary search: left=0, right=11</span>
+                    <div class="flat-array">
+                        <div class="flat-cell active">1</div><div class="flat-cell">2</div><div class="flat-cell">4</div><div class="flat-cell">8</div>
+                        <div class="flat-cell">10</div><div class="flat-cell highlight">11</div><div class="flat-cell">12</div><div class="flat-cell">13</div>
+                        <div class="flat-cell">14</div><div class="flat-cell">20</div><div class="flat-cell">30</div><div class="flat-cell active">40</div>
+                    </div>
+                    <p style="font-size:13px;">mid=5 → row=1,col=1 → val=11 &gt; 10 → right=4</p>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">left=0, right=4</span>
+                    <div class="flat-array">
+                        <div class="flat-cell active">1</div><div class="flat-cell">2</div><div class="flat-cell highlight">4</div><div class="flat-cell">8</div>
+                        <div class="flat-cell active">10</div><div class="flat-cell dim">11</div><div class="flat-cell dim">12</div><div class="flat-cell dim">13</div>
+                        <div class="flat-cell dim">14</div><div class="flat-cell dim">20</div><div class="flat-cell dim">30</div><div class="flat-cell dim">40</div>
+                    </div>
+                    <p style="font-size:13px;">mid=2 → row=0,col=2 → val=4 &lt; 10 → left=3</p>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">left=3, right=4</span>
+                    <div class="flat-array">
+                        <div class="flat-cell dim">1</div><div class="flat-cell dim">2</div><div class="flat-cell dim">4</div><div class="flat-cell active">8</div>
+                        <div class="flat-cell success">10</div><div class="flat-cell dim">11</div><div class="flat-cell dim">12</div><div class="flat-cell dim">13</div>
+                        <div class="flat-cell dim">14</div><div class="flat-cell dim">20</div><div class="flat-cell dim">30</div><div class="flat-cell dim">40</div>
+                    </div>
+                    <p style="font-size:13px;">mid=3 → val=8 &lt; 10 → left=4. mid=4 → val=10 = target. Found!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(m * n)</td>
+                        <td>O(1)</td>
+                        <td>Scan every cell</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Two-Pass Binary</strong></td>
+                        <td>O(log m + log n)</td>
+                        <td>O(1)</td>
+                        <td>Find row then find column</td>
+                    </tr>
+                    <tr>
+                        <td><strong>One-Pass Binary</strong></td>
+                        <td>O(log(m * n))</td>
+                        <td>O(1)</td>
+                        <td>Treat as flattened array</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/search-a-2d-matrix/">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+search+2d+matrix">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_algorithm">Binary Search Algorithm</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Row-_and_column-major_order">Row-Major Order (2D to 1D mapping)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

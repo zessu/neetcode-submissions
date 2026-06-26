@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimum Window Substring</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #2d3436; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { margin-bottom: 12px; color: #636e72; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .tag.orange { background: #ffd3b6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .diagram {
+            background: #fdf6f0;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        .window-container {
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+        .char-box {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #dfe6e9;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            background: #ffffff;
+        }
+        .char-box.in-window { background: #a8d8ea; border-color: #7bc0d8; }
+        .char-box.valid-window { background: #b5ead7; border-color: #8fd4b8; }
+        .char-box.best-window { background: #ffffd8; border-color: #e6d97a; }
+        .char-box.required { background: #ffd3b6; border-color: #e6b99c; }
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #dfe6e9;
+        }
+        .step-label { font-size: 13px; font-weight: 600; min-width: 80px; color: #aa96da; }
+        .step-desc { font-size: 13px; color: #636e72; }
+        .result-badge {
+            display: inline-block;
+            background: #b5ead7;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .approach-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .approach-badge { background: #ffd3b6; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+        .complexity { display: inline-flex; gap: 16px; margin: 8px 0; }
+        .complexity span { font-size: 13px; color: #636e72; }
+        .complexity strong { color: #2d3436; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; font-size: 14px; }
+        .resource-list li:last-child { border-bottom: none; }
+        .map-display {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            background: #f0eef6;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 12px;
+            margin: 4px;
+        }
+        .have-need {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 8px 0;
+        }
+        .have-need span {
+            font-size: 13px;
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+        .have-count { background: #b5ead7; font-weight: 600; }
+        .need-count { background: #ffd3b6; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Minimum Window Substring</h1>
+            <p style="font-size: 16px; color: #636e72;">LeetCode 76</p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag purple">Sliding Window</span>
+                <span class="tag green">Hash Table</span>
+                <span class="tag orange">Two Pointers</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given strings <code>s</code> and <code>t</code>, find the minimum window substring of <code>s</code> that contains all characters of <code>t</code> (including duplicates).</p>
+            <div class="code-block">Input:  s = "ADOBECODEBANC", t = "ABC"
+Output: "BANC"
+Explanation: "BANC" contains A, B, and C &mdash; the shortest such window.</div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 1: Brute Force</h2>
+                <span class="approach-badge">O(n&sup3;)</span>
+            </div>
+            <p>For every (i, j) pair, check if s[i..j] contains all characters of t. Track the shortest valid substring.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n&sup3;)</span>
+                <span><strong>Space:</strong> O(&sigma;)</span>
+            </div>
+            <p style="font-size:13px;color:#ff9aa2;">Impractical for n = 10<sup>5</sup>.</p>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 2: Sliding Window with Rebuilt Maps</h2>
+                <span class="approach-badge">O(n&sup2; &middot; &sigma;)</span>
+            </div>
+            <p>Expand right until the window contains all of t, then shrink left while it still does. The window's frequency map is rebuilt from scratch each step.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n&sup2; &middot; &sigma;) worst case</span>
+                <span><strong>Space:</strong> O(&sigma;)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>Sliding Window: s = "ADOBECODEBANC", t = "ABC"</h3>
+                <p style="font-size:13px;color:#636e72;margin-bottom:8px;">Required: <span class="map-display">A:1, B:1, C:1</span></p>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Expanding right until valid...</p>
+                    <div class="window-container">
+                        <div class="char-box in-window">A</div>
+                        <div class="char-box in-window">D</div>
+                        <div class="char-box in-window">O</div>
+                        <div class="char-box in-window">B</div>
+                        <div class="char-box in-window">E</div>
+                        <div class="char-box in-window">C</div>
+                        <div class="char-box">O</div>
+                        <div class="char-box">D</div>
+                        <div class="char-box">E</div>
+                        <div class="char-box">B</div>
+                        <div class="char-box">A</div>
+                        <div class="char-box">N</div>
+                        <div class="char-box">C</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">L=0, R=5: "ADOBEC" contains A,B,C <span style="color:#b5ead7;font-weight:600;">&#10003;</span></p>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Shrinking left...</p>
+                    <div class="window-container">
+                        <div class="char-box" style="opacity:0.3;">A</div>
+                        <div class="char-box valid-window">D</div>
+                        <div class="char-box valid-window">O</div>
+                        <div class="char-box valid-window">B</div>
+                        <div class="char-box valid-window">E</div>
+                        <div class="char-box valid-window">C</div>
+                        <div class="char-box">O</div>
+                        <div class="char-box">D</div>
+                        <div class="char-box">E</div>
+                        <div class="char-box">B</div>
+                        <div class="char-box">A</div>
+                        <div class="char-box">N</div>
+                        <div class="char-box">C</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">L=1, R=5: "DOBEC" &mdash; missing A, not valid. Expand right.</p>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Continue expanding and shrinking...</p>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <p style="font-size: 13px; color: #636e72; margin-bottom: 4px;">Final shortest window found:</p>
+                    <div class="window-container">
+                        <div class="char-box" style="opacity:0.3;">A</div>
+                        <div class="char-box" style="opacity:0.3;">D</div>
+                        <div class="char-box" style="opacity:0.3;">O</div>
+                        <div class="char-box" style="opacity:0.3;">B</div>
+                        <div class="char-box" style="opacity:0.3;">E</div>
+                        <div class="char-box" style="opacity:0.3;">C</div>
+                        <div class="char-box" style="opacity:0.3;">O</div>
+                        <div class="char-box" style="opacity:0.3;">D</div>
+                        <div class="char-box" style="opacity:0.3;">E</div>
+                        <div class="char-box best-window">B</div>
+                        <div class="char-box best-window">A</div>
+                        <div class="char-box best-window">N</div>
+                        <div class="char-box best-window">C</div>
+                    </div>
+                    <p style="font-size:12px;margin-top:4px;">L=9, R=12: "BANC" &mdash; length 4</p>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <p style="font-size: 16px; font-weight: 600;">Result: <span class="result-badge">"BANC"</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="approach-header">
+                <h2>Approach 3: Sliding Window with have/need Counters</h2>
+                <span class="approach-badge" style="background:#b5ead7;">Optimal &mdash; O(n)</span>
+            </div>
+            <p>Maintain the window's frequency map incrementally. Track <code>have</code> (characters meeting quota) and <code>need</code> (unique chars in t). Window is valid when <code>have === need</code>.</p>
+            <div class="complexity">
+                <span><strong>Time:</strong> O(n + &sigma;)</span>
+                <span><strong>Space:</strong> O(&sigma;)</span>
+            </div>
+
+            <div class="diagram">
+                <h3>have/need Counter Walkthrough</h3>
+                <p style="font-size:13px;color:#636e72;margin-bottom:8px;">t = "ABC" &rarr; need = 3 unique characters</p>
+
+                <div style="text-align:left;max-width:500px;margin:0 auto;">
+                    <div class="step-row">
+                        <span class="step-label">r=0 'A'</span>
+                        <span class="step-desc">window A:1 meets need &rarr; have=1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">r=1 'D'</span>
+                        <span class="step-desc">not required, have=1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">r=3 'B'</span>
+                        <span class="step-desc">window B:1 meets need &rarr; have=2</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">r=5 'C'</span>
+                        <span class="step-desc">window C:1 meets need &rarr; <strong>have=3 = need!</strong></span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">Shrink</span>
+                        <span class="step-desc">l=0 'A' leaves &rarr; A:0 &lt; 1 &rarr; have=2, l=1</span>
+                    </div>
+                    <div class="step-row">
+                        <span class="step-label">...</span>
+                        <span class="step-desc">continue until "BANC" found as shortest</span>
+                    </div>
+                </div>
+
+                <div class="have-need" style="margin-top:12px;">
+                    <span class="have-count">have: 3</span>
+                    <span class="need-count">need: 3</span>
+                </div>
+                <p style="font-size:12px;color:#636e72;">When have === need, the window is valid &rarr; try shrinking.</p>
+            </div>
+
+            <div class="code-block">const need = new Map();
+for (const c of t) need.set(c, (need.get(c) || 0) + 1);
+
+const window = new Map();
+let have = 0, needSize = need.size;
+let l = 0, resLen = Infinity, res = "";
+
+for (let r = 0; r &lt; s.length; r++) {
+    window.set(s[r], (window.get(s[r]) || 0) + 1);
+    if (need.has(s[r]) &amp;&amp; window.get(s[r]) === need.get(s[r])) have++;
+
+    while (have === needSize) {
+        if (r - l + 1 &lt; resLen) {
+            resLen = r - l + 1;
+            res = s.substring(l, r + 1);
+        }
+        window.set(s[l], window.get(s[l]) - 1);
+        if (need.has(s[l]) &amp;&amp; window.get(s[l]) &lt; need.get(s[l])) have--;
+        l++;
+    }
+}
+return res;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n&sup3;)</td>
+                        <td>O(&sigma;)</td>
+                        <td>Simple to write</td>
+                        <td>Impractical for n=10<sup>5</sup></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sliding Window + Rebuild</strong></td>
+                        <td>O(n&sup2; &middot; &sigma;)</td>
+                        <td>O(&sigma;)</td>
+                        <td>Mirrors textbook idea</td>
+                        <td>Rebuilds substring each step</td>
+                    </tr>
+                    <tr>
+                        <td><strong>have/need Counters</strong></td>
+                        <td>O(n + &sigma;)</td>
+                        <td>O(&sigma;)</td>
+                        <td>Single pass, true optimal</td>
+                        <td>More bookkeeping</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/minimum-window-substring/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=jSto0O4AJbM" target="_blank">NeetCode YouTube Solution</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" target="_blank">Sliding Window Technique</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

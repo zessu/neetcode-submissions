@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 12px; color: #636e72; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-row { display: flex; gap: 4px; margin: 8px 0; align-items: center; flex-wrap: wrap; }
+        .array-cell { width: 52px; height: 44px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; background: #ffffff; }
+        .array-cell.left { border-color: #a8d8ea; background: #a8d8ea; }
+        .array-cell.right { border-color: #ffd3b6; background: #ffd3b6; }
+        .array-cell.mid { border-color: #aa96da; background: #aa96da; color: #fff; }
+        .array-cell.found { border-color: #b5ead7; background: #b5ead7; }
+        .array-cell.eliminated { opacity: 0.35; }
+        .array-cell .idx { font-size: 10px; color: #636e72; font-weight: 400; display: block; }
+        .pointer-label { font-size: 11px; font-weight: 600; text-align: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .pointer-label.left-ptr { color: #0984e3; }
+        .pointer-label.right-ptr { color: #e17055; }
+        .pointer-label.mid-ptr { color: #6c5ce7; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Binary Search</h1>
+            <p class="subtitle">LeetCode 704 &mdash; Search for a target in a sorted array</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Binary Search</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a sorted array <code>nums</code> and a <code>target</code>, return the index of target. If not found, return <code>-1</code>. Must run in O(log n).</p>
+            <div class="code-block">Input:  nums = [-1, 0, 3, 5, 9, 12], target = 9
+Output: 4</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Linear Search (Brute Force)</h2>
+            <p><strong>Intuition:</strong> Scan every element one by one. Does not take advantage of the sorted property.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Linear scan: check each element sequentially</div>
+                <div class="array-row">
+                    <div class="array-cell eliminated">-1<span class="idx">0</span></div>
+                    <div class="array-cell eliminated">0<span class="idx">1</span></div>
+                    <div class="array-cell eliminated">3<span class="idx">2</span></div>
+                    <div class="array-cell eliminated">5<span class="idx">3</span></div>
+                    <div class="array-cell found">9<span class="idx">4</span></div>
+                    <div class="array-cell">12<span class="idx">5</span></div>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Checks indices 0, 1, 2, 3, 4 before finding target. Worst case: O(n) checks.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Iterative Binary Search (Optimal)</h2>
+            <p><strong>Intuition:</strong> Repeatedly halve the search space. Compare the middle element to decide which half to keep.</p>
+            <span class="complexity-badge badge-time">Time: O(log n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Iteration 1: left=0, right=5, mid=2</div>
+                <div class="array-row">
+                    <div class="array-cell left">-1<span class="idx">0</span></div>
+                    <div class="array-cell">0<span class="idx">1</span></div>
+                    <div class="array-cell mid">3<span class="idx">2</span></div>
+                    <div class="array-cell">5<span class="idx">3</span></div>
+                    <div class="array-cell">9<span class="idx">4</span></div>
+                    <div class="array-cell right">12<span class="idx">5</span></div>
+                </div>
+                <div class="array-row" style="margin-top: 4px;">
+                    <div class="pointer-label left-ptr" style="width:52px;">L</div>
+                    <div style="width:56px;"></div>
+                    <div class="pointer-label mid-ptr" style="width:52px;">M</div>
+                    <div style="width:112px;"></div>
+                    <div class="pointer-label right-ptr" style="width:52px;">R</div>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">nums[2] = 3 &lt; 9 &rarr; search right half: left = mid + 1 = 3</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Iteration 2: left=3, right=5, mid=4</div>
+                <div class="array-row">
+                    <div class="array-cell eliminated">-1<span class="idx">0</span></div>
+                    <div class="array-cell eliminated">0<span class="idx">1</span></div>
+                    <div class="array-cell eliminated">3<span class="idx">2</span></div>
+                    <div class="array-cell left">5<span class="idx">3</span></div>
+                    <div class="array-cell found">9<span class="idx">4</span></div>
+                    <div class="array-cell right">12<span class="idx">5</span></div>
+                </div>
+                <div class="array-row" style="margin-top: 4px;">
+                    <div style="width:168px;"></div>
+                    <div class="pointer-label left-ptr" style="width:52px;">L</div>
+                    <div class="pointer-label mid-ptr" style="width:52px;">M</div>
+                    <div class="pointer-label right-ptr" style="width:52px;">R</div>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">nums[4] = 9 == 9 &rarr; Found! Return index 4.</p>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Left pointer</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Right pointer</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #aa96da;"></div> Mid (checking)</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Found</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #fff; opacity: 0.35;"></div> Eliminated</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Initialize left = 0, right = nums.length - 1</li>
+                <li>While left &le; right, calculate mid = left + (right - left) / 2</li>
+                <li>If nums[mid] === target, return mid</li>
+                <li>If nums[mid] &lt; target, search right: left = mid + 1</li>
+                <li>If nums[mid] &gt; target, search left: right = mid - 1</li>
+            </ol>
+
+            <div class="code-block">let left = 0, right = nums.length - 1;
+while (left &lt;= right) {
+    const mid = Math.floor(left + (right - left) / 2);
+    if (nums[mid] === target) return mid;
+    else if (nums[mid] &lt; target) left = mid + 1;
+    else right = mid - 1;
+}
+return -1;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Recursive Binary Search</h2>
+            <p><strong>Intuition:</strong> Same logic as iterative, but uses recursion to divide the problem.</p>
+            <span class="complexity-badge badge-time">Time: O(log n)</span>
+            <span class="complexity-badge badge-space">Space: O(log n) stack</span>
+
+            <div class="code-block">function binarySearch(nums, target, left, right) {
+    if (left &gt; right) return -1;
+    const mid = Math.floor(left + (right - left) / 2);
+    if (nums[mid] === target) return mid;
+    if (nums[mid] &lt; target) return binarySearch(nums, target, mid + 1, right);
+    return binarySearch(nums, target, left, mid - 1);
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Linear Search</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Simple, works on unsorted arrays</td>
+                        <td>Very slow for large n</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Iterative Binary</strong></td>
+                        <td>O(log n)</td>
+                        <td>O(1)</td>
+                        <td>Most efficient space usage</td>
+                        <td>Requires sorted array</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recursive Binary</strong></td>
+                        <td>O(log n)</td>
+                        <td>O(log n)</td>
+                        <td>Easier to reason about</td>
+                        <td>Stack overhead</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/binary-search/" target="_blank">LeetCode 704: Binary Search</a></li>
+                <li><a href="https://www.youtube.com/watch?v=s4DPM8ct1pI" target="_blank">NeetCode YouTube: Binary Search</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" target="_blank">Concept: Binary Search Algorithm (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

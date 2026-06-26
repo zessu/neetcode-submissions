@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Fleet - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 12px; color: #636e72; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .road { position: relative; height: 60px; background: #dfe6e9; border-radius: 8px; margin: 16px 0; overflow: visible; }
+        .road-line { position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: repeating-linear-gradient(to right, #636e72 0, #636e72 8px, transparent 8px, transparent 16px); transform: translateY(-1px); }
+        .car { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 10px; font-weight: 600; color: #2d3436; border: 2px solid; }
+        .car.fleet1 { background: #b5ead7; border-color: #81c784; }
+        .car.fleet2 { background: #ffd3b6; border-color: #ffb74d; }
+        .car.fleet3 { background: #a8d8ea; border-color: #81d4fa; }
+        .target-marker { position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: #ff9aa2; border-radius: 2px; }
+        .target-label { position: absolute; right: 8px; top: -20px; font-size: 12px; color: #ff9aa2; font-weight: 600; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.fleet1 { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.fleet2 { background: #ffd3b6; border-color: #ffd3b6; }
+        .flow-box.fleet3 { background: #a8d8ea; border-color: #a8d8ea; }
+        .flow-box.highlight { background: #ffffd8; border-color: #ffffd8; }
+        .arrow { color: #636e72; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .fleet-result { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+        .fleet-group { padding: 12px 16px; border-radius: 8px; border: 2px solid; min-width: 140px; }
+        .fleet-group.f1 { background: #b5ead7; border-color: #81c784; }
+        .fleet-group.f2 { background: #ffd3b6; border-color: #ffb74d; }
+        .fleet-group.f3 { background: #a8d8ea; border-color: #81d4fa; }
+        .fleet-group .fleet-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+        .fleet-group .fleet-detail { font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Car Fleet</h1>
+            <p class="subtitle">LeetCode 853 &mdash; Count car fleets arriving at destination</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Sorting</span>
+                <span class="tag">Stack</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>N cars travel on a one-lane road toward a <code>target</code>. Faster cars catch up to slower ones and form fleets. Return the number of distinct fleets that arrive.</p>
+            <div class="code-block">Input:  target = 12, position = [10, 8, 0, 5, 3], speed = [2, 4, 1, 1, 3]
+Output: 3</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Max-Time Tracking (Iterative)</h2>
+            <p><strong>Intuition:</strong> Calculate each car's arrival time. Sort by position descending. If a car behind takes longer than the fleet ahead, it forms a new fleet.</p>
+            <span class="complexity-badge badge-time">Time: O(N log N)</span>
+            <span class="complexity-badge badge-space">Space: O(N)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Cars on the road (target = 12)</div>
+                <div class="road" style="width: 100%;">
+                    <div class="road-line"></div>
+                    <div class="car fleet3" style="left: 0%;">0</div>
+                    <div class="car fleet2" style="left: 22%;">3</div>
+                    <div class="car fleet2" style="left: 38%;">5</div>
+                    <div class="car fleet1" style="left: 62%;">8</div>
+                    <div class="car fleet1" style="left: 78%;">10</div>
+                    <div class="target-marker"></div>
+                    <div class="target-label">Target: 12</div>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Step 1: Calculate arrival times</div>
+                <div class="flow-row">
+                    <span class="flow-box">Pos 10, Spd 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet1">(12-10)/2 = 1.0</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Pos 8, Spd 4</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet1">(12-8)/4 = 1.0</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Pos 5, Spd 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet2">(12-5)/1 = 7.0</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Pos 3, Spd 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet2">(12-3)/3 = 3.0</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Pos 0, Spd 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet3">(12-0)/1 = 12.0</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Step 2: Sort by position descending, then count fleets</div>
+                <div class="flow-row">
+                    <span class="flow-box fleet1">Pos 10, t=1.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box highlight">1.0 &gt; 0 &rarr; Fleet 1, maxTime=1.0</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box fleet1">Pos 8, t=1.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">1.0 &le; 1.0 &rarr; joins fleet</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box fleet2">Pos 5, t=7.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box highlight">7.0 &gt; 1.0 &rarr; Fleet 2, maxTime=7.0</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box fleet2">Pos 3, t=3.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">3.0 &le; 7.0 &rarr; joins fleet</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box fleet3">Pos 0, t=12.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box highlight">12.0 &gt; 7.0 &rarr; Fleet 3, maxTime=12.0</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Result: 3 Fleets</div>
+                <div class="fleet-result">
+                    <div class="fleet-group f1">
+                        <div class="fleet-title">Fleet 1 (t=1.0)</div>
+                        <div class="fleet-detail">Cars at pos 10, 8</div>
+                    </div>
+                    <div class="fleet-group f2">
+                        <div class="fleet-title">Fleet 2 (t=7.0)</div>
+                        <div class="fleet-detail">Cars at pos 5, 3</div>
+                    </div>
+                    <div class="fleet-group f3">
+                        <div class="fleet-title">Fleet 3 (t=12.0)</div>
+                        <div class="fleet-detail">Car at pos 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <ol class="step-list">
+                <li>Pair each position with its time to target: (target - pos) / speed</li>
+                <li>Sort pairs by position descending (closest to target first)</li>
+                <li>Initialize fleets = 0, maxTime = 0</li>
+                <li>If current car's time &gt; maxTime, increment fleets and update maxTime</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Monotonic Stack</h2>
+            <p><strong>Intuition:</strong> Same time calculations, but use a stack. Push arrival time if it's greater than the top (can't catch up). Stack size = number of fleets.</p>
+            <span class="complexity-badge badge-time">Time: O(N log N)</span>
+            <span class="complexity-badge badge-space">Space: O(N)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Stack operations (sorted by position desc)</div>
+                <div class="flow-row">
+                    <span class="flow-box">t=1.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet1">Stack: [1.0]</span>
+                    <span style="color:#636e72; font-size:13px;">Push (stack empty)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">t=1.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet1">Stack: [1.0]</span>
+                    <span style="color:#636e72; font-size:13px;">Skip (1.0 &le; 1.0)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">t=7.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet2">Stack: [1.0, 7.0]</span>
+                    <span style="color:#636e72; font-size:13px;">Push (7.0 &gt; 1.0)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">t=3.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet2">Stack: [1.0, 7.0]</span>
+                    <span style="color:#636e72; font-size:13px;">Skip (3.0 &le; 7.0)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">t=12.0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box fleet3">Stack: [1.0, 7.0, 12.0]</span>
+                    <span style="color:#636e72; font-size:13px;">Push (12.0 &gt; 7.0)</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Stack size = 3 = number of fleets</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Max-Time Tracking</strong></td>
+                        <td>O(N log N)</td>
+                        <td>O(N)</td>
+                        <td>Simple, efficient (just a variable)</td>
+                        <td>Requires sorting</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Monotonic Stack</strong></td>
+                        <td>O(N log N)</td>
+                        <td>O(N)</td>
+                        <td>Intuitive for dependent problems</td>
+                        <td>Slightly more overhead</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/car-fleet/" target="_blank">LeetCode 853: Car Fleet</a></li>
+                <li><a href="https://www.youtube.com/watch?v=Pr6T-3yB9RM" target="_blank">NeetCode YouTube: Car Fleet</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)" target="_blank">Concept: Stack Data Structure (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

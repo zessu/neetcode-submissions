@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koko Eating Bananas - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .piles-row { display: flex; gap: 12px; margin: 12px 0; align-items: flex-end; flex-wrap: wrap; }
+        .pile { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .pile-bar { width: 60px; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; color: #2d3436; border: 2px solid; }
+        .pile-bar.normal { background: #ffffd8; border-color: #f0c929; }
+        .pile-label { font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .search-space { display: flex; align-items: center; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+        .search-cell { width: 40px; height: 36px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; background: #ffffff; }
+        .search-cell.left { border-color: #a8d8ea; background: #a8d8ea; }
+        .search-cell.right { border-color: #ffd3b6; background: #ffd3b6; }
+        .search-cell.mid { border-color: #aa96da; background: #aa96da; color: #fff; }
+        .search-cell.eliminated { opacity: 0.3; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #636e72; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Koko Eating Bananas</h1>
+            <p class="subtitle">LeetCode 875 &mdash; Find minimum eating speed to finish in h hours</p>
+            <div class="tags">
+                <span class="tag">Binary Search</span>
+                <span class="tag">Math</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Koko must eat all banana piles within <code>h</code> hours. She eats <code>k</code> bananas/hour from one pile. If a pile has fewer than <code>k</code>, she finishes it and waits. Find the minimum <code>k</code>.</p>
+            <div class="code-block">Input:  piles = [3, 6, 7, 11], h = 8
+Output: 4  (speed of 4 bananas/hour finishes in exactly 8 hours)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p><strong>Intuition:</strong> Try every speed from 1 upward until finding the first that works.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; max(piles))</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Try each speed k = 1, 2, 3, ... until hours &le; h</div>
+                <div class="flow-row">
+                    <span class="flow-box">k=1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">3+6+7+11 = 27 hours &gt; 8</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">k=2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">2+3+4+6 = 15 hours &gt; 8</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">k=3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">1+2+3+4 = 10 hours &gt; 8</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">k=4</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">1+2+2+3 = 8 hours &le; 8</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Works but extremely slow when max(piles) = 10^9.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Binary Search (Optimal)</h2>
+            <p><strong>Intuition:</strong> The speed range [1, max(piles)] is monotonic &mdash; if speed k works, any higher speed also works. Binary search finds the minimum valid k.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; log(max(piles)))</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Banana piles: [3, 6, 7, 11], h = 8</div>
+                <div class="piles-row">
+                    <div class="pile">
+                        <div class="pile-bar normal" style="height: 40px;">3</div>
+                        <div class="pile-label">Pile 0</div>
+                    </div>
+                    <div class="pile">
+                        <div class="pile-bar normal" style="height: 72px;">6</div>
+                        <div class="pile-label">Pile 1</div>
+                    </div>
+                    <div class="pile">
+                        <div class="pile-bar normal" style="height: 84px;">7</div>
+                        <div class="pile-label">Pile 2</div>
+                    </div>
+                    <div class="pile">
+                        <div class="pile-bar normal" style="height: 120px;">11</div>
+                        <div class="pile-label">Pile 3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Binary search on speed range [1, 11]</div>
+
+                <p style="color: #636e72; font-size: 13px; margin-bottom: 8px;"><strong>Iteration 1:</strong> left=1, right=11, mid=6</p>
+                <div class="search-space">
+                    <div class="search-cell left">1</div>
+                    <div class="search-cell">2</div>
+                    <div class="search-cell">3</div>
+                    <div class="search-cell">4</div>
+                    <div class="search-cell">5</div>
+                    <div class="search-cell mid">6</div>
+                    <div class="search-cell">7</div>
+                    <div class="search-cell">8</div>
+                    <div class="search-cell">9</div>
+                    <div class="search-cell">10</div>
+                    <div class="search-cell right">11</div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">ceil(3/6)+ceil(6/6)+ceil(7/6)+ceil(11/6) = 1+1+2+2 = 6</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">6 &le; 8, try lower: right=5</span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>Iteration 2:</strong> left=1, right=5, mid=3</p>
+                <div class="search-space">
+                    <div class="search-cell left">1</div>
+                    <div class="search-cell">2</div>
+                    <div class="search-cell mid">3</div>
+                    <div class="search-cell">4</div>
+                    <div class="search-cell right">5</div>
+                    <div class="search-cell eliminated">6</div>
+                    <div class="search-cell eliminated">7</div>
+                    <div class="search-cell eliminated">8</div>
+                    <div class="search-cell eliminated">9</div>
+                    <div class="search-cell eliminated">10</div>
+                    <div class="search-cell eliminated">11</div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">ceil(3/3)+ceil(6/3)+ceil(7/3)+ceil(11/3) = 1+2+3+4 = 10</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">10 &gt; 8, too slow: left=4</span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>Iteration 3:</strong> left=4, right=5, mid=4</p>
+                <div class="search-space">
+                    <div class="search-cell eliminated">1</div>
+                    <div class="search-cell eliminated">2</div>
+                    <div class="search-cell eliminated">3</div>
+                    <div class="search-cell left">4</div>
+                    <div class="search-cell right">5</div>
+                    <div class="search-cell eliminated">6</div>
+                    <div class="search-cell eliminated">7</div>
+                    <div class="search-cell eliminated">8</div>
+                    <div class="search-cell eliminated">9</div>
+                    <div class="search-cell eliminated">10</div>
+                    <div class="search-cell eliminated">11</div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">ceil(3/4)+ceil(6/4)+ceil(7/4)+ceil(11/4) = 1+2+2+3 = 8</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">8 &le; 8, try lower: right=3</span>
+                </div>
+
+                <div class="flow-row" style="margin-top: 16px;">
+                    <span class="flow-box result">left=4 &gt; right=3, Return 4</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Left bound</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Right bound</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #aa96da;"></div> Mid (testing)</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Valid speed</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2;"></div> Invalid speed</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Set left = 1, right = max(piles)</li>
+                <li>Calculate mid = floor((left + right) / 2)</li>
+                <li>Sum ceil(pile / mid) for all piles</li>
+                <li>If total hours &le; h: valid, try lower (right = mid - 1)</li>
+                <li>If total hours &gt; h: too slow, try higher (left = mid + 1)</li>
+                <li>Return left when loop exits</li>
+            </ol>
+
+            <div class="code-block">let left = 1, right = Math.max(...piles);
+while (left &lt;= right) {
+    const mid = Math.floor((left + right) / 2);
+    let hours = 0;
+    for (const pile of piles) {
+        hours += Math.ceil(pile / mid);
+    }
+    if (hours &lt;= h) right = mid - 1;
+    else left = mid + 1;
+}
+return left;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n &middot; m)</td>
+                        <td>O(1)</td>
+                        <td>Simple logic</td>
+                        <td>Very slow for m = 10^9</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Binary Search</strong></td>
+                        <td>O(n &middot; log m)</td>
+                        <td>O(1)</td>
+                        <td>Fast and efficient</td>
+                        <td>Requires monotonic search space</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/koko-eating-bananas/" target="_blank">LeetCode 875: Koko Eating Bananas</a></li>
+                <li><a href="https://www.youtube.com/watch?v/U2MzDzBjRic" target="_blank">NeetCode YouTube: Koko Eating Bananas</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" target="_blank">Concept: Binary Search (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

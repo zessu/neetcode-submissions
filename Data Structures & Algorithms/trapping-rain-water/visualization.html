@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trapping Rain Water - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #636e72; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #dfe6e9;
+        }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .diagram {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            padding: 24px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            min-height: 180px;
+            position: relative;
+        }
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .bar {
+            width: 100%;
+            background: #aa96da;
+            border-radius: 4px 4px 0 0;
+            min-height: 8px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        .bar-label {
+            font-size: 11px;
+            color: #636e72;
+            margin-top: 6px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .water {
+            width: 100%;
+            background: #a8d8ea;
+            opacity: 0.6;
+            border-radius: 2px;
+            min-height: 4px;
+        }
+        .pointer-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 20px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .pointer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .pointer-left { background: #b5ead7; color: #2d3436; }
+        .pointer-right { background: #ffd3b6; color: #2d3436; }
+        .arrow { font-size: 24px; color: #636e72; }
+        .step-list { list-style: none; padding: 0; }
+        .step-list li {
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: #fdf6f0;
+            border-radius: 8px;
+            font-size: 14px;
+            border-left: 3px solid #a8d8ea;
+        }
+        .step-list li.active { border-left-color: #ffd3b6; background: #fff8f0; }
+        .highlight { background: #ffffd8; padding: 2px 6px; border-radius: 4px; }
+        .success { color: #2d3436; background: #b5ead7; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .error-tag { color: #2d3436; background: #ff9aa2; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+        .resources-list { list-style: none; padding: 0; }
+        .resources-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #dfe6e9;
+            font-size: 14px;
+        }
+        .resources-list li:last-child { border-bottom: none; }
+        .formula-box {
+            background: #ffffd8;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Trapping Rain Water</h1>
+            <p>LeetCode 42 &mdash; Hard</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Two Pointers</span>
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag">Stack</span>
+                <span class="tag">Monotonic Stack</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given <strong>n</strong> non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.</p>
+            <div class="formula-box">
+                water[i] = min(maxLeft[i], maxRight[i]) - height[i]
+            </div>
+            <h3>Example</h3>
+            <div class="code-block">Input:  height = [0,1,0,2,1,0,1,3,2,1,2,1]
+Output: 6</div>
+            <div class="diagram">
+                <div class="bar-wrapper">
+                    <div class="bar" style="height:8px; background:#aa96da;"></div>
+                    <span class="bar-label">0</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:0px;"></div>
+                    <div class="bar" style="height:24px;"></div>
+                    <span class="bar-label">1</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:24px;"></div>
+                    <div class="bar" style="height:8px;"></div>
+                    <span class="bar-label">0</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="bar" style="height:48px;"></div>
+                    <span class="bar-label">2</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:24px;"></div>
+                    <div class="bar" style="height:24px;"></div>
+                    <span class="bar-label">1</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:48px;"></div>
+                    <div class="bar" style="height:8px;"></div>
+                    <span class="bar-label">0</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:24px;"></div>
+                    <div class="bar" style="height:24px;"></div>
+                    <span class="bar-label">1</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="bar" style="height:72px;"></div>
+                    <span class="bar-label">3</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:24px;"></div>
+                    <div class="bar" style="height:48px;"></div>
+                    <span class="bar-label">2</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:48px;"></div>
+                    <div class="bar" style="height:24px;"></div>
+                    <span class="bar-label">1</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="water" style="height:24px;"></div>
+                    <div class="bar" style="height:48px;"></div>
+                    <span class="bar-label">2</span>
+                </div>
+                <div class="bar-wrapper">
+                    <div class="bar" style="height:24px;"></div>
+                    <span class="bar-label">1</span>
+                </div>
+            </div>
+            <p><span style="display:inline-block;width:12px;height:12px;background:#aa96da;border-radius:2px;vertical-align:middle;"></span> Bar &nbsp;&nbsp; <span style="display:inline-block;width:12px;height:12px;background:#a8d8ea;opacity:0.6;border-radius:2px;vertical-align:middle;"></span> Trapped Water</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p>For each bar, scan left and right to find the maximum heights, then compute trapped water.</p>
+            <h3>Algorithm Steps</h3>
+            <ul class="step-list">
+                <li>For each index <span class="highlight">i</span>, scan all elements to the left to find <span class="highlight">maxLeft</span></li>
+                <li>Scan all elements to the right to find <span class="highlight">maxRight</span></li>
+                <li>Add <code>min(maxLeft, maxRight) - height[i]</code> to total water</li>
+            </ul>
+            <div class="pointer-diagram">
+                <div class="pointer pointer-left">maxLeft scan &larr;</div>
+                <div style="font-size:20px;font-weight:700;color:#aa96da;">i</div>
+                <div class="pointer pointer-right">&rarr; maxRight scan</div>
+            </div>
+            <h3>Code</h3>
+            <div class="code-block">for (let i = 0; i &lt; height.length; i++) {
+    let maxLeft = 0, maxRight = 0;
+    for (let j = 0; j &lt; i; j++)
+        maxLeft = Math.max(maxLeft, height[j]);
+    for (let j = height.length - 1; j &gt; i; j--)
+        maxRight = Math.max(maxRight, height[j]);
+    sum += Math.min(maxLeft, maxRight) - height[i];
+}</div>
+            <p><strong>Time:</strong> O(n&sup2;) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Dynamic Programming (Prefix/Suffix Arrays)</h2>
+            <p>Precompute <code>maxLeft[]</code> and <code>maxRight[]</code> arrays in a single pass each, then compute water in a third pass.</p>
+            <h3>Visual: Precomputed Arrays</h3>
+            <table>
+                <tr>
+                    <th>i</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th>
+                </tr>
+                <tr>
+                    <td><strong>height</strong></td><td>0</td><td>1</td><td>0</td><td>2</td><td>1</td><td>0</td><td>1</td><td>3</td><td>2</td><td>1</td><td>2</td><td>1</td>
+                </tr>
+                <tr>
+                    <td><strong>maxLeft</strong></td><td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td>
+                </tr>
+                <tr>
+                    <td><strong>maxRight</strong></td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>2</td><td>2</td><td>2</td><td>1</td>
+                </tr>
+                <tr>
+                    <td><strong>water</strong></td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td><td>2</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td>
+                </tr>
+            </table>
+            <h3>Code</h3>
+            <div class="code-block">const maxLeft = [], maxRight = [];
+maxLeft[0] = height[0];
+for (let i = 1; i &lt; n; i++)
+    maxLeft[i] = Math.max(maxLeft[i-1], height[i]);
+maxRight[n-1] = height[n-1];
+for (let i = n-2; i &gt;= 0; i--)
+    maxRight[i] = Math.max(maxRight[i+1], height[i]);
+for (let i = 0; i &lt; n; i++)
+    sum += Math.min(maxLeft[i], maxRight[i]) - height[i];</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(n)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Two Pointers (Optimal)</h2>
+            <p>Use two pointers moving inward, tracking <code>leftMax</code> and <code>rightMax</code> on the fly. The smaller side determines water level.</p>
+            <h3>Visual: Pointer Movement</h3>
+            <div class="pointer-diagram">
+                <div class="pointer pointer-left">left &rarr;</div>
+                <div style="font-size:14px;color:#636e72;">height[left] &lt; height[right]<br>process left side</div>
+                <div class="pointer pointer-right">&larr; right</div>
+            </div>
+            <ul class="step-list">
+                <li class="active">If <span class="highlight">height[left] &lt; height[right]</span>: water is bounded by leftMax</li>
+                <li>If <span class="highlight">height[left] &ge; leftMax</span>: update leftMax (no water here)</li>
+                <li>Else: add <span class="highlight">leftMax - height[left]</span> to water</li>
+                <li class="active">Mirror logic applies for the right pointer</li>
+            </ul>
+            <h3>Code</h3>
+            <div class="code-block">let left = 0, right = height.length - 1;
+let leftMax = 0, rightMax = 0, water = 0;
+
+while (left &lt; right) {
+    if (height[left] &lt; height[right]) {
+        if (height[left] &gt;= leftMax) leftMax = height[left];
+        else water += leftMax - height[left];
+        left++;
+    } else {
+        if (height[right] &gt;= rightMax) rightMax = height[right];
+        else water += rightMax - height[right];
+        right--;
+    }
+}
+return water;</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr>
+                    <th>Approach</th>
+                    <th>Time</th>
+                    <th>Space</th>
+                    <th>Notes</th>
+                </tr>
+                <tr>
+                    <td>Brute Force</td>
+                    <td>O(n&sup2;)</td>
+                    <td>O(1)</td>
+                    <td>Scans for max left/right on every bar</td>
+                </tr>
+                <tr>
+                    <td>Dynamic Programming</td>
+                    <td>O(n)</td>
+                    <td>O(n)</td>
+                    <td>Precomputes max values in arrays</td>
+                </tr>
+                <tr>
+                    <td><strong>Two Pointers</strong></td>
+                    <td><span class="success">O(n)</span></td>
+                    <td><span class="success">O(1)</span></td>
+                    <td>Optimal: replaces arrays with variables</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resources-list">
+                <li><a href="https://leetcode.com/problems/trapping-rain-water/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/watch?v=ZI2z5pq0TqA" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Two_pointer_technique" target="_blank">Two Pointer Technique (Wikipedia)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Dynamic_programming" target="_blank">Dynamic Programming (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

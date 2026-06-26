@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search in Rotated Sorted Array - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        h1 { font-size: 28px; margin-bottom: 12px; }
+        h2 { font-size: 22px; margin-bottom: 16px; color: #2d3436; }
+        h3 { font-size: 18px; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        tr:nth-child(odd) td { background: #ffffff; }
+        .diagram { display: flex; align-items: flex-end; justify-content: center; gap: 4px; padding: 20px; margin: 16px 0; flex-wrap: wrap; }
+        .bar { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .bar-box { width: 48px; height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #2d3436; }
+        .highlight-blue { background: #a8d8ea; }
+        .highlight-purple { background: #aa96da; color: #fff; }
+        .highlight-green { background: #b5ead7; }
+        .highlight-orange { background: #ffd3b6; }
+        .highlight-red { background: #ff9aa2; }
+        .highlight-yellow { background: #ffffd8; }
+        .dimmed { background: #dfe6e9; color: #636e72; }
+        .pointer-label { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+        .step-card { background: #fdf6f0; border-radius: 8px; padding: 16px; margin: 8px 0; border: 1px solid #dfe6e9; }
+        .step-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: #aa96da; }
+        a { color: #aa96da; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .resource-list { list-style: none; }
+        .resource-list li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resource-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Search in Rotated Sorted Array</h1>
+            <p>LeetCode 33 &mdash; Find the index of a target in a rotated sorted array in O(log n) time.</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Binary Search</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a sorted array that may have been rotated at an unknown pivot, find the index of a target value. Return -1 if not found. Must run in O(log n).</p>
+            <div class="code-block">Input:  nums = [4, 5, 6, 7, 0, 1, 2], target = 0
+Output: 4</div>
+            <p>The key insight: at every binary search step, at least one half of the array is guaranteed to be sorted. We check if the target lies within the sorted half.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <h3>Linear Scan</h3>
+            <p>Iterate through the array and check each element against the target.</p>
+            <div class="diagram">
+                <div class="bar"><div class="bar-box highlight-blue">4</div></div>
+                <div class="bar"><div class="bar-box highlight-blue">5</div></div>
+                <div class="bar"><div class="bar-box highlight-blue">6</div></div>
+                <div class="bar"><div class="bar-box highlight-blue">7</div></div>
+                <div class="bar"><div class="bar-box highlight-green">0</div><div class="pointer-label highlight-green">found!</div></div>
+                <div class="bar"><div class="bar-box dimmed">1</div></div>
+                <div class="bar"><div class="bar-box dimmed">2</div></div>
+            </div>
+            <div class="code-block">for i = 0 to n-1:
+    if nums[i] === target: return i
+return -1</div>
+            <p><strong>Time:</strong> O(n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Modified Binary Search (Optimal)</h2>
+            <h3>Identify Sorted Half, Then Search</h3>
+            <p>At each step, determine which half is sorted. If the target is within the sorted half's range, search there; otherwise search the other half.</p>
+
+            <div class="step-card">
+                <div class="step-title">Step 1: left=0, right=6, mid=3</div>
+                <div class="diagram">
+                    <div class="bar"><div class="bar-box highlight-blue">4</div><div class="pointer-label" style="background:#a8d8ea">L</div></div>
+                    <div class="bar"><div class="bar-box highlight-blue">5</div></div>
+                    <div class="bar"><div class="bar-box highlight-blue">6</div></div>
+                    <div class="bar"><div class="bar-box highlight-orange">7</div><div class="pointer-label" style="background:#ffd3b6">mid</div></div>
+                    <div class="bar"><div class="bar-box highlight-yellow">0</div></div>
+                    <div class="bar"><div class="bar-box highlight-yellow">1</div></div>
+                    <div class="bar"><div class="bar-box highlight-yellow">2</div><div class="pointer-label" style="background:#aa96da;color:#fff">R</div></div>
+                </div>
+                <p>nums[mid]=7 &gt; nums[right]=2 &rarr; left half [4,5,6,7] is sorted. Target 0 not in [4,7] &rarr; search right. left = 4</p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 2: left=4, right=6, mid=5</div>
+                <div class="diagram">
+                    <div class="bar"><div class="bar-box dimmed">4</div></div>
+                    <div class="bar"><div class="bar-box dimmed">5</div></div>
+                    <div class="bar"><div class="bar-box dimmed">6</div></div>
+                    <div class="bar"><div class="bar-box dimmed">7</div></div>
+                    <div class="bar"><div class="bar-box highlight-blue">0</div><div class="pointer-label" style="background:#a8d8ea">L</div></div>
+                    <div class="bar"><div class="bar-box highlight-orange">1</div><div class="pointer-label" style="background:#ffd3b6">mid</div></div>
+                    <div class="bar"><div class="bar-box highlight-purple">2</div><div class="pointer-label" style="background:#aa96da;color:#fff">R</div></div>
+                </div>
+                <p>nums[mid]=1 &lt; nums[right]=2 &rarr; right half [1,2] is sorted. Target 0 not in (1,2] &rarr; search left. right = 4</p>
+            </div>
+
+            <div class="step-card">
+                <div class="step-title">Step 3: left=4, right=4, mid=4</div>
+                <div class="diagram">
+                    <div class="bar"><div class="bar-box dimmed">4</div></div>
+                    <div class="bar"><div class="bar-box dimmed">5</div></div>
+                    <div class="bar"><div class="bar-box dimmed">6</div></div>
+                    <div class="bar"><div class="bar-box dimmed">7</div></div>
+                    <div class="bar"><div class="bar-box highlight-green">0</div><div class="pointer-label" style="background:#b5ead7">FOUND</div></div>
+                    <div class="bar"><div class="bar-box dimmed">1</div></div>
+                    <div class="bar"><div class="bar-box dimmed">2</div></div>
+                </div>
+                <p>nums[mid]=0 === target &rarr; <strong>Return index 4</strong></p>
+            </div>
+
+            <div class="code-block">while (left &lt;= right):
+    mid = floor((left + right) / 2)
+    if nums[mid] === target: return mid
+    if nums[mid] &lt; nums[right]:       // right half sorted
+        if target &gt; nums[mid] &amp;&amp; target &lt;= nums[right]:
+            left = mid + 1
+        else:
+            right = mid - 1
+    else:                              // left half sorted
+        if target &gt;= nums[left] &amp;&amp; target &lt; nums[mid]:
+            right = mid - 1
+        else:
+            left = mid + 1
+return -1</div>
+            <p><strong>Time:</strong> O(log n) &nbsp;|&nbsp; <strong>Space:</strong> O(1)</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <tr><th>Approach</th><th>Time</th><th>Space</th><th>Description</th></tr>
+                <tr><td>Brute Force</td><td>O(n)</td><td>O(1)</td><td>Simple linear scan</td></tr>
+                <tr><td>Modified Binary Search</td><td>O(log n)</td><td>O(1)</td><td>Identifies sorted half, narrows search</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Resources</h2>
+            <ul class="resource-list">
+                <li><a href="https://leetcode.com/problems/search-in-rotated-sorted-array/" target="_blank">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+search+in+rotated+sorted+array" target="_blank">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" target="_blank">Binary Search Algorithm (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Maximum - LeetCode 239</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fdf6f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #2d3436; }
+        h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; border-bottom: 2px solid #a8d8ea; padding-bottom: 8px; }
+        h3 { font-size: 1.15rem; margin-bottom: 12px; color: #2d3436; }
+        p { color: #636e72; margin-bottom: 12px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .tag {
+            background: #a8d8ea;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #2d3436;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .code-block {
+            background: #f0eef6;
+            border-left: 4px solid #aa96da;
+            padding: 16px 20px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 12px 0;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th {
+            background: #a8d8ea;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        td { padding: 12px 16px; font-size: 14px; color: #2d3436; }
+        tr:nth-child(even) { background: #fdf6f0; }
+        tr:nth-child(odd) { background: #ffffff; }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .array-row {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .cell {
+            width: 52px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+            background: #ffffff;
+            border: 2px solid #dfe6e9;
+            border-radius: 6px;
+            color: #2d3436;
+        }
+        .cell.highlight { background: #a8d8ea; border-color: #a8d8ea; }
+        .cell.active { background: #ffd3b6; border-color: #ffd3b6; }
+        .cell.success { background: #b5ead7; border-color: #b5ead7; }
+        .cell.error { background: #ff9aa2; border-color: #ff9aa2; }
+        .cell.dim { background: #fdf6f0; color: #b2bec3; border-color: #dfe6e9; }
+        .step-label {
+            font-weight: 600;
+            color: #aa96da;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .window-bracket {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .bracket {
+            width: 3px;
+            height: 52px;
+            background: #aa96da;
+            border-radius: 2px;
+        }
+        .result-badge {
+            background: #b5ead7;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        .deque-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: #f0eef6;
+            border-radius: 8px;
+            border: 1px solid #dfe6e9;
+        }
+        .deque-item {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #ffffff;
+            border: 1px solid #dfe6e9;
+        }
+        .deque-item.front { background: #b5ead7; border-color: #b5ead7; }
+        .deque-item.back { background: #ffd3b6; border-color: #ffd3b6; }
+        .resources a {
+            color: #aa96da;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .resources a:hover { text-decoration: underline; }
+        .resources li { margin-bottom: 8px; color: #636e72; }
+        ul { padding-left: 20px; }
+        li { color: #636e72; margin-bottom: 6px; }
+        .complexity { display: flex; gap: 16px; margin: 8px 0; }
+        .complexity span {
+            background: #ffffd8;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sliding Window Maximum</h1>
+        <div class="tags">
+            <span class="tag">Array</span>
+            <span class="tag">Sliding Window</span>
+            <span class="tag">Monotonic Queue</span>
+            <span class="tag">Heap</span>
+            <span class="tag">LeetCode 239</span>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array of integers and a sliding window of size k moving from left to right, return the maximum value in each window position.</p>
+            <div class="code-block">nums = [1, 3, -1, -3, 5, 3, 6, 7], k = 3
+Output: [3, 3, 5, 5, 6, 7]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force Sliding Window</h2>
+            <div class="complexity">
+                <span>Time: O(n * k)</span>
+                <span>Space: O(1)</span>
+            </div>
+            <p>For each window position, scan all k elements to find the maximum.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Window 1: [1, 3, -1]</span>
+                    <div class="array-row">
+                        <div class="cell highlight">1</div>
+                        <div class="cell highlight">3</div>
+                        <div class="cell highlight">-1</div>
+                        <div class="cell dim">-3</div>
+                        <div class="cell dim">5</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell dim">6</div>
+                        <div class="cell dim">7</div>
+                    </div>
+                    <span class="result-badge">max = 3</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Window 2: [3, -1, -3]</span>
+                    <div class="array-row">
+                        <div class="cell dim">1</div>
+                        <div class="cell highlight">3</div>
+                        <div class="cell highlight">-1</div>
+                        <div class="cell highlight">-3</div>
+                        <div class="cell dim">5</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell dim">6</div>
+                        <div class="cell dim">7</div>
+                    </div>
+                    <span class="result-badge">max = 3</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Window 3: [-1, -3, 5]</span>
+                    <div class="array-row">
+                        <div class="cell dim">1</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell highlight">-1</div>
+                        <div class="cell highlight">-3</div>
+                        <div class="cell highlight">5</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell dim">6</div>
+                        <div class="cell dim">7</div>
+                    </div>
+                    <span class="result-badge">max = 5</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Window 4: [-3, 5, 3]</span>
+                    <div class="array-row">
+                        <div class="cell dim">1</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell dim">-1</div>
+                        <div class="cell highlight">-3</div>
+                        <div class="cell highlight">5</div>
+                        <div class="cell highlight">3</div>
+                        <div class="cell dim">6</div>
+                        <div class="cell dim">7</div>
+                    </div>
+                    <span class="result-badge">max = 5</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Window 5: [5, 3, 6]</span>
+                    <div class="array-row">
+                        <div class="cell dim">1</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell dim">-1</div>
+                        <div class="cell dim">-3</div>
+                        <div class="cell highlight">5</div>
+                        <div class="cell highlight">3</div>
+                        <div class="cell highlight">6</div>
+                        <div class="cell dim">7</div>
+                    </div>
+                    <span class="result-badge">max = 6</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Window 6: [3, 6, 7]</span>
+                    <div class="array-row">
+                        <div class="cell dim">1</div>
+                        <div class="cell dim">3</div>
+                        <div class="cell dim">-1</div>
+                        <div class="cell dim">-3</div>
+                        <div class="cell dim">5</div>
+                        <div class="cell highlight">3</div>
+                        <div class="cell highlight">6</div>
+                        <div class="cell highlight">7</div>
+                    </div>
+                    <span class="result-badge">max = 7</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Monotonic Deque (Optimal)</h2>
+            <div class="complexity">
+                <span>Time: O(n)</span>
+                <span>Space: O(k)</span>
+            </div>
+            <p>Maintain a deque of indices where values are in decreasing order. The front is always the maximum in the current window.</p>
+
+            <div class="diagram">
+                <div class="step-row">
+                    <span class="step-label">Process index 0: val=1</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">0 (1)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 1: val=3 → removes 0 (1 &lt; 3)</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">1 (3)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 2: val=-1 → window complete, max = deque front</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">1 (3)</div>
+                        <div class="deque-item back">2 (-1)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                    <span class="result-badge">max = 3</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 3: val=-3 → window slides, front still valid</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">1 (3)</div>
+                        <div class="deque-item">2 (-1)</div>
+                        <div class="deque-item back">3 (-3)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                    <span class="result-badge">max = 3</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 4: val=5 → removes all smaller, front evicted (out of window)</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">4 (5)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                    <span class="result-badge">max = 5</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 5: val=3</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">4 (5)</div>
+                        <div class="deque-item back">5 (3)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                    <span class="result-badge">max = 5</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 6: val=6 → removes all smaller</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">6 (6)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                    <span class="result-badge">max = 6</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">Process index 7: val=7 → removes all smaller</span>
+                    <div class="deque-container">
+                        <span style="font-size:12px;color:#636e72;">front</span>
+                        <div class="deque-item front">7 (7)</div>
+                        <span style="font-size:12px;color:#636e72;">back</span>
+                    </div>
+                    <span class="result-badge">max = 7</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Max Heap</h2>
+            <div class="complexity">
+                <span>Time: O(n log k)</span>
+                <span>Space: O(k)</span>
+            </div>
+            <p>Use a max heap to track the maximum in the current window. Insert each element and lazily remove elements that fall outside the window.</p>
+        </div>
+
+        <div class="card">
+            <h2>Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n * k)</td>
+                        <td>O(1)</td>
+                        <td>Simple to implement</td>
+                        <td>TLE on large inputs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Monotonic Deque</strong></td>
+                        <td>O(n)</td>
+                        <td>O(k)</td>
+                        <td>Optimal time</td>
+                        <td>More complex logic</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max Heap</strong></td>
+                        <td>O(n log k)</td>
+                        <td>O(k)</td>
+                        <td>Moderate improvement</td>
+                        <td>Still slower than deque</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/sliding-window-maximum/">LeetCode Problem Page</a></li>
+                <li><a href="https://www.youtube.com/results?search_query=neetcode+sliding+window+maximum">NeetCode YouTube Explanation</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Double-ended_queue">Monotonic Deque</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol">Sliding Window Technique</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
