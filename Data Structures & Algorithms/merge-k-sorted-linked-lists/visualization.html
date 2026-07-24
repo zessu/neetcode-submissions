@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge k Sorted Lists - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .linked-list { display: flex; align-items: center; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+        .node { display: inline-flex; align-items: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 16px; font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; }
+        .node.min { background: #ffd3b6; border-color: #ff9aa2; }
+        .node.empty { background: #dfe6e9; border-color: #dfe6e9; color: #636e72; }
+        .node.result { background: #b5ead7; border-color: #b5ead7; }
+        .arrow { color: #aa96da; font-size: 20px; margin: 0 4px; }
+        .list-label { font-size: 12px; color: #636e72; margin-bottom: 4px; font-weight: 600; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.min { background: #ffd3b6; border-color: #ff9aa2; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Merge k Sorted Lists</h1>
+            <p class="subtitle">LeetCode 23 &mdash; Merge k sorted linked lists into one</p>
+            <div class="tags">
+                <span class="tag">Linked List</span>
+                <span class="tag">Divide and Conquer</span>
+                <span class="tag">Heap</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given k sorted linked lists, merge them into one sorted linked list.</p>
+            <div class="code-block">Input:  lists = [[1,4,5],[1,3,4],[2,6]]
+Output: [1,1,2,3,4,4,5,6]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Collect All Values and Sort</h2>
+            <p><strong>Intuition:</strong> Extract all values, sort, rebuild list.</p>
+            <span class="complexity-badge badge-time">Time: O(N log N)</span>
+            <span class="complexity-badge badge-space">Space: O(N)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Collect all values, sort, rebuild</div>
+                <div class="flow-row">
+                    <span class="flow-box">[1,4,5] + [1,3,4] + [2,6] = [1,4,5,1,3,4,2,6]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Sort: [1,1,2,3,4,4,5,6]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">Rebuild: 1->1->2->3->4->4->5->6</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Doesn't leverage the fact that input lists are already sorted.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Iterative Min Selection (Implemented)</h2>
+            <p><strong>Intuition:</strong> At each step, pick the smallest head among all lists.</p>
+            <span class="complexity-badge badge-time">Time: O(k * N)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Input lists</div>
+                <div class="list-label">List 0:</div>
+                <div class="linked-list">
+                    <span class="node min">1</span><span class="arrow">&rarr;</span>
+                    <span class="node">4</span><span class="arrow">&rarr;</span>
+                    <span class="node">5</span>
+                </div>
+                <div class="list-label">List 1:</div>
+                <div class="linked-list">
+                    <span class="node min">1</span><span class="arrow">&rarr;</span>
+                    <span class="node">3</span><span class="arrow">&rarr;</span>
+                    <span class="node">4</span>
+                </div>
+                <div class="list-label">List 2:</div>
+                <div class="linked-list">
+                    <span class="node">2</span><span class="arrow">&rarr;</span>
+                    <span class="node">6</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Step-by-step merge</div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [1, 1, 2] -> min=1 (list 0)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [4, 1, 2] -> min=1 (list 1)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [4, 3, 2] -> min=2 (list 2)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [4, 3, 6] -> min=3 (list 1)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [4, 4, 6] -> min=4 (list 0)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [5, 4, 6] -> min=4 (list 1)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [5, Inf, 6] -> min=5 (list 0)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box min">Heads: [Inf, Inf, 6] -> min=6 (list 2)</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Result</div>
+                <div class="linked-list">
+                    <span class="node result">1</span><span class="arrow">&rarr;</span>
+                    <span class="node result">1</span><span class="arrow">&rarr;</span>
+                    <span class="node result">2</span><span class="arrow">&rarr;</span>
+                    <span class="node result">3</span><span class="arrow">&rarr;</span>
+                    <span class="node result">4</span><span class="arrow">&rarr;</span>
+                    <span class="node result">4</span><span class="arrow">&rarr;</span>
+                    <span class="node result">5</span><span class="arrow">&rarr;</span>
+                    <span class="node result">6</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border: 2px solid #a8d8ea;"></div> Normal node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border: 2px solid #ff9aa2;"></div> Minimum head (selected)</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border: 2px solid #b5ead7;"></div> Result node</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Create dummy head node</li>
+                <li>Map all list heads to values (Infinity for null)</li>
+                <li>Find minimum value and its list index</li>
+                <li>If all Infinity, break</li>
+                <li>Append min node to result, advance that list</li>
+                <li>Repeat until all lists exhausted</li>
+            </ol>
+
+            <div class="code-block">const newNode = new ListNode();
+let curr = newNode;
+while (true) {
+    const values = lists.map(list => list?.val ?? Infinity);
+    const minValue = Math.min(...values);
+    if (minValue === Infinity) break;
+    const minIndex = values.indexOf(minValue);
+    curr.next = lists[minIndex];
+    lists[minIndex] = lists[minIndex].next;
+    curr = curr.next;
+}
+return newNode.next;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Collect & Sort</strong></td>
+                        <td>O(N log N)</td>
+                        <td>O(N)</td>
+                        <td>Simple</td>
+                        <td>Doesn't leverage sorted input</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min Selection</strong></td>
+                        <td>O(k * N)</td>
+                        <td>O(1)</td>
+                        <td>No extra space</td>
+                        <td>O(k) per step</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min-Heap</strong></td>
+                        <td>O(N log k)</td>
+                        <td>O(k)</td>
+                        <td>Optimal time</td>
+                        <td>Requires heap</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/merge-k-sorted-lists/" target="_blank">LeetCode 23: Merge k Sorted Lists</a></li>
+                <li><a href="https://www.youtube.com/watch?v=ptYUCjfNhJY" target="_blank">NeetCode YouTube: Merge k Sorted Lists</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/K-way_merge_algorithm" target="_blank">Concept: K-way Merge (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
