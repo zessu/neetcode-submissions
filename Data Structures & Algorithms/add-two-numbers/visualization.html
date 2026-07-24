@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Two Numbers - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .linked-list { display: flex; align-items: center; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+        .node { display: inline-flex; align-items: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 16px; font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; }
+        .node.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .node.result { background: #b5ead7; border-color: #b5ead7; }
+        .arrow { color: #aa96da; font-size: 20px; margin: 0 4px; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.carry { background: #ffd3b6; border-color: #ff9aa2; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Add Two Numbers</h1>
+            <p class="subtitle">LeetCode 2 &mdash; Add two numbers represented as reversed linked lists</p>
+            <div class="tags">
+                <span class="tag">Linked List</span>
+                <span class="tag">Math</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Two non-empty linked lists represent non-negative integers in reverse order. Add them and return the sum as a linked list.</p>
+            <div class="code-block">Input:  l1 = [2,4,3], l2 = [5,6,4]
+Output: [7,0,8]  (342 + 465 = 807)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Convert to Integers (Naive)</h2>
+            <p><strong>Intuition:</strong> Convert both lists to integers, add, then convert back.</p>
+            <span class="complexity-badge badge-time">Time: O(max(m, n))</span>
+            <span class="complexity-badge badge-space">Space: O(max(m, n))</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Steps</div>
+                <div class="flow-row">
+                    <span class="flow-box">l1 = [2,4,3]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">342</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">l2 = [5,6,4]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">465</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">342 + 465 = 807</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">[7,0,8]</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Fails for numbers exceeding 64-bit integer range.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Elementary Math (Optimal)</h2>
+            <p><strong>Intuition:</strong> Add digit by digit with carry, like elementary school addition.</p>
+            <span class="complexity-badge badge-time">Time: O(max(m, n))</span>
+            <span class="complexity-badge badge-space">Space: O(max(m, n))</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Input lists: l1 = [2,4,3], l2 = [5,6,4]</div>
+                <div class="linked-list">
+                    <span class="node">2</span><span class="arrow">&rarr;</span>
+                    <span class="node">4</span><span class="arrow">&rarr;</span>
+                    <span class="node">3</span>
+                </div>
+                <div class="linked-list">
+                    <span class="node">5</span><span class="arrow">&rarr;</span>
+                    <span class="node">6</span><span class="arrow">&rarr;</span>
+                    <span class="node">4</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Step-by-step addition</div>
+
+                <p style="color: #636e72; font-size: 13px; margin-bottom: 8px;"><strong>Step 1:</strong> 2 + 5 + carry(0) = 7</p>
+                <div class="flow-row">
+                    <span class="flow-box">digit = 7 % 10 = 7</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">carry = 0</span>
+                </div>
+                <div class="linked-list">
+                    <span class="node result">7</span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>Step 2:</strong> 4 + 6 + carry(0) = 10</p>
+                <div class="flow-row">
+                    <span class="flow-box carry">digit = 10 % 10 = 0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box carry">carry = 1</span>
+                </div>
+                <div class="linked-list">
+                    <span class="node result">7</span><span class="arrow">&rarr;</span>
+                    <span class="node result">0</span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>Step 3:</strong> 3 + 4 + carry(1) = 8</p>
+                <div class="flow-row">
+                    <span class="flow-box">digit = 8 % 10 = 8</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">carry = 0</span>
+                </div>
+                <div class="linked-list">
+                    <span class="node result">7</span><span class="arrow">&rarr;</span>
+                    <span class="node result">0</span><span class="arrow">&rarr;</span>
+                    <span class="node result">8</span>
+                </div>
+
+                <div class="flow-row" style="margin-top: 16px;">
+                    <span class="flow-box valid">Result: [7, 0, 8] (represents 807)</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border: 2px solid #a8d8ea;"></div> Input node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border: 2px solid #ff9aa2;"></div> Carry generated</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border: 2px solid #b5ead7;"></div> Result node</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Initialize ptr1 = l1, ptr2 = l2, carry = 0</li>
+                <li>While ptr1 or ptr2 exists: sum = (ptr1?.val || 0) + (ptr2?.val || 0) + carry</li>
+                <li>Create new node with value sum % 10</li>
+                <li>Update carry = Math.floor(sum / 10)</li>
+                <li>Advance ptr1 and ptr2</li>
+                <li>If carry > 0 after loop, append final node</li>
+            </ol>
+
+            <div class="code-block">let ptr1 = l1, ptr2 = l2, rem = 0;
+let finalList = null, dirty = false;
+while (ptr1 || ptr2) {
+    if (!ptr1) ptr1 = { val: 0, next: null };
+    if (!ptr2) ptr2 = { val: 0, next: null };
+    const sum = ptr1.val + ptr2.val + rem;
+    rem = sum >= 10 ? 1 : 0;
+    const newNode = { val: sum % 10, next: null };
+    if (!dirty) { finalList = newNode; dirty = true; }
+    else { appendNode(finalList, newNode); }
+    ptr1 = ptr1.next; ptr2 = ptr2.next;
+}
+if (rem) appendNode(finalList, { val: 1, next: null });
+return finalList;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Convert to Integers</strong></td>
+                        <td>O(max(m, n))</td>
+                        <td>O(max(m, n))</td>
+                        <td>Simple to understand</td>
+                        <td>Integer overflow for large numbers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Elementary Math</strong></td>
+                        <td>O(max(m, n))</td>
+                        <td>O(max(m, n))</td>
+                        <td>No overflow, works for any size</td>
+                        <td>Slightly more code</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/add-two-numbers/" target="_blank">LeetCode 2: Add Two Numbers</a></li>
+                <li><a href="https://www.youtube.com/watch?v=wgFPrzTjm7s" target="_blank">NeetCode YouTube: Add Two Numbers</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Linked_list" target="_blank">Concept: Linked List (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
