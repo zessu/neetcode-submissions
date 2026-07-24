@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maximum Depth of Binary Tree - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 400px; margin: 0 auto; display: block; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2px; }
+        .tree-node.level1 { fill: #b5ead7; stroke: #b5ead7; }
+        .tree-node.level2 { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-node.level3 { fill: #aa96da; stroke: #aa96da; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-label { font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .arrow { color: #aa96da; font-size: 20px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Maximum Depth of Binary Tree</h1>
+            <p class="subtitle">LeetCode 104 &mdash; Find the longest path from root to leaf</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">BFS</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>The maximum depth is the number of nodes along the longest path from the root to the farthest leaf.</p>
+            <div class="code-block">Input:  root = [3,9,20,null,null,15,7]
+Output: 3  (path: 3 &rarr; 20 &rarr; 15 or 3 &rarr; 20 &rarr; 7)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: BFS (Level Order)</h2>
+            <p><strong>Intuition:</strong> Traverse level by level, counting levels.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(w)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Level-by-level traversal</div>
+                <div class="flow-row">
+                    <span class="flow-box">Level 1: [3]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Level 2: [9, 20]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">Level 3: [15, 7]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">Depth = 3</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Recursive DFS (Optimal)</h2>
+            <p><strong>Intuition:</strong> Depth = 1 + max(left depth, right depth).</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Tree: [3,9,20,null,null,15,7]</div>
+                <svg class="tree-svg" viewBox="0 0 400 250">
+                    <line class="tree-edge" x1="200" y1="40" x2="100" y2="110" />
+                    <line class="tree-edge" x1="200" y1="40" x2="300" y2="110" />
+                    <line class="tree-edge" x1="300" y1="110" x2="240" y2="180" />
+                    <line class="tree-edge" x1="300" y1="110" x2="360" y2="180" />
+                    <circle class="tree-node level1" cx="200" cy="40" r="20" />
+                    <text class="tree-label" x="200" y="45">3</text>
+                    <circle class="tree-node level2" cx="100" cy="110" r="20" />
+                    <text class="tree-label" x="100" y="115">9</text>
+                    <circle class="tree-node level2" cx="300" cy="110" r="20" />
+                    <text class="tree-label" x="300" y="115">20</text>
+                    <circle class="tree-node level3" cx="240" cy="180" r="20" />
+                    <text class="tree-label" x="240" y="185">15</text>
+                    <circle class="tree-node level3" cx="360" cy="180" r="20" />
+                    <text class="tree-label" x="360" y="185">7</text>
+                </svg>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Recursive computation</div>
+
+                <div class="flow-row">
+                    <span class="flow-box">maxDepth(9) = 1 + max(0, 0) = 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">maxDepth(15) = 1 + max(0, 0) = 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">maxDepth(7) = 1 + max(0, 0) = 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">maxDepth(20) = 1 + max(1, 1) = 2</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">maxDepth(3) = 1 + max(1, 2) = 3</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border-color: #b5ead7;"></div> Level 1</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border-color: #ff9aa2;"></div> Level 2</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #aa96da; border-color: #aa96da;"></div> Level 3</div>
+            </div>
+
+            <ol class="step-list">
+                <li>If node is null, return 0</li>
+                <li>Recursively compute left subtree depth</li>
+                <li>Recursively compute right subtree depth</li>
+                <li>Return 1 + max(left, right)</li>
+            </ol>
+
+            <div class="code-block">maxDepth(root) {
+    if (root === null) return 0;
+    return Math.max(
+        this.maxDepth(root.left),
+        this.maxDepth(root.right)
+    ) + 1;
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BFS</strong></td>
+                        <td>O(n)</td>
+                        <td>O(w)</td>
+                        <td>Iterative, no stack overflow</td>
+                        <td>Uses queue, more code</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recursive DFS</strong></td>
+                        <td>O(n)</td>
+                        <td>O(h)</td>
+                        <td>Elegant, minimal code</td>
+                        <td>Stack overflow for skewed trees</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/maximum-depth-of-binary-tree/" target="_blank">LeetCode 104: Maximum Depth of Binary Tree</a></li>
+                <li><a href="https://www.youtube.com/watch?v=hTM3phVI6YQ" target="_blank">NeetCode YouTube: Maximum Depth of Binary Tree</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Tree_(graph_theory)" target="_blank">Concept: Tree Depth (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
