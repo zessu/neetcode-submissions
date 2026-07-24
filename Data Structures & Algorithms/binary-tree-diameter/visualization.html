@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Diameter - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 400px; margin: 0 auto; display: block; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2px; }
+        .tree-node.active { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-node.diameter { fill: #b5ead7; stroke: #b5ead7; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-edge.highlight { stroke: #ff9aa2; stroke-width: 3px; }
+        .tree-label { font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .arrow { color: #aa96da; font-size: 20px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Binary Tree Diameter</h1>
+            <p class="subtitle">LeetCode 543 &mdash; Find the longest path between any two nodes</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">Binary Tree</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>The diameter of a binary tree is the length of the longest path between any two nodes, measured in edges. The path may or may not pass through the root.</p>
+            <div class="code-block">Input:  root = [1,2,3,4,5]
+Output: 3  (path: 4 &rarr; 2 &rarr; 1 &rarr; 3)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force (For Each Node)</h2>
+            <p><strong>Intuition:</strong> For every node, compute left and right subtree heights separately and track the maximum sum.</p>
+            <span class="complexity-badge badge-time">Time: O(n^2)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Recompute height for every node</div>
+                <div class="flow-row">
+                    <span class="flow-box">Node 1: height(left)=2, height(right)=1, d=3</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Node 2: height(left)=1, height(right)=1, d=2</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Node 3: height(left)=0, height(right)=0, d=0</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">O(n^2) because height() is called for every node.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: DFS with Global Maximum (Optimal)</h2>
+            <p><strong>Intuition:</strong> Compute height and update diameter in a single DFS pass.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Tree: [1,2,3,4,5]</div>
+                <svg class="tree-svg" viewBox="0 0 400 250">
+                    <!-- Edges -->
+                    <line class="tree-edge highlight" x1="200" y1="40" x2="100" y2="110" />
+                    <line class="tree-edge highlight" x1="200" y1="40" x2="300" y2="110" />
+                    <line class="tree-edge highlight" x1="100" y1="110" x2="60" y2="180" />
+                    <line class="tree-edge highlight" x1="100" y1="110" x2="140" y2="180" />
+                    <!-- Nodes -->
+                    <circle class="tree-node diameter" cx="200" cy="40" r="20" />
+                    <text class="tree-label" x="200" y="45">1</text>
+                    <circle class="tree-node diameter" cx="100" cy="110" r="20" />
+                    <text class="tree-label" x="100" y="115">2</text>
+                    <circle class="tree-node diameter" cx="300" cy="110" r="20" />
+                    <text class="tree-label" x="300" y="115">3</text>
+                    <circle class="tree-node diameter" cx="60" cy="180" r="20" />
+                    <text class="tree-label" x="60" y="185">4</text>
+                    <circle class="tree-node diameter" cx="140" cy="180" r="20" />
+                    <text class="tree-label" x="140" y="185">5</text>
+                </svg>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">DFS traversal (post-order)</div>
+
+                <div class="flow-row">
+                    <span class="flow-box">Node 4: L=0, R=0, maxLen=0, return 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Node 5: L=0, R=0, maxLen=0, return 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">Node 2: L=1, R=1, maxLen=2, return 2</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">Node 3: L=0, R=0, maxLen=2, return 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">Node 1: L=2, R=1, maxLen=3, return 3</span>
+                </div>
+
+                <div class="flow-row" style="margin-top: 16px;">
+                    <span class="flow-box valid">Diameter = 3 (path: 4 &rarr; 2 &rarr; 1 &rarr; 3)</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border-color: #a8d8ea;"></div> Normal node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border-color: #b5ead7;"></div> Diameter path</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border-color: #ff9aa2;"></div> Active node</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Initialize maxLength = 0</li>
+                <li>DFS: if node is null, return 0</li>
+                <li>Recursively get left and right subtree heights</li>
+                <li>Update maxLength = max(maxLength, left + right)</li>
+                <li>Return max(left, right) + 1 as subtree height</li>
+                <li>After DFS, maxLength holds the diameter</li>
+            </ol>
+
+            <div class="code-block">let maxLength = 0;
+const findDiameter = (node) => {
+    if (node === null) return 0;
+    const left = findDiameter(node.left);
+    const right = findDiameter(node.right);
+    maxLength = Math.max(maxLength, left + right);
+    return Math.max(left, right) + 1;
+};
+findDiameter(root);
+return maxLength;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brute Force</strong></td>
+                        <td>O(n^2)</td>
+                        <td>O(h)</td>
+                        <td>Simple concept</td>
+                        <td>Recomputes heights repeatedly</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DFS with Global Max</strong></td>
+                        <td>O(n)</td>
+                        <td>O(h)</td>
+                        <td>Single pass, optimal</td>
+                        <td>Requires global variable</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/diameter-of-binary-tree/" target="_blank">LeetCode 543: Diameter of Binary Tree</a></li>
+                <li><a href="https://www.youtube.com/watch?v=KorI4zpjgZU" target="_blank">NeetCode YouTube: Diameter of Binary Tree</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Tree_(graph_theory)" target="_blank">Concept: Tree Diameter (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
