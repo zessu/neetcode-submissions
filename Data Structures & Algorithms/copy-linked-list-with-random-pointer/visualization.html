@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy List with Random Pointer - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .linked-list { display: flex; align-items: center; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+        .node { display: inline-flex; align-items: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 16px; font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; }
+        .node.clone { background: #aa96da; color: #fff; border-color: #aa96da; }
+        .node.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .arrow { color: #aa96da; font-size: 20px; margin: 0 4px; }
+        .random-arrow { color: #ff9aa2; font-size: 16px; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.step { background: #a8d8ea; border-color: #a8d8ea; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Copy List with Random Pointer</h1>
+            <p class="subtitle">LeetCode 138 &mdash; Deep copy a linked list with random pointers</p>
+            <div class="tags">
+                <span class="tag">Hash Table</span>
+                <span class="tag">Linked List</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Each node has a <code>next</code> pointer and a <code>random</code> pointer. Create a deep copy where all pointers in the new list point to new nodes, not originals.</p>
+            <div class="code-block">Input:  head = [[7,null],[7,1],[13,0],[10,1],[5,null]]
+Output: deep copy with same structure</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Hash Map (Two Pass)</h2>
+            <p><strong>Intuition:</strong> Use a hash map to map original nodes to their clones.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Pass 1: Create clones, Pass 2: Set pointers</div>
+                <div class="flow-row">
+                    <span class="flow-box step">map = { orig1: clone1, orig2: clone2, ... }</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">clone1.next = map[orig1.next]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">clone1.random = map[orig1.random]</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Simple but uses O(n) extra space for the hash map.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Interweaving Nodes (Optimal)</h2>
+            <p><strong>Intuition:</strong> Interleave clones with originals to avoid using a hash map.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Original list</div>
+                <div class="linked-list">
+                    <span class="node">7</span><span class="arrow">&rarr;</span>
+                    <span class="node">7</span><span class="arrow">&rarr;</span>
+                    <span class="node">13</span><span class="arrow">&rarr;</span>
+                    <span class="node">10</span><span class="arrow">&rarr;</span>
+                    <span class="node">5</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Pass 1: Interleave clones</div>
+                <div class="linked-list">
+                    <span class="node">7</span><span class="arrow">&rarr;</span>
+                    <span class="node clone">7'</span><span class="arrow">&rarr;</span>
+                    <span class="node">7</span><span class="arrow">&rarr;</span>
+                    <span class="node clone">7'</span><span class="arrow">&rarr;</span>
+                    <span class="node">13</span><span class="arrow">&rarr;</span>
+                    <span class="node clone">13'</span><span class="arrow">&rarr;</span>
+                    <span class="node">10</span><span class="arrow">&rarr;</span>
+                    <span class="node clone">10'</span><span class="arrow">&rarr;</span>
+                    <span class="node">5</span><span class="arrow">&rarr;</span>
+                    <span class="node clone">5'</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Pass 2: Set random pointers (clone.random = original.random.next)</div>
+                <div class="flow-row">
+                    <span class="flow-box">7'.random = 7.random?.next = null</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">7'.random = 7.random?.next = 7'</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">13'.random = 13.random?.next = 7'</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">10'.random = 10.random?.next = 7'</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">5'.random = 5.random?.next = null</span>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Pass 3: Separate lists</div>
+                <div class="flow-row">
+                    <span class="flow-box">Original: 7 &rarr; 7 &rarr; 13 &rarr; 10 &rarr; 5</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">Clone: 7' &rarr; 7' &rarr; 13' &rarr; 10' &rarr; 5'</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border: 2px solid #a8d8ea;"></div> Original node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #aa96da; border: 2px solid #aa96da;"></div> Clone node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border: 2px solid #b5ead7;"></div> Valid pointer set</div>
+            </div>
+
+            <ol class="step-list">
+                <li>If head is null, return null</li>
+                <li>Pass 1: For each node, insert clone right after it</li>
+                <li>Pass 2: Set clone.random = original.random?.next ?? null</li>
+                <li>Pass 3: Separate original and clone lists</li>
+                <li>Return cloneHead</li>
+            </ol>
+
+            <div class="code-block">// Pass 1: Interleave
+while (curr) {
+    const clone = { val: curr.val, next: null, random: null };
+    clone.next = curr.next;
+    curr.next = clone;
+    curr = clone.next;
+}
+// Pass 2: Set random
+curr = head;
+while (curr) {
+    curr.next.random = curr.random?.next ?? null;
+    curr = curr.next.next;
+}
+// Pass 3: Separate
+curr = head; cloneHead = curr.next;
+while (curr) {
+    const clone = curr.next;
+    curr.next = clone.next;
+    clone.next = clone.next?.next ?? null;
+    curr = curr.next;
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hash Map</strong></td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                        <td>Simple, two passes</td>
+                        <td>Extra O(n) space for map</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interweaving Nodes</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>No extra space</td>
+                        <td>Modifies original list temporarily</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/copy-list-with-random-pointer/" target="_blank">LeetCode 138: Copy List with Random Pointer</a></li>
+                <li><a href="https://www.youtube.com/watch?v=5Y2EiZST97Y" target="_blank">NeetCode YouTube: Copy List with Random Pointer</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Linked_list" target="_blank">Concept: Linked List (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
