@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRU Cache - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .cache-row { display: flex; gap: 8px; margin: 12px 0; align-items: center; }
+        .cache-entry { display: flex; align-items: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 16px; font-family: 'SF Mono', monospace; font-size: 14px; }
+        .cache-entry.lru { background: #ff9aa2; border-color: #ff9aa2; color: #fff; }
+        .cache-entry.mru { background: #b5ead7; border-color: #b5ead7; }
+        .cache-entry.evicting { background: #ffd3b6; border-color: #ff9aa2; }
+        .cache-key { font-weight: 700; }
+        .cache-val { color: #636e72; margin-left: 8px; }
+        .arrow { color: #aa96da; font-size: 20px; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.miss { background: #ff9aa2; border-color: #ff9aa2; color: #fff; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .direction-label { font-size: 12px; color: #636e72; margin: 4px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LRU Cache</h1>
+            <p class="subtitle">LeetCode 146 &mdash; Least Recently Used cache with O(1) operations</p>
+            <div class="tags">
+                <span class="tag">Hash Table</span>
+                <span class="tag">Linked List</span>
+                <span class="tag">Design</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Design a cache that evicts the least recently used item when capacity is reached. Both <code>get</code> and <code>put</code> must run in O(1) time.</p>
+            <div class="code-block">Capacity: 2
+Operations: put(1,1), put(2,2), get(1), put(3,3), get(2), put(4,4), get(1), get(3), get(4)
+Output: [null, null, null, 1, null, -1, null, -1, 3, 4]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Hash Map + Array</h2>
+            <p><strong>Intuition:</strong> Use a map for lookups and an array to track access order.</p>
+            <span class="complexity-badge badge-time">Time: O(1) get, O(n) put</span>
+            <span class="complexity-badge badge-space">Space: O(capacity)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Array shift on every access makes put O(n)</div>
+                <div class="flow-row">
+                    <span class="flow-box">get(1): find 1 in array, move to end (O(n))</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box miss">put(3,3): evict first, shift all (O(n))</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Array operations are O(n), not meeting the O(1) requirement.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Hash Map Using Map Insertion Order (Optimal)</h2>
+            <p><strong>Intuition:</strong> JavaScript's Map preserves insertion order. Delete + re-insert marks as recently used.</p>
+            <span class="complexity-badge badge-time">Time: O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(capacity)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">LRU &larr; --- Cache (capacity 2) --- &rarr; MRU</div>
+
+                <p style="color: #636e72; font-size: 13px; margin-bottom: 8px;"><strong>put(1, 1):</strong></p>
+                <div class="cache-row">
+                    <span class="cache-entry mru"><span class="cache-key">1</span><span class="cache-val">= 1</span></span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>put(2, 2):</strong></p>
+                <div class="cache-row">
+                    <span class="cache-entry"><span class="cache-key">1</span><span class="cache-val">= 1</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="cache-entry mru"><span class="cache-key">2</span><span class="cache-val">= 2</span></span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>get(1):</strong> found, move to end</p>
+                <div class="cache-row">
+                    <span class="cache-entry"><span class="cache-key">2</span><span class="cache-val">= 2</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="cache-entry mru"><span class="cache-key">1</span><span class="cache-val">= 1</span></span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>put(3, 3):</strong> evict LRU (key 2)</p>
+                <div class="cache-row">
+                    <span class="cache-entry evicting"><span class="cache-key">2</span><span class="cache-val">= 2 (evicted)</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="cache-entry"><span class="cache-key">1</span><span class="cache-val">= 1</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="cache-entry mru"><span class="cache-key">3</span><span class="cache-val">= 3</span></span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>get(2):</strong> not found</p>
+                <div class="flow-row">
+                    <span class="flow-box miss">Return -1</span>
+                </div>
+
+                <p style="color: #636e72; font-size: 13px; margin: 16px 0 8px;"><strong>put(4, 4):</strong> evict LRU (key 1)</p>
+                <div class="cache-row">
+                    <span class="cache-entry evicting"><span class="cache-key">1</span><span class="cache-val">= 1 (evicted)</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="cache-entry"><span class="cache-key">3</span><span class="cache-val">= 3</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="cache-entry mru"><span class="cache-key">4</span><span class="cache-val">= 4</span></span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border: 2px solid #a8d8ea;"></div> Normal entry</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border: 2px solid #b5ead7;"></div> Most recently used</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2; border: 2px solid #ff9aa2;"></div> LRU / Evicting</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border: 2px solid #ff9aa2;"></div> Being evicted</div>
+            </div>
+
+            <ol class="step-list">
+                <li>get(key): if exists, delete and re-insert, return value; else return -1</li>
+                <li>put(key, value): if key exists, delete and re-insert with new value</li>
+                <li>If cache is full, evict the first key (LRU) before inserting</li>
+                <li>Otherwise, simply insert the new key-value pair</li>
+            </ol>
+
+            <div class="code-block">get(key) {
+    if (!this.store.has(key)) return -1;
+    const value = this.store.get(key);
+    this.store.delete(key);
+    this.store.set(key, value);
+    return value;
+}
+
+put(key, value) {
+    if (this.store.has(key)) {
+        this.store.delete(key);
+        this.store.set(key, value);
+        return;
+    }
+    if (this.store.size === this.capacity) {
+        const lruKey = this.store.keys().next().value;
+        this.store.delete(lruKey);
+    }
+    this.store.set(key, value);
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hash Map + Array</strong></td>
+                        <td>O(1)/O(n)</td>
+                        <td>O(capacity)</td>
+                        <td>Simple</td>
+                        <td>put is O(n)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Map (Insertion Order)</strong></td>
+                        <td>O(1)</td>
+                        <td>O(capacity)</td>
+                        <td>O(1) for both ops</td>
+                        <td>Language-specific</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DLL + Map</strong></td>
+                        <td>O(1)</td>
+                        <td>O(capacity)</td>
+                        <td>Language-agnostic</td>
+                        <td>More complex</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/lru-cache/" target="_blank">LeetCode 146: LRU Cache</a></li>
+                <li><a href="https://www.youtube.com/watch?v=7ABdPKDVdQU" target="_blank">NeetCode YouTube: LRU Cache</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)" target="_blank">Concept: LRU Cache (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
