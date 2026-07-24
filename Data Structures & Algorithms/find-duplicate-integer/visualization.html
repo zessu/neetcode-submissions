@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find the Duplicate Number - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-container { display: flex; gap: 4px; margin: 16px 0; }
+        .array-cell { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 14px; background: #ffffff; color: #2d3436; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #ff9aa2; border-color: #ff9aa2; color: #fff; }
+        .array-cell.seen { background: #b5ead7; border-color: #b5ead7; }
+        .array-index { font-size: 11px; color: #636e72; text-align: center; margin-top: 2px; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.found { background: #ff9aa2; border-color: #ff9aa2; color: #fff; }
+        .arrow { color: #aa96da; font-size: 20px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Find the Duplicate Number</h1>
+            <p class="subtitle">LeetCode 287 &mdash; Find the repeated number in an array</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Set</span>
+                <span class="tag">Two Pointers</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array of n+1 integers in range [1, n], find the single duplicate number without modifying the array and using O(1) extra space.</p>
+            <div class="code-block">Input:  nums = [1,3,4,2,2]
+Output: 2</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Hash Set</h2>
+            <p><strong>Intuition:</strong> Track seen numbers; the first one already in the set is the duplicate.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Array: [1, 3, 4, 2, 2]</div>
+                <div class="array-container">
+                    <div><div class="array-cell seen">1</div><div class="array-index">0</div></div>
+                    <div><div class="array-cell seen">3</div><div class="array-index">1</div></div>
+                    <div><div class="array-cell seen">4</div><div class="array-index">2</div></div>
+                    <div><div class="array-cell seen">2</div><div class="array-index">3</div></div>
+                    <div><div class="array-cell found">2</div><div class="array-index">4</div></div>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Step-by-step</div>
+                <div class="flow-row">
+                    <span class="flow-box">i=0: nums[0]=1, set={1}</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">i=1: nums[1]=3, set={1,3}</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">i=2: nums[2]=4, set={1,3,4}</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">i=3: nums[3]=2, set={1,3,4,2}</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box found">i=4: nums[4]=2, already in set! Return 2</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Floyd's Cycle Detection (Optimal)</h2>
+            <p><strong>Intuition:</strong> Treat array as linked list with cycle; find cycle entrance.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Array as linked list: nums[i] points to index nums[i]</div>
+                <div class="flow-row">
+                    <span class="flow-box">0 &rarr; 1 &rarr; 3 &rarr; 2 &rarr; 4 &rarr; 2 &rarr; 4 &rarr; ...</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">Cycle: 2 &rarr; 4 &rarr; 2. The entrance (2) is the duplicate.</p>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border: 2px solid #a8d8ea;"></div> Seen number</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2; border: 2px solid #ff9aa2;"></div> Duplicate found</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border: 2px solid #b5ead7;"></div> Valid step</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Initialize an empty set</li>
+                <li>Iterate through each number in the array</li>
+                <li>If number is in set, return it as duplicate</li>
+                <li>Otherwise, add number to set</li>
+            </ol>
+
+            <div class="code-block">const existing = new Set();
+for (const num in nums) {
+    if (existing.has(nums[num])) return nums[num];
+    existing.add(nums[num]);
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Time</th>
+                        <th>Space</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hash Set</strong></td>
+                        <td>O(n)</td>
+                        <td>O(n)</td>
+                        <td>Simple, one pass</td>
+                        <td>Uses O(n) extra space</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Floyd's Cycle</strong></td>
+                        <td>O(n)</td>
+                        <td>O(1)</td>
+                        <td>Constant space, no modification</td>
+                        <td>Harder to understand</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Binary Search</strong></td>
+                        <td>O(n log n)</td>
+                        <td>O(1)</td>
+                        <td>No modification, constant space</td>
+                        <td>Slower than O(n)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/find-the-duplicate-number/" target="_blank">LeetCode 287: Find the Duplicate Number</a></li>
+                <li><a href="https://www.youtube.com/watch?v=wjYnzkAhcNk" target="_blank">NeetCode YouTube: Find the Duplicate Number</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Cycle_detection" target="_blank">Concept: Floyd's Cycle Detection (Wikipedia)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
