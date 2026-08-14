@@ -1,0 +1,27 @@
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    res: number[] = [];
+    traverse(root: TreeNode | null) {
+        if(!root) return;
+        this.traverse(root.left);
+        this.traverse(root.right);
+        this.res.push(root.val);
+    }
+    /**
+     * @param {TreeNode} root
+     * @return {number[]}
+     */
+    postorderTraversal(root: TreeNode | null): number[] {
+        this.traverse(root);
+        return this.res;
+    }
+}
