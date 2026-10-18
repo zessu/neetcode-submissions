@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Largest Component - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .graphs-row { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+        .graph-block { flex: 1 1 240px; min-width: 200px; }
+        .graph-cap { font-size: 12px; color: #636e72; text-align: center; margin-top: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .graph-block svg { width: 100%; height: auto; max-width: 260px; display: block; margin: 0 auto; }
+        .gnode { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2; }
+        .gnode.big { fill: #b5ead7; stroke: #b5ead7; }
+        .gnode.small { fill: #ffffd8; stroke: #f0c929; }
+        .glabel { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; fill: #2d3436; text-anchor: middle; dominant-baseline: central; font-weight: 600; }
+        .gedge { stroke: #aa96da; stroke-width: 2; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.skip { background: #fdf6f0; color: #b2bec3; }
+        .arrow { color: #636e72; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 6px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .note { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; color: #636e72; margin: 12px 0; }
+        @media (max-width: 600px) { .header h1 { font-size: 1.5rem; } .card { padding: 18px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Largest Component</h1>
+            <p class="subtitle">Find the size of the largest connected component in an undirected graph</p>
+            <div class="tags">
+                <span class="tag">Graph</span>
+                <span class="tag">DFS</span>
+                <span class="tag">BFS</span>
+                <span class="tag">Union-Find</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an undirected graph as an adjacency list, return the number of nodes in its largest <strong>connected component</strong>. A component is a maximal group of nodes where each node can reach every other node in the group.</p>
+            <div class="code-block">Input:  graph = {
+  0: [8,1,5], 1: [0], 5: [0,8], 8: [0,5],
+  2: [3,4],   3: [2,4], 4: [3,2],
+}
+Output: 4   ( {0,1,5,8} has 4 nodes, {2,3,4} has 3 )</div>
+            <div class="note"><strong>Note:</strong> the submission's function is named <code>largestComponent</code>. An earlier scratch version called it <code>longestPath</code>, but a "longest path" is a different (NP-hard) problem — this task is a simple graph traversal.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Per-Node DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> The component containing a node is exactly the set of nodes reachable from it. So run a DFS from <em>every</em> node, count the nodes reached, and keep the maximum.</p>
+            <span class="complexity-badge badge-time">Time: O(V &middot; (V + E))</span>
+            <span class="complexity-badge badge-space">Space: O(V)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">The two components of the sample graph</div>
+                <div class="graphs-row">
+                    <div class="graph-block">
+                        <svg viewBox="0 0 260 220" role="img" aria-label="Component containing nodes 0, 1, 5, 8">
+                            <line class="gedge" x1="55" y1="50" x2="135" y2="110" />
+                            <line class="gedge" x1="135" y1="110" x2="55" y2="170" />
+                            <line class="gedge" x1="135" y1="110" x2="215" y2="110" />
+                            <line class="gedge" x1="55" y1="170" x2="215" y2="110" />
+                            <circle class="gnode big" cx="55" cy="50" r="22" />
+                            <circle class="gnode big" cx="135" cy="110" r="22" />
+                            <circle class="gnode big" cx="55" cy="170" r="22" />
+                            <circle class="gnode big" cx="215" cy="110" r="22" />
+                            <text class="glabel" x="55" y="50">1</text>
+                            <text class="glabel" x="135" y="110">0</text>
+                            <text class="glabel" x="55" y="170">5</text>
+                            <text class="glabel" x="215" y="110">8</text>
+                        </svg>
+                        <div class="graph-cap">{0,1,5,8} &rarr; size 4</div>
+                    </div>
+                    <div class="graph-block">
+                        <svg viewBox="0 0 220 220" role="img" aria-label="Component containing nodes 2, 3, 4">
+                            <line class="gedge" x1="110" y1="45" x2="55" y2="170" />
+                            <line class="gedge" x1="110" y1="45" x2="165" y2="170" />
+                            <line class="gedge" x1="55" y1="170" x2="165" y2="170" />
+                            <circle class="gnode small" cx="110" cy="45" r="22" />
+                            <circle class="gnode small" cx="55" cy="170" r="22" />
+                            <circle class="gnode small" cx="165" cy="170" r="22" />
+                            <text class="glabel" x="110" y="45">2</text>
+                            <text class="glabel" x="55" y="170">3</text>
+                            <text class="glabel" x="165" y="170">4</text>
+                        </svg>
+                        <div class="graph-cap">{2,3,4} &rarr; size 3</div>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Largest component (size 4)</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #ffffd8;"></div> Other component (size 3)</div>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Every node re-traverses its whole component (redundant work)</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Start node</th><th>DFS reaches</th><th>Size</th><th>largest</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>0</td><td>{0,1,5,8}</td><td>4</td><td>4</td></tr>
+                            <tr><td>1</td><td>{0,1,5,8}</td><td>4</td><td>4</td></tr>
+                            <tr><td>5</td><td>{0,1,5,8}</td><td>4</td><td>4</td></tr>
+                            <tr><td>8</td><td>{0,1,5,8}</td><td>4</td><td>4</td></tr>
+                            <tr><td>2</td><td>{2,3,4}</td><td>3</td><td>4</td></tr>
+                            <tr><td>3</td><td>{2,3,4}</td><td>3</td><td>4</td></tr>
+                            <tr><td>4</td><td>{2,3,4}</td><td>3</td><td>4</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">A component of size <code>k</code> is visited <code>k</code> times &mdash; correct, but wasteful.</p>
+            </div>
+
+            <div class="code-block">const largestComponent = (graph) =&gt; {
+  let largest = 0;
+  for (const [key, _] of Object.entries(graph)) {
+    largest = Math.max(largest, navigate(graph, Number(key)));
+  }
+  return largest;
+};
+
+const navigate = (graph, key) =&gt; {
+  const visited = new Set();
+  let length = 0;
+  const stack = [key];
+  while (stack.length) {
+    const current = stack.pop();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    length++;
+    for (const neighbor of graph[current]) stack.push(neighbor);
+  }
+  return length;
+};</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Single-Pass DFS/BFS (Optimal)</h2>
+            <p><strong>Intuition:</strong> Use <em>one shared</em> <code>visited</code> set. Each time we start a traversal from a node that has not been seen, we have discovered a brand-new component. Count its nodes and keep the maximum.</p>
+            <span class="complexity-badge badge-time">Time: O(V + E)</span>
+            <span class="complexity-badge badge-space">Space: O(V)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">One walk across the whole graph</div>
+                <div class="flow-row">
+                    <span class="flow-box">node 0 unvisited</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">DFS finds {0,1,5,8}, size 4</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">largest = 4</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box skip">nodes 1, 5, 8 already visited &rarr; skip</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">node 2 unvisited</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">DFS finds {2,3,4}, size 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">largest stays 4</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box skip">nodes 3, 4 already visited &rarr; skip</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return 4</span>
+                </div>
+            </div>
+
+            <ol class="step-list">
+                <li>Create one global <code>visited</code> set and <code>largest = 0</code>.</li>
+                <li>For each node, if it is already visited, skip it.</li>
+                <li>Otherwise traverse from it (DFS or BFS), marking and counting each node reached.</li>
+                <li>Update <code>largest = max(largest, count)</code>.</li>
+                <li>Return <code>largest</code> after the loop.</li>
+            </ol>
+
+            <div class="code-block">const largestComponent = (graph) =&gt; {
+  const visited = new Set();
+  let largest = 0;
+  for (const key of Object.keys(graph)) {
+    const size = explore(graph, Number(key), visited);
+    if (size &gt; 0) largest = Math.max(largest, size);
+  }
+  return largest;
+};
+
+const explore = (graph, node, visited) =&gt; {
+  if (visited.has(node)) return 0;   // already part of another component
+  visited.add(node);
+  let size = 1;
+  for (const neighbor of graph[node]) size += explore(graph, neighbor, visited);
+  return size;
+};</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Union-Find (Disjoint Set Union)</h2>
+            <p><strong>Intuition:</strong> Merge the two endpoints of every edge into the same set, then report the largest set size. Useful when edges arrive incrementally.</p>
+            <span class="complexity-badge badge-time">Time: O((V + E) &middot; &alpha;(V))</span>
+            <span class="complexity-badge badge-space">Space: O(V)</span>
+            <div class="code-block">// parent[x] and size[x] for every node; union by size
+for (const [a, neighbors] of Object.entries(graph)) {
+  for (const b of neighbors) union(Number(a), b);
+}
+return Math.max(...Object.keys(graph).map(x =&gt; size[find(Number(x))]));</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Pros</th><th>Cons</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Per-Node DFS</strong> (implemented)</td><td>O(V &middot; (V + E))</td><td>O(V)</td><td>Simple; iterative (no stack overflow)</td><td>Re-explores each component once per node</td></tr>
+                        <tr><td><strong>Single-Pass DFS/BFS</strong></td><td>O(V + E)</td><td>O(V)</td><td>Optimal; each node/edge seen once</td><td>Needs one shared visited set</td></tr>
+                        <tr><td><strong>Union-Find (DSU)</strong></td><td>O((V + E) &middot; &alpha;(V))</td><td>O(V)</td><td>Great for streaming/online edges</td><td>More code; overkill for a full adjacency list</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Optimal time</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffd8;"></div> Implemented</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Reference</div>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://neetcode.io/problems/largest-component" target="_blank">NeetCode: Largest Component</a></li>
+                <li><a href="https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/" target="_blank">LeetCode 323: Number of Connected Components in an Undirected Graph</a></li>
+                <li><a href="https://leetcode.com/problems/largest-component-size-by-common-factor/" target="_blank">LeetCode 952: Largest Component Size by Common Factor</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Component_(graph_theory)" target="_blank">Concept: Connected Component (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/" target="_blank">Concept: Depth-First Search for a Graph (GeeksforGeeks)</a></li>
+                <li><a href="../level-order-traversal-of-binary-tree/" target="_blank">Related in this repo: Level Order Traversal of Binary Tree</a></li>
+                <li><a href="../serialize-and-deserialize-binary-tree/" target="_blank">Related in this repo: Serialize and Deserialize Binary Tree</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
