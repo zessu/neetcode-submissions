@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortest Path - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .graph-wrap svg { width: 100%; height: auto; max-width: 360px; display: block; margin: 0 auto; }
+        .gnode { stroke-width: 2; }
+        .gnode.start { fill: #ffd3b6; stroke: #ff9aa2; }
+        .gnode.l1 { fill: #a8d8ea; stroke: #7fb8cf; }
+        .gnode.l2 { fill: #b5ead7; stroke: #7fc9a9; }
+        .gnode.finish { stroke: #aa96da; stroke-width: 3.5; }
+        .glabel { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 16px; fill: #2d3436; text-anchor: middle; dominant-baseline: central; font-weight: 600; }
+        .gedge { stroke: #aa96da; stroke-width: 2; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.skip { background: #fdf6f0; color: #b2bec3; }
+        .arrow { color: #636e72; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 6px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #dfe6e9; }
+        .note { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; color: #636e72; margin: 12px 0; }
+        @media (max-width: 600px) { .header h1 { font-size: 1.5rem; } .card { padding: 18px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Shortest Path</h1>
+            <p class="subtitle">Find the fewest edges between two nodes in an undirected graph</p>
+            <div class="tags">
+                <span class="tag">Graph</span>
+                <span class="tag">BFS</span>
+                <span class="tag">Shortest Path</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an undirected graph as a list of edges plus a <code>start</code> and <code>finish</code> node, return the number of <strong>edges</strong> in the shortest path between them, or <code>-1</code> if no path exists. Because every edge has equal weight, BFS finds the shortest route.</p>
+            <div class="code-block">Input:  edges = [['w','x'],['x','y'],['z','y'],['z','v'],['w','v']]
+        start = "w", finish = "z"
+Output: 2   ( w &rarr; v &rarr; z )</div>
+            <div class="note"><strong>Key idea:</strong> BFS visits nodes in order of distance, so the first time it dequeues <code>finish</code>, the stored distance is the shortest possible.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: BFS by Levels (Implemented)</h2>
+            <p><strong>Intuition:</strong> Explore the graph in rings of increasing distance. Distance 0 is the start, distance 1 is its neighbors, distance 2 is their neighbors, and so on.</p>
+            <span class="complexity-badge badge-time">Time: O(V + E)</span>
+            <span class="complexity-badge badge-space">Space: O(V)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">BFS layers from "w" &mdash; "z" is reached at distance 2</div>
+                <div class="graph-wrap">
+                    <svg viewBox="0 0 360 260" role="img" aria-label="Undirected graph with nodes w, x, y, z, v and BFS layers colored">
+                        <line class="gedge" x1="180" y1="40" x2="266" y2="102" />
+                        <line class="gedge" x1="266" y1="102" x2="233" y2="203" />
+                        <line class="gedge" x1="233" y1="203" x2="127" y2="203" />
+                        <line class="gedge" x1="127" y1="203" x2="94" y2="102" />
+                        <line class="gedge" x1="94" y1="102" x2="180" y2="40" />
+
+                        <circle class="gnode start" cx="180" cy="40" r="24" />
+                        <circle class="gnode l1" cx="266" cy="102" r="24" />
+                        <circle class="gnode l2" cx="233" cy="203" r="24" />
+                        <circle class="gnode l2 finish" cx="127" cy="203" r="24" />
+                        <circle class="gnode l1" cx="94" cy="102" r="24" />
+
+                        <text class="glabel" x="180" y="40">w</text>
+                        <text class="glabel" x="266" y="102">x</text>
+                        <text class="glabel" x="233" y="203">y</text>
+                        <text class="glabel" x="127" y="203">z</text>
+                        <text class="glabel" x="94" y="102">v</text>
+
+                        <text x="180" y="22" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#636e72">0</text>
+                        <text x="266" y="84" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#636e72">1</text>
+                        <text x="94" y="84" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#636e72">1</text>
+                        <text x="233" y="235" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#636e72">2</text>
+                        <text x="127" y="235" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#636e72">2 (finish)</text>
+                    </svg>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border-color: #ff9aa2;"></div> Start / distance 0</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Distance 1</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Distance 2</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border-color: #aa96da;"></div> Finish node</div>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Queue trace (each entry is [node, distance])</div>
+                <div class="flow-row"><span class="flow-box">[[w, 0]]</span></div>
+                <div class="flow-row"><span class="flow-box">pop [w, 0] &rarr; push [x, 1], [v, 1]</span></div>
+                <div class="flow-row"><span class="flow-box">pop [x, 1] &rarr; push [w, 2], [y, 2]</span></div>
+                <div class="flow-row"><span class="flow-box">pop [v, 1] &rarr; push [z, 2], [w, 2]</span></div>
+                <div class="flow-row"><span class="flow-box skip">pop [w, 2] &rarr; already visited, skip</span></div>
+                <div class="flow-row"><span class="flow-box">pop [y, 2] &rarr; push [x, 3], [z, 3]</span></div>
+                <div class="flow-row"><span class="flow-box result">pop [z, 2] &rarr; z === finish, return 2</span></div>
+            </div>
+
+            <ol class="step-list">
+                <li>Build an adjacency list, adding every edge in both directions.</li>
+                <li>Enqueue <code>[start, 0]</code>.</li>
+                <li>Dequeue <code>[node, dist]</code>; skip if already visited.</li>
+                <li>Mark it visited; if it is <code>finish</code>, return <code>dist</code>.</li>
+                <li>Enqueue every neighbor as <code>[neighbor, dist + 1]</code>.</li>
+                <li>If the queue empties, return <code>-1</code>.</li>
+            </ol>
+
+            <div class="code-block">const shortestPath = (edges, start, finish) =&gt; {
+  const adjList = buildAdjacencyGraph(edges);
+  const queue = [[start, 0]];
+  const visited = new Set();
+
+  while (queue.length) {
+    let [item, idx] = queue.shift();
+    if (visited.has(item)) continue;
+    visited.add(item);
+    if (item === finish) return Number(idx);
+    for (const neighbor of adjList[item]) {
+      queue.push([neighbor, Number(idx) + 1]);
+    }
+  }
+  return -1;
+};</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Dijkstra (for weighted graphs)</h2>
+            <p><strong>Intuition:</strong> When edges have different weights, a plain FIFO queue no longer visits nodes in distance order. Dijkstra uses a min-heap to always expand the closest known node.</p>
+            <span class="complexity-badge badge-time">Time: O((V + E) &middot; log V)</span>
+            <span class="complexity-badge badge-space">Space: O(V + E)</span>
+            <div class="code-block">dist[start] = 0; heap = [[0, start]];
+while (heap.length) {
+  const [d, node] = popMin(heap);
+  if (node === finish) return d;
+  for (const [neighbor, w] of adj[node]) {
+    if (d + w &lt; dist[neighbor]) {
+      dist[neighbor] = d + w;
+      push(heap, [d + w, neighbor]);
+    }
+  }
+}</div>
+            <p style="color:#636e72;font-size:13px;">With unit weights this reduces to BFS with extra <code>log V</code> overhead &mdash; unnecessary here.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: DFS / Backtracking (not optimal)</h2>
+            <p><strong>Intuition:</strong> Enumerate every path from <code>start</code> to <code>finish</code> and keep the shortest. This is correct but exponential, and it explores paths that BFS prunes immediately.</p>
+            <span class="complexity-badge badge-time">Time: O(V!) worst case</span>
+            <span class="complexity-badge badge-space">Space: O(V)</span>
+            <div class="code-block">const dfs = (node, dist) =&gt; {
+  if (node === finish) { best = Math.min(best, dist); return; }
+  for (const n of adj[node]) {
+    if (!visited.has(n)) {
+      visited.add(n);
+      dfs(n, dist + 1);
+      visited.delete(n); // backtrack
+    }
+  }
+};</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Pros</th><th>Cons</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>BFS</strong> (implemented)</td><td>O(V + E)</td><td>O(V)</td><td>Optimal for unweighted graphs; simple, iterative</td><td>Not directly usable with weighted edges</td></tr>
+                        <tr><td><strong>Dijkstra</strong></td><td>O((V + E) &middot; log V)</td><td>O(V + E)</td><td>Handles weighted edges</td><td>Unnecessary heap overhead on unit weights</td></tr>
+                        <tr><td><strong>DFS / Backtracking</strong></td><td>O(V!) worst case</td><td>O(V)</td><td>Can enumerate all paths</td><td>Exponential; much slower than BFS</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border-radius: 4px;"></div> Optimal time</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffd8; border-radius: 4px;"></div> Implemented</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea; border-radius: 4px;"></div> Reference</div>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://neetcode.io/problems/shortest-path" target="_blank">NeetCode: Shortest Path</a></li>
+                <li><a href="https://leetcode.com/problems/find-if-path-exists-in-graph/" target="_blank">LeetCode 1971: Find if Path Exists in Graph</a></li>
+                <li><a href="https://leetcode.com/problems/shortest-path-in-binary-matrix/" target="_blank">LeetCode 1091: Shortest Path in Binary Matrix</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Breadth-first_search" target="_blank">Concept: Breadth-First Search (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/" target="_blank">Concept: BFS for a Graph (GeeksforGeeks)</a></li>
+                <li><a href="../largest-component/" target="_blank">Related in this repo: Largest Component</a></li>
+                <li><a href="../level-order-traversal-of-binary-tree/" target="_blank">Related in this repo: Level Order Traversal of Binary Tree</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
