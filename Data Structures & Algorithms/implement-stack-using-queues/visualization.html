@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement Stack using Queues - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: #2d3436; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .array-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+        .array-cell { width: 52px; height: 48px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 15px; font-weight: 600; background: #ffffff; color: #2d3436; }
+        .array-cell.top { background: #b5ead7; border-color: #7fc9ad; }
+        .array-cell.new { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.moved { background: #ffffd8; border-color: #f0c929; }
+        .array-cell.gone { border-style: dashed; background: #fdf6f0; color: #b2bec3; }
+        .array-label { font-size: 11px; color: #636e72; font-family: 'SF Mono', monospace; }
+        .array-block { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .queue-wrap { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+        .queue-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .queue-name { width: 46px; font-family: 'SF Mono', monospace; font-size: 13px; font-weight: 600; color: #636e72; flex: 0 0 auto; white-space: nowrap; }
+        .queue-track { display: flex; align-items: center; gap: 4px; padding: 6px; border: 2px dashed #dfe6e9; border-radius: 8px; background: #ffffff; min-height: 58px; flex-wrap: wrap; }
+        .qcell { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 6px; font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; background: #a8d8ea; color: #2d3436; }
+        .qcell.front { background: #b5ead7; border-color: #7fc9ad; }
+        .qcell.back { background: #ffd3b6; border-color: #ff9aa2; }
+        .qcell.rotate { background: #ffffd8; border-color: #f0c929; }
+        .qcell.ghost { border-style: dashed; background: transparent; color: #b2bec3; }
+        .marker { font-size: 11px; color: #636e72; font-family: 'SF Mono', monospace; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.ok { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .pitfalls { list-style: none; padding: 0; margin: 0; }
+        .pitfalls li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid #dfe6e9; }
+        .pitfalls li:last-child { border-bottom: none; }
+        .pitfalls li::before { content: "!"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; background: #ff9aa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #2d3436; }
+        @media (max-width: 620px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .queue-name { width: 38px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Implement Stack using Queues</h1>
+            <p class="subtitle">LeetCode 225 &mdash; LIFO behaviour from FIFO queues</p>
+            <div class="tags">
+                <span class="tag">Stack</span>
+                <span class="tag">Queue</span>
+                <span class="tag">Design</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Build <code>push</code>, <code>pop</code>, <code>top</code>, and <code>empty</code> for a LIFO stack using only queue operations (enqueue at the back, dequeue at the front). A queue gives the <em>oldest</em> element first, so either every push or every pop must rotate the queue to bring the newest element to the front.</p>
+            <div class="code-block">Input:
+["MyStack","push","push","top","pop","empty"]
+[[],        [1],   [2],   [],   [],  []]
+
+Output:
+[null, null, null, 2, 2, false]</div>
+            <p>After two pushes the queue front is <code>1</code>, but the stack top must be <code>2</code>. Resolving that mismatch is the entire problem.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Single Array as a Deque (Implemented)</h2>
+            <p><strong>Intuition:</strong> Keep the top of the stack at index <code>0</code>. <code>unshift</code> inserts a new top; <code>shift</code> removes it. The array's front acts like a stack top.</p>
+            <span class="complexity-badge badge-time">Time: push O(n), pop O(n), top O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">push(2) on [1]: every existing element shifts right</div>
+                <div class="array-line">
+                    <div class="array-block">
+                        <div class="array-cell new">2</div>
+                        <div class="array-label">index 0 = top</div>
+                    </div>
+                    <div class="array-block">
+                        <div class="array-cell">1</div>
+                        <div class="array-label">index 1</div>
+                    </div>
+                    <div class="array-block">
+                        <div class="array-cell gone">&nbsp;</div>
+                        <div class="array-label">&nbsp;</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">before: [1]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">unshift(2)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">after: [2, 1]</span>
+                </div>
+                <p class="diagram-note"><code>unshift</code> re-indexes <code>1</code> from slot 0 to slot 1, which is why <code>push</code> is <code>O(n)</code>. <code>pop()</code> calls <code>shift()</code>, which moves every remaining element back down one slot — also <code>O(n)</code>.</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">top() and pop() read from index 0</div>
+                <div class="array-line">
+                    <div class="array-block">
+                        <div class="array-cell top">2</div>
+                        <div class="array-label">top</div>
+                    </div>
+                    <div class="array-block">
+                        <div class="array-cell">1</div>
+                        <div class="array-label">older</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">top()</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">elements[0] = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return 2 (no change)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">pop()</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">shift() removes index 0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return 2, array = [1]</span>
+                </div>
+                <p class="diagram-note">This is the same ordering as queue rotation, but achieved with a deque insert at the front instead of an enqueue-plus-rotate. Note that <code>unshift</code> is not a queue operation.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Two Queues, Expensive Push</h2>
+            <p><strong>Intuition:</strong> Keep the top at the front of the main queue. To push, enqueue the new element into a second queue, move all older elements behind it, then swap the queues.</p>
+            <span class="complexity-badge badge-time">Time: push O(n), pop/top O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">push(3) when q1 = [1, 2] (front on the left)</div>
+                <div class="queue-wrap">
+                    <div class="queue-row">
+                        <div class="queue-name">q1</div>
+                        <div class="queue-track">
+                            <div class="qcell front">1</div>
+                            <div class="qcell">2</div>
+                        </div>
+                        <span class="marker">front &rarr; back</span>
+                    </div>
+                    <div class="queue-row">
+                        <div class="queue-name">q2</div>
+                        <div class="queue-track">
+                            <div class="qcell back">3</div>
+                        </div>
+                        <span class="marker">new element</span>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">enqueue 3 into q2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">move 1, 2 from q1 to q2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">q2 = [3, 1, 2]</span>
+                </div>
+                <div class="queue-wrap">
+                    <div class="queue-row">
+                        <div class="queue-name">q1</div>
+                        <div class="queue-track">
+                            <div class="qcell front">3</div>
+                            <div class="qcell">1</div>
+                            <div class="qcell">2</div>
+                        </div>
+                        <span class="marker">after swap: front = top</span>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">pop()</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">dequeue front of q1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return 3</span>
+                </div>
+                <p class="diagram-note">The older elements <code>1, 2</code> keep their relative order behind the new top. The swap is essential: after moving, <code>q2</code> owns the data and <code>q1</code> is empty.</p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Front / stack top</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> New element</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Queued element</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: One Queue + Rotation (Follow-up)</h2>
+            <p><strong>Intuition:</strong> With a single queue, enqueue the new element at the back, then rotate the older elements one by one to the back. After <code>n - 1</code> rotations the new element is at the front.</p>
+            <span class="complexity-badge badge-time">Time: push O(n), pop/top O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">push(3) on q = [1, 2]</div>
+                <div class="queue-wrap">
+                    <div class="queue-row">
+                        <div class="queue-name">step 1</div>
+                        <div class="queue-track">
+                            <div class="qcell front">1</div>
+                            <div class="qcell">2</div>
+                            <div class="qcell back">3</div>
+                        </div>
+                        <span class="marker">enqueue 3 at back</span>
+                    </div>
+                    <div class="queue-row">
+                        <div class="queue-name">step 2</div>
+                        <div class="queue-track">
+                            <div class="qcell">2</div>
+                            <div class="qcell back">3</div>
+                            <div class="qcell rotate">1</div>
+                        </div>
+                        <span class="marker">rotate 1 (dequeue 1, enqueue it)</span>
+                    </div>
+                    <div class="queue-row">
+                        <div class="queue-name">step 3</div>
+                        <div class="queue-track">
+                            <div class="qcell front">3</div>
+                            <div class="qcell">1</div>
+                            <div class="qcell">2</div>
+                        </div>
+                        <span class="marker">rotate 2 &mdash; done</span>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">push(3)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">rotate size - 1 = 2 times</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">front = 3 = top</span>
+                </div>
+                <p class="diagram-note">Rotating exactly <code>size - 1</code> times is critical: one extra rotation restores <code>[1, 2, 3]</code> and puts the oldest element back at the front. Every operation is a genuine queue enqueue/dequeue.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Two Queues, Expensive Pop</h2>
+            <p><strong>Intuition:</strong> Let push be a plain enqueue. To pop, move the first <code>n - 1</code> elements to the auxiliary queue; the one left at the front is the newest element, i.e. the top.</p>
+            <span class="complexity-badge badge-time">Time: push O(1), pop/top O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">pop() when q1 = [1, 2, 3]</div>
+                <div class="queue-wrap">
+                    <div class="queue-row">
+                        <div class="queue-name">q1</div>
+                        <div class="queue-track">
+                            <div class="qcell">1</div>
+                            <div class="qcell">2</div>
+                            <div class="qcell back">3</div>
+                        </div>
+                        <span class="marker">front &rarr; back</span>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">move 1, 2 to q2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">q1 = [3], q2 = [1, 2]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">dequeue 3 = top</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">swap</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">q1 = [1, 2], q2 = []</span>
+                </div>
+                <p class="diagram-note">Like the push-expensive variant, this needs a swap after the move. It is the better choice when pushes vastly outnumber pops.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>push</th><th>pop</th><th>top</th><th>Space</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Array as deque (implemented)</strong></td>
+                            <td>O(n)</td><td>O(n)</td><td>O(1)</td><td>O(n)</td>
+                            <td>Shortest; not queue-only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Two queues, expensive push</strong></td>
+                            <td>O(n)</td><td>O(1)</td><td>O(1)</td><td>O(n)</td>
+                            <td>Textbook queue-only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>One queue + rotation</strong></td>
+                            <td>O(n)</td><td>O(1)</td><td>O(1)</td><td>O(n)</td>
+                            <td>Follow-up; genuine queue ops</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Two queues, expensive pop</strong></td>
+                            <td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td>
+                            <td>Best for push-heavy workloads</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul class="pitfalls">
+                <li><strong>Using <code>push</code>/<code>pop</code> on the array:</strong> that is already a stack, not a stack built from queues. The exercise is the emulation itself.</li>
+                <li><strong>Forgetting the swap:</strong> after moving elements between two queues, the auxiliary becomes the owner of the data. Without <code>[q1, q2] = [q2, q1]</code>, the next operation reads an empty queue.</li>
+                <li><strong>Rotation count:</strong> rotate exactly <code>size - 1</code> times after enqueueing. Rotating <code>size</code> times cancels the work and leaves the new element at the back.</li>
+                <li><strong><code>top()</code> mutating:</strong> peeking must not remove. Read the front, or pop and re-enqueue.</li>
+                <li><strong>Falsy check on <code>empty()</code>:</strong> <code>this.elements.length ? false : true</code> is correct here; do not accidentally invert it.</li>
+                <li><strong>Assuming <code>shift</code> is free:</strong> it is <code>O(n)</code> for the same reason <code>unshift</code> is — the remaining elements are re-indexed.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/implement-stack-using-queues/" target="_blank" rel="noopener">LeetCode 225: Implement Stack using Queues</a></li>
+                <li><a href="https://neetcode.io/problems/implement-stack-using-queues" target="_blank" rel="noopener">NeetCode: Implement Stack using Queues</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)" target="_blank" rel="noopener">Concept: Stack (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/implement-stack-using-queue/" target="_blank" rel="noopener">Concept: Implement Stack using Queues (GeeksforGeeks)</a></li>
+                <li><a href="../implement-queue-using-stacks/visualization.html">Related in this repo: Implement Queue using Stacks (LeetCode 232)</a></li>
+                <li><a href="../minimum-stack/visualization.html">Related in this repo: Min Stack (LeetCode 155)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
