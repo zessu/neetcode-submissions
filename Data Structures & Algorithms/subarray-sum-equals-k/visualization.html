@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subarray Sum Equals K - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; font-size: 14px; }
+        .array-row { display: flex; gap: 4px; margin: 4px 0; flex-wrap: wrap; align-items: flex-end; }
+        .cell-wrap { display: flex; flex-direction: column; align-items: center; min-width: 44px; }
+        .cell-index { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; color: #636e72; margin-bottom: 2px; }
+        .array-cell { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffff; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.done { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.prefix { background: #ffffd8; border-color: #f0c929; }
+        .array-cell.pivot { background: #aa96da; border-color: #aa96da; color: #fff; }
+        .row-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; color: #636e72; margin-top: 10px; }
+        .arrow-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #fff5f6; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 10px 12px; font-size: 14px; border: 1px solid #dfe6e9; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-scroll { overflow-x: auto; }
+        .map-chip { display: inline-block; background: #ffffff; border: 1px solid #a8d8ea; border-radius: 6px; padding: 2px 8px; margin: 2px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 4px; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .pitfall { border-left: 4px solid #ff9aa2; background: #fff5f6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        .insight { border-left: 4px solid #b5ead7; background: #f2fbf7; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .array-cell { width: 36px; height: 36px; font-size: 13px; }
+            .cell-wrap { min-width: 36px; }
+            th, td { padding: 8px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Subarray Sum Equals K</h1>
+            <p class="subtitle">LeetCode 560 &mdash; Count contiguous subarrays with sum k</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Table</span>
+                <span class="tag">Prefix Sum</span>
+                <span class="tag purple">O(n)</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Count how many contiguous, non-empty subarrays of <code>nums</code> sum to exactly <code>k</code>. Values can be negative or zero, so the running sum is not monotonic and a sliding window is unsafe.</p>
+            <div class="code-block">Input:  nums = [1,1,1], k = 2
+Output: 2      ([0..1] and [1..2])
+
+Input:  nums = [1,2,3], k = 3
+Output: 2      ([1,2] and [3])</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force (O(n&sup3;) baseline, O(n&sup2;) running sum)</h2>
+            <p><strong>Intuition:</strong> Fix a start index and extend the end index one element at a time, adding the new element to a running sum. Every subarray is examined exactly once. Recomputing each sum from scratch would add a third loop.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;) with running sum; O(n&sup3;) if recomputed</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">All subarrays of [1,2,3], k = 3</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell">1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell">2</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">3</div></div>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr><th>Start</th><th>End</th><th>Subarray</th><th>Sum</th><th>Counts?</th></tr></thead>
+                        <tbody>
+                            <tr><td>0</td><td>0</td><td>[1]</td><td>1</td><td>no</td></tr>
+                            <tr><td>0</td><td>1</td><td>[1,2]</td><td>3</td><td>&#10003; yes</td></tr>
+                            <tr><td>0</td><td>2</td><td>[1,2,3]</td><td>6</td><td>no</td></tr>
+                            <tr><td>1</td><td>1</td><td>[2]</td><td>2</td><td>no</td></tr>
+                            <tr><td>1</td><td>2</td><td>[2,3]</td><td>5</td><td>no</td></tr>
+                            <tr><td>2</td><td>2</td><td>[3]</td><td>3</td><td>&#10003; yes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="arrow-row"><span class="flow-box result">answer = 2</span><span class="flow-box">recompute sum each time: O(n&sup3;) &rarr; add incrementally: O(n&sup2;)</span></div>
+                <p style="font-size:13px; margin-top:8px;">For n = 2&times;10<sup>4</sup>, there are about 2&times;10<sup>8</sup> subarrays &mdash; too many for the time limit.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Prefix Sum Array</h2>
+            <p><strong>Intuition:</strong> Precompute <code>P[i]</code> = sum of the first <code>i</code> elements, with <code>P[0] = 0</code>. A subarray <code>nums[i..j-1]</code> sums to <code>P[j] - P[i]</code>. Check every pair of prefix positions.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [1,2,3] &rarr; P = [0,1,3,6]</div>
+                <div class="row-label">nums</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell">1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell">2</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">3</div></div>
+                </div>
+                <div class="row-label">P (P[i] = sum of first i elements)</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell prefix">0</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell prefix">1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell prefix">3</div></div>
+                    <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell prefix">6</div></div>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr><th>i</th><th>j</th><th>P[j] - P[i]</th><th>Subarray</th><th>= k?</th></tr></thead>
+                        <tbody>
+                            <tr><td>0</td><td>1</td><td>1 - 0 = 1</td><td>[1]</td><td>no</td></tr>
+                            <tr><td>0</td><td>2</td><td>3 - 0 = 3</td><td>[1,2]</td><td>&#10003; yes</td></tr>
+                            <tr><td>0</td><td>3</td><td>6 - 0 = 6</td><td>[1,2,3]</td><td>no</td></tr>
+                            <tr><td>1</td><td>2</td><td>3 - 1 = 2</td><td>[2]</td><td>no</td></tr>
+                            <tr><td>1</td><td>3</td><td>6 - 1 = 5</td><td>[2,3]</td><td>no</td></tr>
+                            <tr><td>2</td><td>3</td><td>6 - 3 = 3</td><td>[3]</td><td>&#10003; yes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="arrow-row"><span class="flow-box result">answer = 2</span></div>
+                <p style="font-size:13px; margin-top:8px;">The identity <code>P[j] - P[i] = k</code> is the key. The hash map replaces the inner scan with a lookup of <code>P[j] - k</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Prefix Sum + Hash Map (Implemented)</h2>
+            <p><strong>Intuition:</strong> While scanning once, remember how many times each prefix sum has appeared. At the current prefix <code>sum</code>, every earlier prefix equal to <code>sum - k</code> closes a valid subarray. Add its frequency to the answer.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [1,1,1], k = 2</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell active">1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell active">1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell active">1</div></div>
+                </div>
+
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr><th>Step</th><th>num</th><th>sum</th><th>diff = sum - k</th><th>map[diff]</th><th>result</th><th>Map after insert</th></tr></thead>
+                        <tbody>
+                            <tr><td>start</td><td>&mdash;</td><td>0</td><td>&mdash;</td><td>&mdash;</td><td>0</td><td><span class="map-chip">0:1</span></td></tr>
+                            <tr><td>1</td><td>1</td><td>1</td><td>-1</td><td>0</td><td>0</td><td><span class="map-chip">0:1</span><span class="map-chip">1:1</span></td></tr>
+                            <tr><td>2</td><td>1</td><td>2</td><td>0</td><td>1</td><td>1</td><td><span class="map-chip">0:1</span><span class="map-chip">1:1</span><span class="map-chip">2:1</span></td></tr>
+                            <tr><td>3</td><td>1</td><td>3</td><td>1</td><td>1</td><td>2</td><td><span class="map-chip">0:1</span><span class="map-chip">1:1</span><span class="map-chip">2:1</span><span class="map-chip">3:1</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="arrow-row">
+                    <span class="flow-box valid">step 2: P=2, P-2=0 seen once &rarr; [1,1]</span>
+                    <span class="flow-box valid">step 3: P=3, P-2=1 seen once &rarr; [1,1]</span>
+                </div>
+                <div class="arrow-row"><span class="flow-box result">answer = 2</span></div>
+                <p style="font-size:13px; margin-top:8px;">The seed <code>{0:1}</code> represents the empty prefix. Without it, subarrays starting at index 0 would be missed.</p>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;"></div> Scanned elements</div>
+                <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> Valid subarray match</div>
+                <div class="legend-item"><div class="legend-swatch" style="background:#ffffd8;"></div> Prefix sums</div>
+            </div>
+
+            <div class="code-block">const map = new Map();
+map.set(0, 1);
+let sum = 0, result = 0;
+
+for (const num of nums) {
+    sum += num;
+    result += map.get(sum - k) || 0;
+    map.set(sum, (map.get(sum) || 0) + 1);
+}
+return result;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Sliding Window &mdash; Why It Fails</h2>
+            <p><strong>Intuition (misleading):</strong> Grow the window until its sum reaches <code>k</code>, then shrink from the left. This works only when all values are non-negative and the sum moves monotonically.</p>
+            <span class="complexity-badge badge-time">Not correct with negatives</span>
+            <span class="complexity-badge badge-space">O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [1,-1,0], k = 0</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell active">1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell active">-1</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">0</div></div>
+                </div>
+                <div class="arrow-row">
+                    <span class="flow-box">window [1,-1] sums to 0 &#10003;</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">shrink left? sum becomes -1, then extend to 0 again</span>
+                </div>
+                <div class="arrow-row"><span class="flow-box invalid">A larger window can have a smaller sum, so there is no safe rule for moving the left pointer.</span></div>
+                <p style="font-size:13px; margin-top:8px;">Correct answer for this input is 3: <code>[1,-1]</code>, <code>[0]</code>, and <code>[1,-1,0]</code>. A naive window loses at least one of them.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Verdict</th></tr></thead>
+                    <tbody>
+                        <tr><td>Brute Force + Running Sum</td><td>O(n&sup2;)</td><td>O(1)</td><td>Too slow at n = 2&times;10<sup>4</sup></td></tr>
+                        <tr><td>Prefix Sum Array</td><td>O(n&sup2;)</td><td>O(n)</td><td>Shows the key identity; still quadratic</td></tr>
+                        <tr><td><strong>Prefix Sum + Hash Map</strong></td><td><strong>O(n)</strong></td><td><strong>O(n)</strong></td><td><strong>Optimal &mdash; implemented</strong></td></tr>
+                        <tr><td>Sliding Window</td><td>not correct</td><td>O(1)</td><td>Breaks with negative numbers</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Pitfalls</h2>
+            <div class="insight"><strong>Key insight:</strong> a subarray sum is a difference of two prefix sums. Instead of searching for <code>P[i]</code> such that <code>P[j] - P[i] = k</code>, look up <code>P[j] - k</code> in a frequency map of earlier prefixes.</div>
+            <div class="pitfall"><strong>Pitfall 1:</strong> Forget <code>map.set(0, 1)</code> and every subarray starting at index 0 disappears from the count.</div>
+            <div class="pitfall"><strong>Pitfall 2:</strong> Update the map <em>after</em> the lookup. Otherwise the current prefix can pair with itself, counting an empty subarray.</div>
+            <div class="pitfall"><strong>Pitfall 3:</strong> Use a map of counts, not a set. Repeated prefix sums (from negative numbers or zeroes) each represent different valid starts.</div>
+            <div class="pitfall"><strong>Pitfall 4:</strong> Do not use a sliding window. Negative values destroy monotonicity, so a valid subarray can be skipped forever.</div>
+            <div class="pitfall"><strong>Pitfall 5:</strong> The answer is a count, not a list of subarrays. Return the integer.</div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/subarray-sum-equals-k/" target="_blank" rel="noopener">LeetCode 560: Subarray Sum Equals K</a></li>
+                <li><a href="https://neetcode.io/problems/subarray-sum-equals-k" target="_blank" rel="noopener">NeetCode: Subarray Sum Equals K</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Prefix_sum" target="_blank" rel="noopener">Concept: Prefix sum (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/dsa/number-subarrays-sum-exactly-equal-k/" target="_blank" rel="noopener">GeeksforGeeks: Number of subarrays with sum exactly k</a></li>
+                <li><a href="../two-integer-sum/README.md">Related in this repo: Two Integer Sum (hash map complement lookup)</a></li>
+                <li><a href="../products-of-array-discluding-self/README.md">Related in this repo: Products of Array Discluding Self (prefix/suffix accumulation)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
