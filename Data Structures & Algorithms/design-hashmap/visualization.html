@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design HashMap - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card ul, .card ol { margin: 0 0 12px 22px; color: #636e72; }
+        .card li { margin-bottom: 6px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: #2d3436; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-warn { background: #ff9aa2; color: #2d3436; }
+        .array-container { display: flex; gap: 4px; margin: 16px 0; flex-wrap: wrap; }
+        .array-cell { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 14px; background: #ffffff; color: #2d3436; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.miss { background: #ff9aa2; border-color: #ff9aa2; }
+        .array-cell.empty { background: #fdf6f0; color: #b2bec3; border-style: dashed; }
+        .cell-label { font-size: 11px; color: #636e72; text-align: center; font-family: 'SF Mono', monospace; }
+        .cell-col { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        .bucket-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+        .bucket-index { width: 34px; height: 38px; display: flex; align-items: center; justify-content: center; background: #a8d8ea; border-radius: 6px; font-family: 'SF Mono', monospace; font-weight: 600; font-size: 13px; flex: 0 0 auto; }
+        .node { display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .node.hit { background: #b5ead7; border-color: #b5ead7; }
+        .node.scan { background: #ffd3b6; border-color: #ff9aa2; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .null-mark { color: #b2bec3; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .kv-table td { font-family: 'SF Mono', monospace; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .pitfalls { list-style: none; padding: 0; margin: 0; }
+        .pitfalls li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid #dfe6e9; }
+        .pitfalls li:last-child { border-bottom: none; }
+        .pitfalls li::before { content: "!"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; background: #ff9aa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #2d3436; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.ok { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        @media (max-width: 620px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Design HashMap</h1>
+            <p class="subtitle">LeetCode 706 &mdash; Build put / get / remove without built-in hash tables</p>
+            <div class="tags">
+                <span class="tag">Hash Table</span>
+                <span class="tag">Design</span>
+                <span class="tag">Array</span>
+                <span class="tag">Linked List</span>
+                <span class="tag alt">Hash Function</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Implement a map supporting <code>put(key, value)</code>, <code>get(key)</code> (return <code>-1</code> if absent), and <code>remove(key)</code>. Keys and values are integers in <code>[0, 10^6]</code>, and at most <code>10^4</code> operations are performed. The follow-up asks for an implementation with no built-in hash table.</p>
+            <div class="code-block">Input:
+["MyHashMap","put","put","get","get","put","get","remove","get"]
+[[],        [1,1], [2,2], [1], [3], [2,1], [2], [2],     [2]]
+
+Output:
+[null, null, null, 1, -1, null, 1, null, -1]</div>
+            <p>The sequence checks insertion, a miss, an <em>update</em> of an existing key, and deletion. An update must not create a duplicate entry.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Parallel Arrays / Linear Scan</h2>
+            <p><strong>Intuition:</strong> Store keys and values in two parallel arrays and scan for the key on every operation. No hashing, no collisions &mdash; just slow membership tests.</p>
+            <span class="complexity-badge badge-time">Time: O(n) per operation</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">get(6) scans the key array from left to right</div>
+                <div class="array-container">
+                    <div class="cell-col">
+                        <div class="array-cell miss">1</div>
+                        <div class="cell-label">key[0]</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell miss">2</div>
+                        <div class="cell-label">key[1]</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell active">6</div>
+                        <div class="cell-label">key[2]</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell">11</div>
+                        <div class="cell-label">key[3]</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box bad">1 &ne; 6</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box bad">2 &ne; 6</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">6 = 6, return 60</span>
+                </div>
+                <p class="diagram-note">The matching value sits at the same index in a second array: <code>values = [10, 20, 60, 110]</code>. Removing an element requires shifting every later element.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Direct Addressing</h2>
+            <p><strong>Intuition:</strong> Because keys are bounded by <code>10^6</code>, use the key itself as the array index. Every operation becomes one array read or write.</p>
+            <span class="complexity-badge badge-time">Time: O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(10^6)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">table[key] &mdash; after put(1, 1), put(2, 2), put(2, 1)</div>
+                <div class="array-container">
+                    <div class="cell-col">
+                        <div class="array-cell empty">-1</div>
+                        <div class="cell-label">index 0</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell">1</div>
+                        <div class="cell-label">index 1</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell active">1</div>
+                        <div class="cell-label">index 2</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell empty">-1</div>
+                        <div class="cell-label">index 3</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell empty">-1</div>
+                        <div class="cell-label">index 4</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell empty">&hellip;</div>
+                        <div class="cell-label">index 10^6</div>
+                    </div>
+                </div>
+                <p class="diagram-note">Index 2 was written twice: the first <code>put(2, 2)</code> stored <code>2</code>, then <code>put(2, 1)</code> overwrote it with <code>1</code>. <code>-1</code> marks an empty slot, which is why negative values cannot be stored with this sentinel.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Separate Chaining</h2>
+            <p><strong>Intuition:</strong> Hash the key into a small bucket array and let colliding keys share a linked list. The bucket index narrows the search; the chain resolves collisions.</p>
+            <span class="complexity-badge badge-time">Time: O(1 + n/B) average, O(n) worst</span>
+            <span class="complexity-badge badge-space">Space: O(n + B)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">B = 5 buckets, h(key) = key % 5</div>
+                <div class="bucket-row">
+                    <div class="bucket-index">0</div>
+                    <span class="null-mark">&empty;</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">1</div>
+                    <div class="node"><span>1</span><span>&rarr;</span><span>10</span></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="node hit"><span>6</span><span>&rarr;</span><span>60</span></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="node"><span>11</span><span>&rarr;</span><span>110</span></div>
+                    <span class="null-mark">&rarr; null</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">2</div>
+                    <div class="node"><span>2</span><span>&rarr;</span><span>20</span></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="node"><span>7</span><span>&rarr;</span><span>70</span></div>
+                    <span class="null-mark">&rarr; null</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">3</div>
+                    <span class="null-mark">&empty;</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">4</div>
+                    <div class="node"><span>4</span><span>&rarr;</span><span>40</span></div>
+                    <span class="null-mark">&rarr; null</span>
+                </div>
+                <p class="diagram-note">Each node is a <code>[key, value]</code> pair. <code>get(6)</code> computes <code>6 % 5 = 1</code>, walks bucket 1, and stops at the highlighted node. With a good hash and load factor, chains stay short; a bad hash (all keys in one bucket) degrades every operation to O(n).</p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Bucket / node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Matching key</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Key compared</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: JavaScript Object (Implemented)</h2>
+            <p><strong>Intuition:</strong> A plain object already <em>is</em> a hash table managed by the engine. Numeric keys are coerced to strings, hashed internally, and stored; we only need to expose the three operations.</p>
+            <span class="complexity-badge badge-time">Time: O(1) average</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Internal state of this.values</div>
+                <div class="table-wrap">
+                    <table class="kv-table">
+                        <thead>
+                            <tr><th>Expression</th><th>Property actually used</th><th>Object after the call</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>put(1, 1)</code></td><td><code>"1"</code></td><td><code>{ "1": 1 }</code></td></tr>
+                            <tr><td><code>put(2, 2)</code></td><td><code>"2"</code></td><td><code>{ "1": 1, "2": 2 }</code></td></tr>
+                            <tr><td><code>get(3)</code></td><td><code>"3" in values</code> &rarr; false</td><td><code>{ "1": 1, "2": 2 }</code> &mdash; returns <code>-1</code></td></tr>
+                            <tr><td><code>put(2, 1)</code></td><td><code>"2"</code></td><td><code>{ "1": 1, "2": 1 }</code></td></tr>
+                            <tr><td><code>remove(2)</code></td><td><code>"2"</code></td><td><code>{ "1": 1 }</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">get(2)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">"2" in values</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return 1</span>
+                </div>
+                <p class="diagram-note">Membership is tested with <code>key in values</code>, not truthiness, so a stored value of <code>0</code> is still returned as <code>0</code>. <code>remove</code> uses <code>delete</code>; assigning <code>undefined</code> would leave the property present.</p>
+            </div>
+
+            <div class="code-block">class MyHashMap {
+    values: Record&lt;string, number&gt; = {};
+
+    put(key: number, value: number): void {
+        this.values[key] = value;
+    }
+
+    get(key: number): number {
+        return key in this.values ? this.values[key] : -1;
+    }
+
+    remove(key: number): void {
+        if (key in this.values) {
+            delete this.values[key];
+        }
+    }
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>put</th><th>get</th><th>remove</th><th>Space</th><th>When to use</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Parallel arrays</strong></td>
+                            <td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td>
+                            <td>Tiny inputs / teaching only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Direct addressing</strong></td>
+                            <td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(10^6)</td>
+                            <td>Small, dense integer key universe</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Separate chaining</strong></td>
+                            <td>O(1) avg</td><td>O(1) avg</td><td>O(1) avg</td><td>O(n + B)</td>
+                            <td>Generic implementation, interview answer</td>
+                        </tr>
+                        <tr>
+                            <td><strong>JS object (implemented)</strong></td>
+                            <td>O(1) avg</td><td>O(1) avg</td><td>O(1) avg</td><td>O(n)</td>
+                            <td>Shortest correct solution in JS/TS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="diagram-note">The worst case for chaining and for the object is O(n) when all keys collide. Direct addressing has no collisions, but its memory is fixed regardless of how many keys are actually used.</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul class="pitfalls">
+                <li><strong>Truthiness instead of membership:</strong> <code>if (values[key])</code> treats a stored <code>0</code> as missing. Use <code>key in values</code> / <code>Object.hasOwn</code>.</li>
+                <li><strong><code>in</code> walks the prototype chain:</strong> <code>"toString" in {}</code> is <code>true</code>. Integer keys dodge this, but a general map should use a null-prototype object or <code>Object.hasOwn</code>.</li>
+                <li><strong>Assigning <code>undefined</code> instead of deleting:</strong> the key still exists, so <code>get</code> returns <code>undefined</code> rather than <code>-1</code>.</li>
+                <li><strong>Appending on update:</strong> <code>put</code> on an existing key must overwrite, never create a duplicate entry.</li>
+                <li><strong>Key 0:</strong> a valid key that is falsy; never use it as a "missing" signal.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/design-hashmap/" target="_blank" rel="noopener">LeetCode 706: Design HashMap</a></li>
+                <li><a href="https://neetcode.io/problems/design-hashmap" target="_blank" rel="noopener">NeetCode: Design HashMap</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank" rel="noopener">Concept: Hash Table (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/hashing-data-structure/" target="_blank" rel="noopener">Concept: Hashing and Collision Resolution (GeeksforGeeks)</a></li>
+                <li><a href="../design-hashset/visualization.html">Related in this repo: Design HashSet (LeetCode 705)</a></li>
+                <li><a href="../time-based-key-value-store/visualization.html">Related in this repo: Time Based Key-Value Store (LeetCode 981)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
