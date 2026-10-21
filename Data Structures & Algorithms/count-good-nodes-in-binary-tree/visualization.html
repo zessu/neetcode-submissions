@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count Good Nodes in Binary Tree - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; color: #ffffff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card strong { color: #2d3436; }
+        code { background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 520px; margin: 0 auto; display: block; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2px; }
+        .tree-node.good { fill: #b5ead7; stroke: #b5ead7; }
+        .tree-node.bad { fill: #ff9aa2; stroke: #ff9aa2; }
+        .tree-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .tree-note { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #636e72; text-anchor: middle; }
+        .tree-note.good { fill: #2d7a5f; font-weight: 600; }
+        .tree-note.bad { fill: #b5414c; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 20px; font-weight: 700; }
+        .path-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+        .path-label { width: 86px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; color: #636e72; flex-shrink: 0; }
+        .chip { min-width: 32px; height: 32px; padding: 0 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; }
+        .chip.max { background: #ffffd8; border-color: #f0c929; }
+        .cell { min-width: 44px; height: 38px; padding: 0 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; }
+        .cell.good { background: #b5ead7; border-color: #b5ead7; }
+        .cell.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .cell.pending { background: #ffffd8; border-color: #f0c929; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #dfe6e9; }
+        .pill-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+        .pill { background: #ffffff; border-left: 4px solid #a8d8ea; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 14px; color: #636e72; }
+        .pill.warn { border-left-color: #ff9aa2; }
+        .pill.good { border-left-color: #b5ead7; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .card h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Count Good Nodes in Binary Tree</h1>
+            <p class="subtitle">LeetCode 1448 &mdash; no ancestor may be greater</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">BFS</span>
+                <span class="tag alt">Binary Tree</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>A node is <strong>good</strong> if no node on the path from the root to it has a larger value. Equivalently, the node's value must be greater than or equal to the <strong>maximum ancestor value</strong>. The root is always good.</p>
+            <div class="code-block">Input:  root = [3, 1, 4, 3, null, 1, 5]
+
+            3          <- good (root)
+          /   \
+         1     4      <- 1 is not good; 4 is good
+        /     / \
+       3     1   5    <- 3 is good; 1 is not; 5 is good
+
+Output: 4</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force &mdash; Scan Every Root Path</h2>
+            <p><strong>Intuition:</strong> For each node, materialize the path from the root, take its maximum, and compare. This is the definition translated literally.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; h)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Path maximum for every node (h = 3, so each path scan costs up to 3)</div>
+                <div class="path-row">
+                    <span class="path-label">node 3</span>
+                    <span class="chip">3</span><span class="chip max">max 3</span>
+                    <span class="flow-box valid">3 &ge; 3 &rarr; good</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">node 1</span>
+                    <span class="chip">3</span><span class="chip">1</span><span class="chip max">max 3</span>
+                    <span class="flow-box invalid">1 &lt; 3 &rarr; not good</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">node 4</span>
+                    <span class="chip">3</span><span class="chip">4</span><span class="chip max">max 4</span>
+                    <span class="flow-box valid">4 &ge; 3 &rarr; good</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">node 3</span>
+                    <span class="chip">3</span><span class="chip">1</span><span class="chip">3</span><span class="chip max">max 3</span>
+                    <span class="flow-box valid">3 &ge; 3 &rarr; good</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">node 1</span>
+                    <span class="chip">3</span><span class="chip">4</span><span class="chip">1</span><span class="chip max">max 4</span>
+                    <span class="flow-box invalid">1 &lt; 4 &rarr; not good</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">node 5</span>
+                    <span class="chip">3</span><span class="chip">4</span><span class="chip">5</span><span class="chip max">max 5</span>
+                    <span class="flow-box valid">5 &ge; 4 &rarr; good</span>
+                </div>
+                <p style="font-size: 13px; margin-top: 8px;">The path is rescanned at every node, giving <code>O(n &middot; h)</code> &mdash; on a chain this becomes <code>O(n&sup2;)</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Recursive DFS Carrying the Max (Implemented)</h2>
+            <p><strong>Intuition:</strong> Only the maximum ancestor value matters, so pass it down. Count the node if <code>val &gt;= max</code>, then raise the max and recurse into both children.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Path maximum arriving at each node</div>
+                <svg class="tree-svg" viewBox="0 0 520 340" role="img" aria-label="Tree with root 3, children 1 and 4, leaf 3 under 1, and children 1 and 5 under 4. Good nodes are green: 3, 3, 4, 5. Bad nodes are red: both 1 values.">
+                    <line class="tree-edge" x1="260" y1="60" x2="160" y2="160" />
+                    <line class="tree-edge" x1="260" y1="60" x2="360" y2="160" />
+                    <line class="tree-edge" x1="160" y1="160" x2="100" y2="260" />
+                    <line class="tree-edge" x1="360" y1="160" x2="300" y2="260" />
+                    <line class="tree-edge" x1="360" y1="160" x2="430" y2="260" />
+
+                    <circle class="tree-node good" cx="260" cy="60" r="23" />
+                    <text class="tree-label" x="260" y="65">3</text>
+                    <text class="tree-note good" x="260" y="102">max 3 &middot; good</text>
+
+                    <circle class="tree-node bad" cx="160" cy="160" r="23" />
+                    <text class="tree-label" x="160" y="165">1</text>
+                    <text class="tree-note bad" x="160" y="202">max 3 &middot; no</text>
+
+                    <circle class="tree-node good" cx="360" cy="160" r="23" />
+                    <text class="tree-label" x="360" y="165">4</text>
+                    <text class="tree-note good" x="360" y="202">max 3 &middot; good</text>
+
+                    <circle class="tree-node good" cx="100" cy="260" r="23" />
+                    <text class="tree-label" x="100" y="265">3</text>
+                    <text class="tree-note good" x="100" y="302">max 3 &middot; good</text>
+
+                    <circle class="tree-node bad" cx="300" cy="260" r="23" />
+                    <text class="tree-label" x="300" y="265">1</text>
+                    <text class="tree-note bad" x="300" y="302">max 4 &middot; no</text>
+
+                    <circle class="tree-node good" cx="430" cy="260" r="23" />
+                    <text class="tree-label" x="430" y="265">5</text>
+                    <text class="tree-note good" x="430" y="302">max 4 &middot; good</text>
+                </svg>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Good (val &ge; path max)</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2;"></div> Not good (larger ancestor)</div>
+                </div>
+                <p style="font-size: 13px; margin-top: 8px;">Notice the equal case: the leaf <code>3</code> sees <code>max 3</code> and is still good. The comparison must be <code>&gt;=</code>.</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Call results, bottom-up</div>
+                <div class="flow-row">
+                    <span class="flow-box">dfs(3 leaf) = 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">dfs(1 left) = 0 + 1 + 0 = 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box invalid">dfs(1 under 4) = 0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">dfs(5) = 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">dfs(4) = 1 + 0 + 1 = 2</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box result">dfs(3 root) = 1 + 1 + 2 = 4</span>
+                </div>
+            </div>
+
+            <div class="code-block">let res = node.val &gt;= maxVal ? 1 : 0;
+maxVal = Math.max(maxVal, node.val);
+res += dfs(node.left, maxVal);
+res += dfs(node.right, maxVal);
+return res;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: BFS with (node, max) Pairs</h2>
+            <p><strong>Intuition:</strong> The same state can travel in a queue. Each entry carries a node and the maximum on the path that reached it. No recursion, so deep chains are safe.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(w)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Queue contents (node &middot; path max) and the running count</div>
+                <div class="path-row">
+                    <span class="path-label">start</span>
+                    <span class="cell pending">3 &middot; 3</span>
+                    <span class="flow-box">count = 0</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">pop 3</span>
+                    <span class="cell good">1 &middot; 3</span><span class="cell good">4 &middot; 3</span>
+                    <span class="flow-box valid">3 &ge; 3 &rarr; count = 1; enqueue children</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">pop 1</span>
+                    <span class="cell good">4 &middot; 3</span><span class="cell good">3 &middot; 3</span>
+                    <span class="flow-box invalid">1 &lt; 3 &rarr; count stays 1</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">pop 4</span>
+                    <span class="cell good">3 &middot; 3</span><span class="cell bad">1 &middot; 4</span><span class="cell good">5 &middot; 4</span>
+                    <span class="flow-box valid">4 &ge; 3 &rarr; count = 2</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">pop 3</span>
+                    <span class="cell bad">1 &middot; 4</span><span class="cell good">5 &middot; 4</span>
+                    <span class="flow-box valid">3 &ge; 3 &rarr; count = 3</span>
+                </div>
+                <div class="path-row">
+                    <span class="path-label">pop 1</span>
+                    <span class="cell good">5 &middot; 4</span>
+                    <span class="flow-box invalid">1 &lt; 4 &rarr; count stays 3</span>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box result">pop 5: 5 &ge; 4 &rarr; count = 4</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brute Force</strong> (path scan)</td>
+                            <td>O(n &middot; h)</td>
+                            <td>O(h)</td>
+                            <td>Literal definition</td>
+                            <td>O(n&sup2;) on a chain</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Recursive DFS + max</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>Optimal time and tight memory</td>
+                            <td>Can overflow on a 10^5-node chain</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BFS + pairs</strong></td>
+                            <td>O(n)</td>
+                            <td>O(w)</td>
+                            <td>No recursion; safe for deep trees</td>
+                            <td>Queue can hold a full level</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insight &amp; Common Pitfalls</h2>
+            <div class="pill-list">
+                <div class="pill good"><strong>Key insight:</strong> all ancestors collapse into one number &mdash; their maximum. Because that number never decreases as you go down, it can be passed by value with no backtracking.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> use <code>&gt;=</code>, not <code>&gt;</code>. A node equal to the path maximum is good (the leaf 3 in example 1 depends on this).</div>
+                <div class="pill warn"><strong>Pitfall:</strong> compare before updating the max. Updating first makes every node compare equal to itself and returns <code>n</code>.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> do not seed the max with <code>0</code>; values may be negative. Use the root value or <code>-Infinity</code>.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> the submission reads <code>root.val</code> without a null check. That is safe under <code>n &ge; 1</code>, but a general helper should guard null.</div>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/count-good-nodes-in-binary-tree/" target="_blank" rel="noopener">LeetCode 1448: Count Good Nodes in Binary Tree</a></li>
+                <li><a href="https://neetcode.io/problems/count-good-nodes-in-binary-tree" target="_blank" rel="noopener">NeetCode: Count Good Nodes in Binary Tree</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Tree_traversal" target="_blank" rel="noopener">Concept: Tree Traversal (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/" target="_blank" rel="noopener">GeeksforGeeks: Tree Traversal Techniques</a></li>
+                <li><a href="../binary-tree-right-side-view/">Related in this repo: Binary Tree Right Side View (LeetCode 199)</a></li>
+                <li><a href="../binary-tree-diameter/">Related in this repo: Binary Tree Diameter (LeetCode 543)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
