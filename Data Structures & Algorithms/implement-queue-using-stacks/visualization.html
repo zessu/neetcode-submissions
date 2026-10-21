@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement Queue using Stacks - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: #2d3436; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .stages { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .stage { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .stage-title { font-size: 12px; color: #636e72; font-weight: 600; text-align: center; max-width: 120px; }
+        .stacks { display: flex; gap: 12px; align-items: flex-end; }
+        .stack-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .stack-name { font-size: 11px; font-family: 'SF Mono', monospace; color: #636e72; }
+        .stack { display: flex; flex-direction: column; justify-content: flex-start; gap: 3px; min-height: 132px; width: 48px; padding: 4px; border: 2px dashed #dfe6e9; border-radius: 8px; background: #ffffff; }
+        .stack-cell { height: 34px; display: flex; align-items: center; justify-content: center; background: #a8d8ea; border: 2px solid #a8d8ea; border-radius: 6px; font-family: 'SF Mono', monospace; font-size: 14px; font-weight: 600; color: #2d3436; }
+        .stack-cell.front { background: #b5ead7; border-color: #7fc9ad; }
+        .stack-cell.moving { background: #ffd3b6; border-color: #ff9aa2; }
+        .stack-cell.empty-slot { border: none; background: transparent; }
+        .stack-arrow { font-size: 11px; color: #636e72; font-family: 'SF Mono', monospace; }
+        .big-arrow { color: #aa96da; font-size: 24px; font-weight: 700; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.ok { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .pitfalls { list-style: none; padding: 0; margin: 0; }
+        .pitfalls li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid #dfe6e9; }
+        .pitfalls li:last-child { border-bottom: none; }
+        .pitfalls li::before { content: "!"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; background: #ff9aa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #2d3436; }
+        @media (max-width: 620px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .big-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Implement Queue using Stacks</h1>
+            <p class="subtitle">LeetCode 232 &mdash; FIFO behaviour from two LIFO stacks</p>
+            <div class="tags">
+                <span class="tag">Stack</span>
+                <span class="tag">Queue</span>
+                <span class="tag">Design</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Build <code>push</code>, <code>pop</code>, <code>peek</code>, and <code>empty</code> for a FIFO queue, using only stack operations (push/pop/peek at the top). A stack removes the newest element; a queue must remove the oldest, so elements have to be reversed exactly once.</p>
+            <div class="code-block">Input:
+["MyQueue","push","push","peek","pop","empty"]
+[[],        [1],   [2],   [],    [],   []]
+
+Output:
+[null, null, null, 1, 1, false]</div>
+            <p>The front of the queue is the element at the <em>bottom</em> of the push stack. The whole problem is getting access to that bottom element.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Reverse on Every Pop / Peek (Implemented)</h2>
+            <p><strong>Intuition:</strong> Pour all but the bottom element into a second stack, which reverses the order. The lone remaining element is the front, so pop it &mdash; then pour the second stack back.</p>
+            <span class="complexity-badge badge-time">Time: push O(1), pop/peek O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">pop() after push(1), push(2) &mdash; top of each stack is at the top</div>
+                <div class="stages">
+                    <div class="stage">
+                        <div class="stage-title">1. Start</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">arr1</div>
+                                <div class="stack">
+                                    <div class="stack-cell">2</div>
+                                    <div class="stack-cell front">1</div>
+                                </div>
+                                <div class="stack-arrow">bottom = front</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">arr2</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="big-arrow">&rarr;</div>
+
+                    <div class="stage">
+                        <div class="stage-title">2. Move all but one</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">arr1</div>
+                                <div class="stack">
+                                    <div class="stack-cell front">1</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">front exposed</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">arr2</div>
+                                <div class="stack">
+                                    <div class="stack-cell moving">2</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">reversed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="big-arrow">&rarr;</div>
+
+                    <div class="stage">
+                        <div class="stage-title">3. Pop front, return 1</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">arr1</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">arr2</div>
+                                <div class="stack">
+                                    <div class="stack-cell moving">2</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">holding 2</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="big-arrow">&rarr;</div>
+
+                    <div class="stage">
+                        <div class="stage-title">4. Pour back</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">arr1</div>
+                                <div class="stack">
+                                    <div class="stack-cell front">2</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">queue = [2]</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">arr2</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box">pop()</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">element 2 moves to arr2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">remove bottom of arr1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return 1</span>
+                </div>
+                <p class="diagram-note">The restore step (4) is what lets a later <code>push(3)</code> land at the back: <code>arr1</code> = [2], push 3 &rarr; [2, 3]. Without restoring, the next push would corrupt the order.</p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Queued element</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Front of queue</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Being moved</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Lazy Two-Stack Transfer (Optimal)</h2>
+            <p><strong>Intuition:</strong> Don't reverse after every pop. Keep an <code>in</code> stack for pushes and an <code>out</code> stack for pops; refill <code>out</code> only when it is empty. Each element crosses between stacks at most once.</p>
+            <span class="complexity-badge badge-time">Time: O(1) amortized per operation</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">push(1), push(2), push(3), then pop()</div>
+                <div class="stages">
+                    <div class="stage">
+                        <div class="stage-title">Before pop: out is empty</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">in</div>
+                                <div class="stack">
+                                    <div class="stack-cell moving">3</div>
+                                    <div class="stack-cell">2</div>
+                                    <div class="stack-cell front">1</div>
+                                </div>
+                                <div class="stack-arrow">top = 3</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">out</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="big-arrow">&rarr;</div>
+
+                    <div class="stage">
+                        <div class="stage-title">Refill out, then pop</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">in</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">out</div>
+                                <div class="stack">
+                                    <div class="stack-cell front">1</div>
+                                    <div class="stack-cell">2</div>
+                                    <div class="stack-cell">3</div>
+                                </div>
+                                <div class="stack-arrow">top = front</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box">pop()</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">out was empty &rarr; move 3, 2, 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">out.pop() = 1</span>
+                </div>
+                <p class="diagram-note">Subsequent pops read <code>out</code> in <code>O(1)</code> with no movement. Elements already in <code>out</code> stay there, so pushes and pops do not interfere. Over <code>n</code> operations, each element moves at most twice &rarr; <code>O(1)</code> amortized.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: One Stack + Recursion</h2>
+            <p><strong>Intuition:</strong> Use the call stack as the second stack. Recurse until the bottom element is exposed, remove it, and re-push the held elements while unwinding.</p>
+            <span class="complexity-badge badge-time">Time: pop/peek O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n) recursion</span>
+
+            <div class="diagram">
+                <div class="diagram-title">pop() on stack = [1, 2, 3] (3 on top)</div>
+                <div class="flow-row">
+                    <span class="flow-box">pop()</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">hold 3, recurse</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">hold 2, recurse</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">stack = [1] &rarr; return 1</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">unwind</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">push 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">push 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">stack = [2, 3]</span>
+                </div>
+                <p class="diagram-note">The held values form the "second stack" implicitly. It works, but recursion depth equals the queue size, and interviewers usually expect explicit stacks.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Two Stacks with Expensive Push</h2>
+            <p><strong>Intuition:</strong> Keep the queue permanently reversed, with the front on top, so reads are instant. A new element must go to the bottom; rebuild the stack around it using the second stack.</p>
+            <span class="complexity-badge badge-time">Time: push O(n), pop/peek O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">push(3) when the queue is [1, 2] (front 1 is on top)</div>
+                <div class="stages">
+                    <div class="stage">
+                        <div class="stage-title">1. Start</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">stack</div>
+                                <div class="stack">
+                                    <div class="stack-cell front">1</div>
+                                    <div class="stack-cell">2</div>
+                                </div>
+                                <div class="stack-arrow">top = front</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">aux</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="big-arrow">&rarr;</div>
+
+                    <div class="stage">
+                        <div class="stage-title">2. Move all, push 3</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">stack</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">aux</div>
+                                <div class="stack">
+                                    <div class="stack-cell">3</div>
+                                    <div class="stack-cell">2</div>
+                                    <div class="stack-cell">1</div>
+                                </div>
+                                <div class="stack-arrow">new element at top</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="big-arrow">&rarr;</div>
+
+                    <div class="stage">
+                        <div class="stage-title">3. Move back</div>
+                        <div class="stacks">
+                            <div class="stack-block">
+                                <div class="stack-name">stack</div>
+                                <div class="stack">
+                                    <div class="stack-cell front">1</div>
+                                    <div class="stack-cell">2</div>
+                                    <div class="stack-cell">3</div>
+                                </div>
+                                <div class="stack-arrow">3 at bottom = back</div>
+                            </div>
+                            <div class="stack-block">
+                                <div class="stack-name">aux</div>
+                                <div class="stack">
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                    <div class="stack-cell empty-slot">&nbsp;</div>
+                                </div>
+                                <div class="stack-arrow">empty</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="diagram-note">After the rebuild, the top is still <code>1</code> (the front), and <code>3</code> sits at the bottom (the back). <code>pop()</code> and <code>peek()</code> are now <code>O(1)</code>, at the cost of an <code>O(n)</code> push. This is the mirror image of approach 1.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>push</th><th>pop</th><th>peek</th><th>Space</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Reverse every pop (implemented)</strong></td>
+                            <td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td>
+                            <td>Simple; 2n moves per pop</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lazy two-stack</strong></td>
+                            <td>O(1)</td><td>O(1) amortized</td><td>O(1) amortized</td><td>O(n)</td>
+                            <td>Optimal; meets follow-up</td>
+                        </tr>
+                        <tr>
+                            <td><strong>One stack + recursion</strong></td>
+                            <td>O(1)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td>
+                            <td>Depth risk; clever but fragile</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Expensive push</strong></td>
+                            <td>O(n)</td><td>O(1)</td><td>O(1)</td><td>O(n)</td>
+                            <td>Best for read-heavy workloads</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul class="pitfalls">
+                <li><strong>Popping from the wrong end:</strong> the queue front is the bottom of <code>arr1</code>, not the top. Popping the top returns the newest element (stack behaviour).</li>
+                <li><strong>Forgetting to pour back:</strong> after a pop, <code>arr1</code> must be restored; otherwise the next <code>push</code> lands in front of the remaining elements.</li>
+                <li><strong>Off-by-one in the loop:</strong> <code>while (arr1.length &gt; 1)</code> leaves the front exposed. Using <code>&gt; 0</code> empties the stack and returns <code>undefined</code>.</li>
+                <li><strong><code>peek</code> reading the wrong index:</strong> after the transfer, <code>arr1</code> has exactly one element, so read <code>arr1[0]</code>, never <code>arr1[arr1.length - 1]</code> of the unreversed array.</li>
+                <li><strong>Checking only one stack with lazy transfer:</strong> elements can be split across <code>in</code> and <code>out</code>; <code>empty()</code> must check both.</li>
+                <li><strong>Using <code>shift</code>/<code>unshift</code>:</strong> those are not stack operations and bypass the exercise.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/implement-queue-using-stacks/" target="_blank" rel="noopener">LeetCode 232: Implement Queue using Stacks</a></li>
+                <li><a href="https://neetcode.io/problems/implement-queue-using-stacks" target="_blank" rel="noopener">NeetCode: Implement Queue using Stacks</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Queue_(abstract_data_type)" target="_blank" rel="noopener">Concept: Queue (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/queue-using-stacks/" target="_blank" rel="noopener">Concept: Queue using Stacks (GeeksforGeeks)</a></li>
+                <li><a href="../implement-stack-using-queues/visualization.html">Related in this repo: Implement Stack using Queues (LeetCode 225)</a></li>
+                <li><a href="../sliding-window-maximum/visualization.html">Related in this repo: Sliding Window Maximum (LeetCode 239)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
