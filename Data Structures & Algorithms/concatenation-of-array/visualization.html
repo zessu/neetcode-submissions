@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concatenation of Array (LeetCode 1929) - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card ul, .card ol { margin: 8px 0 12px 22px; color: #636e72; }
+        .card li { margin-bottom: 6px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; background: #f0eef6; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 14px; color: #2d3436; font-size: 14px; }
+        .note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        svg { display: block; width: 100%; height: auto; }
+        .svg-label { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; fill: #2d3436; }
+        .svg-small { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; fill: #636e72; }
+        .array-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+        .array-label { min-width: 82px; font-size: 13px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .arr { display: flex; gap: 4px; flex-wrap: wrap; }
+        .cell { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; }
+        .cell.green { background: #b5ead7; border-color: #b5ead7; }
+        .cell.purple { background: #aa96da; border-color: #aa96da; color: #ffffff; }
+        .cell.orange { background: #ffd3b6; border-color: #ff9aa2; }
+        .cell.yellow { background: #ffffd8; border-color: #e8d98a; }
+        .cell .idx { position: absolute; top: -18px; left: 0; width: 100%; text-align: center; font-size: 10px; color: #636e72; font-weight: 400; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .plus { font-size: 26px; color: #aa96da; font-weight: 700; margin: 0 4px; }
+        .arrow-right { color: #aa96da; font-size: 24px; font-weight: 700; }
+        .brace { text-align: center; font-size: 12px; color: #636e72; margin-top: 22px; }
+        .pass-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+        .pass-label { width: 92px; font-size: 13px; font-weight: 600; color: #2d3436; }
+        .pass-label span { display: block; font-weight: 400; color: #636e72; font-size: 11px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-best { background: #aa96da; color: #ffffff; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; color: #636e72; }
+        .resources li:last-child { border-bottom: none; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #e8d98a; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; font-size: 14px; color: #2d3436; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.55rem; }
+            .card { padding: 18px; }
+            .cell { width: 40px; height: 40px; font-size: 13px; }
+            .array-label, .pass-label { width: 100%; min-width: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Concatenation of Array</h1>
+            <p class="subtitle">LeetCode 1929 &mdash; Return two copies of the array back to back</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Simulation</span>
+                <span class="tag purple">O(n)</span>
+                <span class="tag green">O(n) space</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given <code>nums</code> of length <code>n</code>, build <code>ans</code> of length <code>2n</code> such that <code>ans[i] = nums[i]</code> and <code>ans[i + n] = nums[i]</code>. In short: concatenate <code>nums</code> with itself.</p>
+            <div class="code-block">Input:  nums = [1,2,1]
+Output: [1,2,1,1,2,1]
+
+Input:  nums = [1,3,2,1]
+Output: [1,3,2,1,1,3,2,1]</div>
+            <div class="key-insight"><strong>Key insight:</strong> the output is two copies, not an array of two arrays. The second copy begins exactly at index <code>n</code>.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Spread / Concatenation (Implemented)</h2>
+            <p><strong>Intuition:</strong> Spread each copy of <code>nums</code> into a new array literal. The first spread fills the first half, the second spread fills the second half.</p>
+            <span class="complexity-badge badge-best">Best / implemented</span>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Two spreads, one result &mdash; nums = [1,2,1]</div>
+                <div class="array-row">
+                    <span class="array-label">[...nums]</span>
+                    <div class="arr">
+                        <span class="cell green">1<span class="idx">0</span></span>
+                        <span class="cell green">2<span class="idx">1</span></span>
+                        <span class="cell green">1<span class="idx">2</span></span>
+                    </div>
+                    <span class="plus">+</span>
+                    <div class="arr">
+                        <span class="cell green">1<span class="idx">0</span></span>
+                        <span class="cell green">2<span class="idx">1</span></span>
+                        <span class="cell green">1<span class="idx">2</span></span>
+                    </div>
+                    <span class="arrow-right">&rarr;</span>
+                </div>
+                <div class="array-row">
+                    <span class="array-label">result</span>
+                    <div class="arr">
+                        <span class="cell green">1<span class="idx">0</span></span>
+                        <span class="cell green">2<span class="idx">1</span></span>
+                        <span class="cell green">1<span class="idx">2</span></span>
+                        <span class="cell yellow">1<span class="idx">3</span></span>
+                        <span class="cell yellow">2<span class="idx">4</span></span>
+                        <span class="cell yellow">1<span class="idx">5</span></span>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> First copy (indices 0..n-1)</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffffd8;"></div> Second copy (indices n..2n-1)</div>
+                </div>
+                <p class="note">The new array has length <code>2n = 6</code>. The original <code>nums</code> is untouched.</p>
+            </div>
+
+            <div class="code-block">return [...nums, ...nums];</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Preallocate and Fill Both Positions</h2>
+            <p><strong>Intuition:</strong> Allocate the final <code>2n</code> slots, then send each input element to two destinations: its own index and its index plus <code>n</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Each input cell feeds two output cells</div>
+                <svg viewBox="0 0 760 270" role="img" aria-label="Input cells 1, 2, 1 each map to two output cells offset by n">
+                    <text x="380" y="18" text-anchor="middle" class="svg-small">input nums (n = 3)</text>
+
+                    <rect x="200" y="30" width="60" height="42" rx="8" fill="#a8d8ea" stroke="#a8d8ea"/>
+                    <text x="230" y="57" text-anchor="middle" class="svg-label" font-weight="600">1</text>
+                    <text x="230" y="86" text-anchor="middle" class="svg-small">i = 0</text>
+
+                    <rect x="350" y="30" width="60" height="42" rx="8" fill="#a8d8ea" stroke="#a8d8ea"/>
+                    <text x="380" y="57" text-anchor="middle" class="svg-label" font-weight="600">2</text>
+                    <text x="380" y="86" text-anchor="middle" class="svg-small">i = 1</text>
+
+                    <rect x="500" y="30" width="60" height="42" rx="8" fill="#a8d8ea" stroke="#a8d8ea"/>
+                    <text x="530" y="57" text-anchor="middle" class="svg-label" font-weight="600">1</text>
+                    <text x="530" y="86" text-anchor="middle" class="svg-small">i = 2</text>
+
+                    <path d="M 230 90 L 230 150 L 95 150 L 95 178" fill="none" stroke="#aa96da" stroke-width="2"/>
+                    <path d="M 230 90 L 230 150 L 365 150 L 365 178" fill="none" stroke="#b5ead7" stroke-width="2"/>
+                    <path d="M 380 90 L 380 158 L 185 158 L 185 178" fill="none" stroke="#aa96da" stroke-width="2"/>
+                    <path d="M 380 90 L 380 158 L 455 158 L 455 178" fill="none" stroke="#b5ead7" stroke-width="2"/>
+                    <path d="M 530 90 L 530 150 L 275 150 L 275 178" fill="none" stroke="#aa96da" stroke-width="2"/>
+                    <path d="M 530 90 L 530 150 L 545 150 L 545 178" fill="none" stroke="#b5ead7" stroke-width="2"/>
+
+                    <text x="380" y="142" text-anchor="middle" class="svg-small">ans[i] = nums[i] &nbsp;&nbsp;|&nbsp;&nbsp; ans[i + n] = nums[i]</text>
+
+                    <rect x="65" y="178" width="60" height="42" rx="8" fill="#ffffff" stroke="#aa96da" stroke-width="2"/>
+                    <text x="95" y="205" text-anchor="middle" class="svg-label" font-weight="600">1</text>
+                    <text x="95" y="240" text-anchor="middle" class="svg-small">0</text>
+
+                    <rect x="155" y="178" width="60" height="42" rx="8" fill="#ffffff" stroke="#aa96da" stroke-width="2"/>
+                    <text x="185" y="205" text-anchor="middle" class="svg-label" font-weight="600">2</text>
+                    <text x="185" y="240" text-anchor="middle" class="svg-small">1</text>
+
+                    <rect x="245" y="178" width="60" height="42" rx="8" fill="#ffffff" stroke="#aa96da" stroke-width="2"/>
+                    <text x="275" y="205" text-anchor="middle" class="svg-label" font-weight="600">1</text>
+                    <text x="275" y="240" text-anchor="middle" class="svg-small">2</text>
+
+                    <rect x="335" y="178" width="60" height="42" rx="8" fill="#ffffd8" stroke="#e8d98a" stroke-width="2"/>
+                    <text x="365" y="205" text-anchor="middle" class="svg-label" font-weight="600">1</text>
+                    <text x="365" y="240" text-anchor="middle" class="svg-small">3 = 0 + n</text>
+
+                    <rect x="425" y="178" width="60" height="42" rx="8" fill="#ffffd8" stroke="#e8d98a" stroke-width="2"/>
+                    <text x="455" y="205" text-anchor="middle" class="svg-label" font-weight="600">2</text>
+                    <text x="455" y="240" text-anchor="middle" class="svg-small">4 = 1 + n</text>
+
+                    <rect x="515" y="178" width="60" height="42" rx="8" fill="#ffffd8" stroke="#e8d98a" stroke-width="2"/>
+                    <text x="545" y="205" text-anchor="middle" class="svg-label" font-weight="600">1</text>
+                    <text x="545" y="240" text-anchor="middle" class="svg-small">5 = 2 + n</text>
+
+                    <text x="620" y="205" class="svg-small">output ans</text>
+                </svg>
+                <p class="note">One pass over the input, two writes per element. The purple arrows are the first copy; the green arrows are the second.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Two-Pass Append</h2>
+            <p><strong>Intuition:</strong> Read through the input twice and append each value to the result. Pass 1 builds the first half; pass 2 appends the identical second half.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Result slots filled pass by pass &mdash; nums = [1,3,2,1]</div>
+                <div class="pass-row">
+                    <span class="pass-label">Pass 1<span>i = 0..n-1</span></span>
+                    <div class="arr">
+                        <span class="cell purple">1<span class="idx">0</span></span>
+                        <span class="cell purple">3<span class="idx">1</span></span>
+                        <span class="cell purple">2<span class="idx">2</span></span>
+                        <span class="cell purple">1<span class="idx">3</span></span>
+                        <span class="cell" style="border-style:dashed;color:#b2bec3;">&middot;<span class="idx">4</span></span>
+                        <span class="cell" style="border-style:dashed;color:#b2bec3;">&middot;<span class="idx">5</span></span>
+                        <span class="cell" style="border-style:dashed;color:#b2bec3;">&middot;<span class="idx">6</span></span>
+                        <span class="cell" style="border-style:dashed;color:#b2bec3;">&middot;<span class="idx">7</span></span>
+                    </div>
+                </div>
+                <div class="pass-row">
+                    <span class="pass-label">Pass 2<span>i = 0..n-1 again</span></span>
+                    <div class="arr">
+                        <span class="cell green">1<span class="idx">0</span></span>
+                        <span class="cell green">3<span class="idx">1</span></span>
+                        <span class="cell green">2<span class="idx">2</span></span>
+                        <span class="cell green">1<span class="idx">3</span></span>
+                        <span class="cell yellow">1<span class="idx">4</span></span>
+                        <span class="cell yellow">3<span class="idx">5</span></span>
+                        <span class="cell yellow">2<span class="idx">6</span></span>
+                        <span class="cell yellow">1<span class="idx">7</span></span>
+                    </div>
+                </div>
+                <p class="note">The second pass writes indices <code>n..2n-1</code>; the values are the same because the loop restarts at index 0.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Modulo Mapping (Earlier Submission)</h2>
+            <p><strong>Intuition:</strong> For each output index <code>i</code> in <code>[0, 2n)</code>, the value is <code>nums[i % n]</code>. The modulo wraps the second half back to the start of the input.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Index mapping for nums = [1,2,1] (n = 3)</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Output index <code>i</code></th>
+                                <th>0</th>
+                                <th>1</th>
+                                <th>2</th>
+                                <th>3</th>
+                                <th>4</th>
+                                <th>5</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>i % n</code></td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>2</td>
+                            </tr>
+                            <tr>
+                                <td><code>nums[i % n]</code></td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note">The first three indices use <code>i</code> directly; indices 3..5 wrap to 0..2. This is the logic used by <code>submission-0.ts</code> and <code>submission-1.ts</code> before the spread rewrite.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Spread / Concatenation</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>One line; no index math; readable</td>
+                            <td>Less explicit about the two halves</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Preallocate + Fill</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>Single pass, exact index control</td>
+                            <td>Manual allocation of 2n slots</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Two-Pass Append</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>Mirrors the definition; no modulo</td>
+                            <td>Two loops; dynamic growth</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Modulo Mapping</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>One formula for all indices; generalizes to k copies</td>
+                            <td>Modulo per element; easier to mis-size</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul>
+                <li><strong><code>[nums, nums]</code> is wrong.</strong> It creates a nested array with two elements; use <code>[...nums, ...nums]</code>.</li>
+                <li><strong>Result length must be <code>2n</code>.</strong> Writing the second copy at <code>i + n</code> requires room for exactly twice the input.</li>
+                <li><strong>Do not mutate the input.</strong> <code>nums.push(...nums)</code> changes the caller's array and can make the loop length change mid-flight.</li>
+                <li><strong>A single pass only fills half.</strong> Either spread twice, run the loop twice, or write both positions in one pass.</li>
+                <li><strong>Sparse arrays and <code>map</code>.</strong> <code>new Array(2 * n).map(...)</code> skips holes; use <code>Array.from</code> or an explicit loop.</li>
+                <li><strong>Modulo divisor is <code>n</code>, not <code>2n</code>.</strong> The wrap must return to the start of <code>nums</code>.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/concatenation-of-array/" target="_blank" rel="noopener">LeetCode 1929: Concatenation of Array</a></li>
+                <li><a href="https://neetcode.io/problems/concatenation-of-array" target="_blank" rel="noopener">NeetCode: Concatenation of Array</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Array_(data_structure)" target="_blank" rel="noopener">Concept: Array (Wikipedia)</a></li>
+                <li><a href="../merge-sorted-array/" target="_blank" rel="noopener">Related in this repo: Merge Sorted Array</a></li>
+                <li><a href="../remove-duplicates-from-sorted-array/" target="_blank" rel="noopener">Related in this repo: Remove Duplicates from Sorted Array</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
