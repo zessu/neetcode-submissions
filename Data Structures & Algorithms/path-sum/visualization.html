@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Sum - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; overflow-x: auto; margin: 12px 0; line-height: 1.6; color: #2d3436; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; min-width: 560px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 560px; margin: 0 auto; display: block; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-edge.win { stroke: #b5ead7; stroke-width: 5px; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2.5px; }
+        .tree-node.dead { fill: #ff9aa2; stroke: #ff9aa2; }
+        .tree-node.win { fill: #b5ead7; stroke: #2d3436; stroke-width: 3px; }
+        .tree-node.live { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .sum-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; fill: #636e72; text-anchor: middle; }
+        .sum-label.win { fill: #2d3436; font-weight: 700; }
+        .note-label { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #636e72; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.found { background: #b5ead7; border-color: #b5ead7; font-weight: 700; }
+        .flow-box.dead { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.skip { background: #f0eef6; border-color: #dfe6e9; color: #636e72; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; margin: 10px 0 10px 12px; }
+        .stack-item { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 6px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .stack-item.top { background: #ffd3b6; border-color: #ff9aa2; }
+        .stack-wrap { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+        .stack-col { min-width: 180px; }
+        .stack-col-title { font-size: 13px; color: #636e72; margin-bottom: 6px; font-weight: 600; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 6px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-impl { background: #aa96da; color: #ffffff; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; margin-top: 8px; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; font-size: 14px; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #dfe6e9; }
+        .pitfall { border-left: 4px solid #ff9aa2; background: #fff5f5; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 10px 0; font-size: 14px; }
+        .pitfall strong { color: #2d3436; }
+        .note { border-left: 4px solid #a8d8ea; background: #f7fbfd; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Path Sum</h1>
+            <p class="subtitle">LeetCode 112 &mdash; Does a root-to-leaf path add up to the target?</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">BFS</span>
+                <span class="tag green">Recursion</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a binary tree and <code>targetSum</code>, return <code>true</code> if some path from the root down to a <em>leaf</em> sums exactly to the target. A leaf has no children; stopping at an internal node does not count.</p>
+            <div class="code-block">Input:  root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+Output: true       <span style="color:#636e72">// 5 + 4 + 11 + 2 = 22</span>
+
+Input:  root = [1,2,3], targetSum = 5
+Output: false      <span style="color:#636e72">// paths sum to 3 and 4</span>
+
+Input:  root = [], targetSum = 0
+Output: false      <span style="color:#636e72">// no path exists at all</span></div>
+            <p class="muted">Constraints: <code>0 &lt;= nodes &lt;= 5000</code>, <code>-1000 &lt;= Node.val &lt;= 1000</code>, <code>-1000 &lt;= targetSum &lt;= 1000</code>.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Recursive DFS with a Running Sum <span class="tag purple">Implemented</span></h2>
+            <p><strong>Intuition:</strong> carry the sum of the current path down the recursion. At a leaf, that running sum is a complete root-to-leaf sum, so compare it with the target. If either subtree succeeds, the tree succeeds.</p>
+            <span class="complexity-badge badge-impl">Implemented in this repo</span>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Example 1 &mdash; each node shows the running sum; only 5+4+11+2 reaches 22 at a leaf</div>
+                <svg class="tree-svg" viewBox="0 0 560 360" role="img" aria-label="Example tree with running path sums at each node">
+                    <line class="tree-edge win" x1="250" y1="70" x2="160" y2="140"></line>
+                    <line class="tree-edge" x1="250" y1="70" x2="370" y2="140"></line>
+                    <line class="tree-edge win" x1="160" y1="165" x2="120" y2="235"></line>
+                    <line class="tree-edge" x1="370" y1="165" x2="320" y2="235"></line>
+                    <line class="tree-edge" x1="370" y1="165" x2="430" y2="235"></line>
+                    <line class="tree-edge" x1="120" y1="260" x2="80" y2="325"></line>
+                    <line class="tree-edge win" x1="120" y1="260" x2="160" y2="325"></line>
+                    <line class="tree-edge" x1="430" y1="260" x2="470" y2="325"></line>
+
+                    <circle class="tree-node win" cx="250" cy="45" r="24"></circle>
+                    <text class="tree-label" x="250" y="51">5</text>
+                    <text class="sum-label win" x="250" y="88">sum 5</text>
+
+                    <circle class="tree-node win" cx="160" cy="165" r="24"></circle>
+                    <text class="tree-label" x="160" y="171">4</text>
+                    <text class="sum-label win" x="160" y="205">sum 9</text>
+
+                    <circle class="tree-node live" cx="370" cy="165" r="24"></circle>
+                    <text class="tree-label" x="370" y="171">8</text>
+                    <text class="sum-label" x="370" y="205">sum 13</text>
+
+                    <circle class="tree-node win" cx="120" cy="260" r="24"></circle>
+                    <text class="tree-label" x="120" y="266">11</text>
+                    <text class="sum-label win" x="120" y="300">sum 20</text>
+
+                    <circle class="tree-node dead" cx="320" cy="260" r="24"></circle>
+                    <text class="tree-label" x="320" y="266">13</text>
+                    <text class="sum-label" x="320" y="300">sum 26</text>
+
+                    <circle class="tree-node live" cx="430" cy="260" r="24"></circle>
+                    <text class="tree-label" x="430" y="266">4</text>
+                    <text class="sum-label" x="430" y="300">sum 17</text>
+
+                    <circle class="tree-node dead" cx="80" cy="325" r="22"></circle>
+                    <text class="tree-label" x="80" y="331">7</text>
+                    <text class="sum-label" x="45" y="348">27 &ne; 22</text>
+
+                    <circle class="tree-node win" cx="160" cy="325" r="22"></circle>
+                    <text class="tree-label" x="160" y="331">2</text>
+                    <text class="sum-label win" x="205" y="330">22 = 22 &#10003;</text>
+
+                    <circle class="tree-node dead" cx="470" cy="325" r="22"></circle>
+                    <text class="tree-label" x="470" y="331">1</text>
+                    <text class="sum-label" x="470" y="352">18 &ne; 22</text>
+                </svg>
+
+                <div class="flow-row">
+                    <span class="flow-box active">5 &rarr; 4 &rarr; 11 &rarr; 7</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box dead">leaf sum 27 &ne; 22</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box found">backtrack, try right: 5+4+11+2 = 22 &#10003;</span>
+                </div>
+                <p class="muted">Once the winning leaf is found, <code>||</code> short-circuits and the entire right subtree of 5 is skipped.</p>
+            </div>
+
+            <div class="code-block">recurr(node, targetSum, counter):
+    if node is null: return false
+    newCount = counter + node.val
+    if node is a leaf and newCount == targetSum: return true
+    return recurr(node.left,  targetSum, newCount)
+        or recurr(node.right, targetSum, newCount)</div>
+
+            <h3>Why the leaf test is essential</h3>
+            <div class="diagram">
+                <div class="diagram-title">Counter-example: root = [1,2], targetSum = 1 — node 1 is not a leaf</div>
+                <svg class="tree-svg" viewBox="0 0 340 210" role="img" aria-label="Tree with root 1 and left child 2">
+                    <line class="tree-edge" x1="170" y1="60" x2="170" y2="125"></line>
+                    <circle class="tree-node live" cx="170" cy="45" r="24"></circle>
+                    <text class="tree-label" x="170" y="51">1</text>
+                    <text class="note-label" x="260" y="45" text-anchor="middle">sum 1, but has a child</text>
+                    <circle class="tree-node dead" cx="170" cy="150" r="24"></circle>
+                    <text class="tree-label" x="170" y="156">2</text>
+                    <text class="note-label" x="260" y="150" text-anchor="middle">leaf sum 3 &ne; 1</text>
+                </svg>
+                <p class="muted">Answer: <code>false</code>. Checking only <code>newCount === targetSum</code> would wrongly stop at the root.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Iterative DFS with an Explicit Stack</h2>
+            <p><strong>Intuition:</strong> recursion is a stack of pending branches. Store each node with the sum still needed below it; popping an entry resumes exactly the path the recursive call would have explored.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Stack snapshots — entries are [node, remaining]</div>
+                <div class="stack-wrap">
+                    <div class="stack-col">
+                        <div class="stack-col-title">after pushing root</div>
+                        <div class="stack">
+                            <div class="stack-item top">[5, 17]</div>
+                        </div>
+                    </div>
+                    <div class="stack-col">
+                        <div class="stack-col-title">pop 5, push children</div>
+                        <div class="stack">
+                            <div class="stack-item top">[4, 13]</div>
+                            <div class="stack-item">[8, 9]</div>
+                        </div>
+                    </div>
+                    <div class="stack-col">
+                        <div class="stack-col-title">pop 4, push 11</div>
+                        <div class="stack">
+                            <div class="stack-item top">[11, 2]</div>
+                            <div class="stack-item">[8, 9]</div>
+                        </div>
+                    </div>
+                    <div class="stack-col">
+                        <div class="stack-col-title">pop 11, push 7 and 2</div>
+                        <div class="stack">
+                            <div class="stack-item top">[7, -5]</div>
+                            <div class="stack-item">[2, 0]</div>
+                            <div class="stack-item">[8, 9]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top:14px;">
+                    <span class="flow-box dead">pop [7, -5]: leaf, remaining &ne; 0 &rarr; false</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box found">pop [2, 0]: leaf, remaining == 0 &rarr; true</span>
+                </div>
+                <p class="muted"><code>[8, 9]</code> is never popped. The stack holds at most one branch per level, so the space is <code>O(h)</code>.</p>
+            </div>
+
+            <div class="code-block">const stack = [[root, targetSum - root.val]];
+while (stack.length) {
+    const [node, remaining] = stack.pop();
+    if (!node.left &amp;&amp; !node.right) {
+        if (remaining === 0) return true;
+        continue;
+    }
+    if (node.right) stack.push([node.right, remaining - node.right.val]);
+    if (node.left)  stack.push([node.left,  remaining - node.left.val]);
+}
+return false;</div>
+
+            <div class="note"><strong>When this wins:</strong> deep trees where the recursive version could overflow the call stack. Same <code>O(h)</code> memory, no recursion limit.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: BFS with a Queue of <code>(node, remaining)</code></h2>
+            <p><strong>Intuition:</strong> explore the tree level by level while carrying each path's remaining target. A leaf dequeued with <code>remaining === 0</code> proves the answer. This reaches shallow leaves sooner, at the cost of holding a whole frontier.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(w)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Queue evolution on Example 1</div>
+                <div class="flow-row">
+                    <span class="flow-box">[[5, 17]]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">[[4, 13], [8, 9]]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">pop [4, 13] &rarr; [[8, 9], [11, 2]]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">pop [8, 9] &rarr; [[11, 2], [13, -4], [4, 5]]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box active">pop [11, 2] &rarr; [[13, -4], [4, 5], [7, -5], [2, 0]]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box dead">pop [13, -4]: leaf, &ne; 0</span>
+                    <span class="flow-box">pop [4, 5] &rarr; push [1, 4]</span>
+                    <span class="flow-box dead">pop [7, -5]: leaf, &ne; 0</span>
+                    <span class="flow-box found">pop [2, 0]: leaf &#10003;</span>
+                </div>
+                <p class="muted">Notice <code>remaining</code> can go negative — with negative node values there is no safe early pruning.</p>
+            </div>
+
+            <div class="code-block">const queue = [[root, targetSum - root.val]];
+while (queue.length) {
+    const [node, remaining] = queue.shift();
+    if (!node.left &amp;&amp; !node.right &amp;&amp; remaining === 0) return true;
+    if (node.left)  queue.push([node.left,  remaining - node.left.val]);
+    if (node.right) queue.push([node.right, remaining - node.right.val]);
+}
+return false;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Recursive DFS + running sum</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>Shortest code, path-local state, short-circuits</td>
+                            <td>Recursion depth can reach n</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Iterative DFS + stack</strong></td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>No stack-overflow risk, same memory footprint</td>
+                            <td>Manual push/pop bookkeeping</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BFS + queue</strong></td>
+                            <td>O(n)</td>
+                            <td>O(w)</td>
+                            <td>Reaches shallow leaves early</td>
+                            <td>Holds an entire frontier, usually more memory</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted"><code>n</code> = nodes, <code>h</code> = height, <code>w</code> = maximum width.</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls &amp; Key Insights</h2>
+            <div class="pitfall"><strong>Testing the sum at internal nodes.</strong> In Example 1, <code>5 + 4 + 11 = 20</code>, and in the counter-example the root alone equals the target. Only leaves end a path.</div>
+            <div class="pitfall"><strong>Treating <code>null</code> as an empty path.</strong> Returning <code>true</code> for a null node when the remaining target is 0 makes <code>root = []</code>, <code>targetSum = 0</code> wrong.</div>
+            <div class="pitfall"><strong>Pruning when the sum exceeds the target.</strong> Node values can be negative, so a path can overshoot and come back. <code>remaining</code> legitimately goes negative in the trace above.</div>
+            <div class="pitfall"><strong>Sharing a mutable accumulator between siblings.</strong> Pass the updated sum by value; do not add and subtract from a single outer variable without backtracking it.</div>
+            <div class="note"><strong>Key insight:</strong> a root-to-leaf path sum can be tracked either as "sum so far" (implemented) or "remaining target". They are equivalent: <code>sum so far === targetSum</code> iff <code>remaining === 0</code> at a leaf.</div>
+            <div class="note"><strong>Key insight:</strong> a one-child node is not a leaf. The condition is <code>!left &amp;&amp; !right</code>, never <code>!left || !right</code>.</div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/path-sum/" target="_blank" rel="noopener">LeetCode 112: Path Sum</a></li>
+                <li><a href="https://www.youtube.com/watch?v=LSKQyOz_P8I" target="_blank" rel="noopener">NeetCode: Path Sum (LeetCode 112)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Depth-first_search" target="_blank" rel="noopener">Concept: Depth-first search (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/root-to-leaf-path-sum-equal-to-a-given-number/" target="_blank" rel="noopener">GeeksforGeeks: Root-to-leaf path sum equal to a number</a></li>
+                <li><a href="../binary-tree-diameter/README.md">Related in this repo: Binary Tree Diameter (LeetCode 543)</a></li>
+                <li><a href="../depth-of-binary-tree/README.md">Related in this repo: Maximum Depth of Binary Tree (LeetCode 104)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
