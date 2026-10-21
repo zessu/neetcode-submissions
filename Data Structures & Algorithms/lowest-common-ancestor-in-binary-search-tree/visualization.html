@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lowest Common Ancestor of a BST - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; overflow-x: auto; margin: 12px 0; line-height: 1.6; color: #2d3436; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; min-width: 560px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 560px; margin: 0 auto; display: block; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-edge.path { stroke: #ff9aa2; stroke-width: 4px; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2.5px; }
+        .tree-node.root { fill: #b5ead7; stroke: #b5ead7; }
+        .tree-node.target { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-node.visited { fill: #aa96da; stroke: #aa96da; }
+        .tree-node.answer { fill: #b5ead7; stroke: #2d3436; stroke-width: 3.5px; }
+        .tree-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .tree-label.light { fill: #ffffff; }
+        .note-label { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #636e72; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.found { background: #b5ead7; border-color: #b5ead7; font-weight: 700; }
+        .flow-box.skip { background: #f0eef6; border-color: #dfe6e9; color: #636e72; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 6px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-impl { background: #aa96da; color: #ffffff; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; margin-top: 8px; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; font-size: 14px; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #dfe6e9; }
+        .pitfall { border-left: 4px solid #ff9aa2; background: #fff5f5; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 10px 0; font-size: 14px; }
+        .pitfall strong { color: #2d3436; }
+        .note { border-left: 4px solid #a8d8ea; background: #f7fbfd; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Lowest Common Ancestor of a BST</h1>
+            <p class="subtitle">LeetCode 235 &mdash; Find the first node where the two search paths split</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">BST</span>
+                <span class="tag">DFS</span>
+                <span class="tag green">Recursion</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a binary search tree and two nodes <code>p</code> and <code>q</code>, return their lowest common ancestor: the deepest node that has both targets as descendants. A node may be a descendant of itself, so if one target equals the current node, that node can be the answer.</p>
+            <div class="code-block">Input:  root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+Output: 6
+
+Input:  root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+Output: 2
+
+Input:  root = [2,1], p = 2, q = 1
+Output: 2</div>
+            <p class="muted">Constraints: <code>2 &lt;= nodes &lt;= 10^5</code>, <code>-10^9 &lt;= Node.val &lt;= 10^9</code>, all values unique, <code>p != q</code>, both targets exist.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: BST-Guided Recursive Descent <span class="tag purple">Implemented</span></h2>
+            <p><strong>Intuition:</strong> the BST invariant tells you which side a value lives on. If both targets are smaller than the current node, the answer is in the left subtree; if both are larger, it is in the right. The first node that cannot send both targets to the same side is where their paths diverge — that is the LCA.</p>
+            <span class="complexity-badge badge-impl">Implemented in this repo</span>
+            <span class="complexity-badge badge-time">Time: O(h)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Example 1 &mdash; p = 2, q = 8: the paths 6&rarr;2 and 6&rarr;8 split immediately at 6</div>
+                <svg class="tree-svg" viewBox="0 0 640 330" role="img" aria-label="BST with p equals 2 and q equals 8, showing the split at node 6">
+                    <line class="tree-edge" x1="320" y1="80" x2="190" y2="145"></line>
+                    <line class="tree-edge" x1="320" y1="80" x2="450" y2="145"></line>
+                    <line class="tree-edge" x1="190" y1="170" x2="110" y2="232"></line>
+                    <line class="tree-edge" x1="190" y1="170" x2="260" y2="232"></line>
+                    <line class="tree-edge" x1="450" y1="170" x2="380" y2="232"></line>
+                    <line class="tree-edge" x1="450" y1="170" x2="520" y2="232"></line>
+                    <line class="tree-edge" x1="260" y1="257" x2="210" y2="300"></line>
+                    <line class="tree-edge" x1="260" y1="257" x2="310" y2="300"></line>
+
+                    <line class="tree-edge path" x1="320" y1="80" x2="190" y2="145"></line>
+                    <line class="tree-edge path" x1="320" y1="80" x2="450" y2="145"></line>
+
+                    <circle class="tree-node answer" cx="320" cy="55" r="26"></circle>
+                    <text class="tree-label" x="320" y="61">6</text>
+                    <text class="note-label" x="320" y="18" text-anchor="middle">LCA — split point</text>
+
+                    <circle class="tree-node target" cx="190" cy="145" r="23"></circle>
+                    <text class="tree-label" x="190" y="151">2</text>
+                    <text class="note-label" x="160" y="122" text-anchor="middle">p</text>
+
+                    <circle class="tree-node target" cx="450" cy="145" r="23"></circle>
+                    <text class="tree-label" x="450" y="151">8</text>
+                    <text class="note-label" x="480" y="122" text-anchor="middle">q</text>
+
+                    <circle class="tree-node" cx="110" cy="232" r="21"></circle>
+                    <text class="tree-label" x="110" y="238">0</text>
+                    <circle class="tree-node" cx="260" cy="232" r="21"></circle>
+                    <text class="tree-label" x="260" y="238">4</text>
+                    <circle class="tree-node" cx="380" cy="232" r="21"></circle>
+                    <text class="tree-label" x="380" y="238">7</text>
+                    <circle class="tree-node" cx="520" cy="232" r="21"></circle>
+                    <text class="tree-label" x="520" y="238">9</text>
+                    <circle class="tree-node" cx="210" cy="300" r="21"></circle>
+                    <text class="tree-label" x="210" y="306">3</text>
+                    <circle class="tree-node" cx="310" cy="300" r="21"></circle>
+                    <text class="tree-label" x="310" y="306">5</text>
+
+                    <text class="note-label" x="30" y="200">left subtree &lt; 6</text>
+                    <text class="note-label" x="500" y="200">right subtree &gt; 6</text>
+                </svg>
+
+                <div class="flow-row">
+                    <span class="flow-box active">node 6: 2 &lt; 6 &lt; 8</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box found">straddle &rArr; return 6</span>
+                </div>
+                <p class="muted">Only one comparison is needed: the two targets are on opposite sides, so no deeper node can reach both.</p>
+            </div>
+
+            <div class="code-block">lowestCommonAncestor(root, p, q):
+    if root, p, or q is null: return null
+    if p.val &lt; root.val and q.val &lt; root.val:
+        return lowestCommonAncestor(root.left, p, q)
+    if p.val &gt; root.val and q.val &gt; root.val:
+        return lowestCommonAncestor(root.right, p, q)
+    return root        <span style="color:#636e72">// split point, or root is p/q</span></div>
+
+            <h3>Why Example 2 returns 2, not 6</h3>
+            <div class="diagram">
+                <div class="diagram-title">p = 2, q = 4 &mdash; both targets are left of 6, so descend; then p equals the node</div>
+                <svg class="tree-svg" viewBox="0 0 420 240" role="img" aria-label="Subtree rooted at 2 with p equals 2 and q equals 4">
+                    <line class="tree-edge path" x1="210" y1="60" x2="120" y2="130"></line>
+                    <line class="tree-edge" x1="120" y1="155" x2="70" y2="205"></line>
+                    <line class="tree-edge path" x1="120" y1="155" x2="200" y2="205"></line>
+
+                    <circle class="tree-node visited" cx="210" cy="60" r="24"></circle>
+                    <text class="tree-label" x="210" y="66">6</text>
+                    <text class="note-label" x="290" y="55" text-anchor="middle">both 2 and 4 &lt; 6 &rarr; go left</text>
+
+                    <circle class="tree-node answer" cx="120" cy="155" r="26"></circle>
+                    <text class="tree-label" x="120" y="161">2</text>
+                    <text class="note-label" x="120" y="118" text-anchor="middle">p — answer</text>
+
+                    <circle class="tree-node" cx="70" cy="205" r="21"></circle>
+                    <text class="tree-label" x="70" y="211">0</text>
+                    <circle class="tree-node target" cx="200" cy="205" r="23"></circle>
+                    <text class="tree-label" x="200" y="211">4</text>
+                    <text class="note-label" x="240" y="211" text-anchor="middle">q</text>
+                </svg>
+                <div class="flow-row">
+                    <span class="flow-box">at 6: both &lt; 6</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box active">at 2: p == 2, q = 4 &gt; 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box found">return 2</span>
+                </div>
+                <p class="muted">This is exactly why the comparisons must be strict: <code>2 &lt; 2</code> is false, so the walk stops instead of searching for a deeper ancestor that cannot exist.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: BST-Guided Iterative Walk</h2>
+            <p><strong>Intuition:</strong> the recursion is tail-recursive — it never revisits a node on the way back up. A single <code>current</code> pointer reproduces the descent with no call stack at all.</p>
+            <span class="complexity-badge badge-time">Time: O(h)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Same rule, pointer instead of stack (p = 3, q = 5)</div>
+                <div class="flow-row">
+                    <span class="flow-box active">current = 6<br><span style="color:#636e72;font-size:11px">3 &lt; 6 and 5 &lt; 6</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box active">current = 2<br><span style="color:#636e72;font-size:11px">3 &gt; 2 and 5 &gt; 2</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box found">current = 4<br><span style="font-size:11px">3 &lt; 4 &lt; 5 &rArr; answer</span></span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box skip">current.left discarded</span>
+                    <span class="flow-box skip">current.right discarded</span>
+                    <span class="flow-box skip">never touch 0, 3, 5 subtrees</span>
+                </div>
+                <p class="muted">Each step crosses out one whole subtree. The loop runs at most <code>h</code> times and keeps only one pointer.</p>
+            </div>
+
+            <div class="code-block">let current = root;
+while (current) {
+    if (p.val &lt; current.val &amp;&amp; q.val &lt; current.val) current = current.left;
+    else if (p.val &gt; current.val &amp;&amp; q.val &gt; current.val) current = current.right;
+    else return current;
+}
+return null;</div>
+
+            <div class="note"><strong>When this wins:</strong> a skewed BST with up to <code>10^5</code> nodes has height <code>n</code>, and the recursive version can exhaust the JS call stack. The iterative walk has identical time and constant space.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: General Binary Tree LCA (Post-Order)</h2>
+            <p><strong>Intuition:</strong> ignore ordering and search both subtrees. If the left search and the right search each find one target, the current node is the LCA. If only one side finds something, pass that result upward. This is the LeetCode 236 solution and works on any binary tree.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Post-order results bubble up — p = 3, q = 5 (subtree rooted at 2)</div>
+                <svg class="tree-svg" viewBox="0 0 420 280" role="img" aria-label="Post-order LCA in the subtree rooted at 2">
+                    <line class="tree-edge" x1="210" y1="55" x2="110" y2="130"></line>
+                    <line class="tree-edge" x1="210" y1="55" x2="310" y2="130"></line>
+                    <line class="tree-edge" x1="310" y1="155" x2="260" y2="230"></line>
+                    <line class="tree-edge" x1="310" y1="155" x2="360" y2="230"></line>
+
+                    <circle class="tree-node" cx="210" cy="55" r="25"></circle>
+                    <text class="tree-label" x="210" y="61">2</text>
+                    <text class="note-label" x="210" y="20" text-anchor="middle">left null, right returns 4 &rarr; return 4</text>
+
+                    <circle class="tree-node" cx="110" cy="130" r="22"></circle>
+                    <text class="tree-label" x="110" y="136">0</text>
+
+                    <circle class="tree-node answer" cx="310" cy="130" r="26"></circle>
+                    <text class="tree-label" x="310" y="136">4</text>
+                    <text class="note-label" x="370" y="105" text-anchor="middle">LCA</text>
+
+                    <circle class="tree-node target" cx="260" cy="230" r="22"></circle>
+                    <text class="tree-label" x="260" y="236">3</text>
+                    <text class="note-label" x="245" y="265" text-anchor="middle">finds 3 &rarr; up</text>
+                    <circle class="tree-node target" cx="360" cy="230" r="22"></circle>
+                    <text class="tree-label" x="360" y="236">5</text>
+                    <text class="note-label" x="375" y="265" text-anchor="middle">finds 5 &rarr; up</text>
+                </svg>
+                <div class="flow-row">
+                    <span class="flow-box skip">dfs(0) returns null</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">dfs(4): left returns 3, right returns 5</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box found">node 4 got both sides &rArr; LCA = 4</span>
+                </div>
+                <p class="muted">The result 4 is passed up through 2; node 2 only sees one non-null child, so it is not the LCA. This is correct everywhere, but it explores subtrees the BST ordering would have eliminated — <code>O(n)</code> instead of <code>O(h)</code>.</p>
+            </div>
+
+            <div class="code-block">function dfs(node) {
+    if (!node || node === p || node === q) return node;
+    const left  = dfs(node.left);
+    const right = dfs(node.right);
+    if (left &amp;&amp; right) return node;   <span style="color:#636e72">// one target on each side</span>
+    return left || right;              <span style="color:#636e72">// pass the finding upward</span>
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>BST recursive descent</strong> (implemented)</td>
+                            <td>O(h)</td>
+                            <td>O(h)</td>
+                            <td>Three branches, mirrors the split rule, minimal code</td>
+                            <td>Stack depth equals tree height</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BST iterative walk</strong></td>
+                            <td>O(h)</td>
+                            <td>O(1)</td>
+                            <td>No stack risk, constant space, same comparisons</td>
+                            <td>Easy to forget the final <code>null</code> return</td>
+                        </tr>
+                        <tr>
+                            <td><strong>General LCA (post-order)</strong></td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>Works on any binary tree, no BST assumption</td>
+                            <td>Visits both subtrees; ignores the ordering that makes this easy</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted"><code>n</code> = number of nodes, <code>h</code> = height (<code>O(log n)</code> balanced, <code>O(n)</code> skewed).</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls &amp; Key Insights</h2>
+            <div class="pitfall"><strong>Using <code>&lt;=</code> in the descent tests.</strong> Equality means the current node is a target, so it is the LCA. Non-strict comparisons walk past the correct answer (Example 2 breaks).</div>
+            <div class="pitfall"><strong>Assuming <code>p.val &lt; q.val</code>.</strong> The inputs are not ordered. Compare both values against the current node, or normalize with <code>min</code>/<code>max</code>.</div>
+            <div class="pitfall"><strong>Solving it as a general tree problem.</strong> Searching both subtrees is correct but turns <code>O(h)</code> into <code>O(n)</code> and throws away the BST's entire advantage.</div>
+            <div class="pitfall"><strong>Returning a value instead of a node.</strong> The expected return type is <code>TreeNode</code>; returning <code>root.val</code> fails the judge's node comparison.</div>
+            <div class="note"><strong>Key insight:</strong> the LCA is the first node where the root-to-<code>p</code> and root-to-<code>q</code> paths diverge. In a BST, "diverge" is detected by comparing both values with the current node.</div>
+            <div class="note"><strong>Key insight:</strong> "a node is a descendant of itself" is not a special case to patch — it falls out naturally from returning the current node when one target equals it.</div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/" target="_blank" rel="noopener">LeetCode 235: Lowest Common Ancestor of a Binary Search Tree</a></li>
+                <li><a href="https://www.youtube.com/watch?v=gs2LMfuOR9k" target="_blank" rel="noopener">NeetCode: Lowest Common Ancestor of a BST</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Lowest_common_ancestor" target="_blank" rel="noopener">Concept: Lowest common ancestor (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/lowest-common-ancestor-in-a-binary-search-tree/" target="_blank" rel="noopener">GeeksforGeeks: LCA in a Binary Search Tree</a></li>
+                <li><a href="../valid-binary-search-tree/">Related in this repo: Validate Binary Search Tree (LeetCode 98)</a></li>
+                <li><a href="../kth-smallest-integer-in-bst/">Related in this repo: Kth Smallest Integer in a BST (LeetCode 230)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
