@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majority Element II - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1rem; margin: 18px 0 8px; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-block { display: inline-flex; flex-direction: column; gap: 2px; margin: 4px 12px 4px 0; vertical-align: bottom; }
+        .array-row { display: flex; gap: 4px; }
+        .array-cell { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; background: #ffffff; color: #2d3436; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #b5ead7; border-color: #9fd8c2; }
+        .array-cell.muted { background: #f0eef6; border-color: #dfe6e9; color: #a0a8ac; }
+        .array-cell.cand { background: #aa96da; border-color: #8f79c9; color: #fff; }
+        .index-row { display: flex; gap: 4px; }
+        .index-cell { width: 44px; text-align: center; font-size: 11px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .pointer-row { display: flex; gap: 4px; }
+        .pointer-cell { width: 44px; text-align: center; font-size: 11px; color: #aa96da; font-weight: 700; height: 16px; }
+        .step-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; margin: 6px 0; background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; }
+        .step-row.current { background: #ffffd8; border-color: #f0c929; }
+        .step-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; color: #636e72; min-width: 92px; }
+        .mini-cell { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 6px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #ffffff; }
+        .mini-cell.hit { background: #ffd3b6; border-color: #ff9aa2; }
+        .mini-cell.miss { background: #f0eef6; color: #a0a8ac; }
+        .candidate { display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 2px solid #aa96da; border-radius: 8px; padding: 4px 10px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .candidate .count { background: #ffd3b6; border-radius: 10px; padding: 1px 8px; font-size: 12px; }
+        .candidate.empty { border-style: dashed; color: #a0a8ac; }
+        .action { font-size: 12px; color: #636e72; }
+        .arrow { color: #aa96da; font-weight: 700; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.neutral { background: #f0eef6; border-color: #dfe6e9; }
+        .map-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 10px 0; }
+        .map-entry { background: #ffffff; border: 2px solid #dfe6e9; border-radius: 8px; padding: 8px 10px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+        .map-entry.pass { background: #b5ead7; border-color: #9fd8c2; }
+        .map-entry.pending { background: #ffffff; }
+        .map-entry .k { color: #2d3436; font-weight: 700; }
+        .map-entry .v { color: #636e72; }
+        .run { display: flex; flex-direction: column; align-items: center; }
+        .run-cells { display: flex; gap: 4px; }
+        .run-label { margin-top: 4px; font-size: 11px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; padding: 1px 8px; border-radius: 10px; }
+        .run-label.pass { background: #b5ead7; }
+        .run-label.fail { background: #ff9aa2; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 2px 8px 2px 0; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .badge-note { background: #f0eef6; color: #636e72; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; color: #2d3436; margin-top: 12px; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .array-cell, .index-cell, .pointer-cell { width: 34px; }
+            .array-cell { height: 38px; font-size: 13px; }
+            .step-label { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Majority Element II</h1>
+            <p class="subtitle">LeetCode 229 &mdash; Find every value appearing more than &lfloor;n / 3&rfloor; times</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Hash Table</span>
+                <span class="tag">Counting</span>
+                <span class="tag">Sorting</span>
+                <span class="tag purple">Boyer-Moore</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given <code>nums</code> of length <code>n</code>, return all elements whose frequency is <strong>strictly greater</strong> than <code>n / 3</code>. Order does not matter. Because three values cannot each take more than a third of the array, there are at most <strong>two</strong> answers.</p>
+            <div class="code-block">Input:  nums = [1,1,1,3,3,2,2,2]
+n = 8, n/3 = 2.67  ->  a value needs count 3 or more
+Output: [1,2]        (1 appears 3x, 2 appears 3x, 3 appears only 2x)
+
+Edge case: nums = [1,2]
+n = 2, floor(n/3) = 0  ->  BOTH values qualify
+Output: [1,2]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p><strong>Intuition:</strong> for every value, scan the entire array to count it. Add the value if the count exceeds <code>n / 3</code>.</p>
+            <span class="badge badge-time">Time: O(n&sup2;)</span>
+            <span class="badge badge-space">Space: O(1) extra</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [3,2,3], target count &gt; 1 &mdash; one full scan per value</div>
+
+                <div class="step-row current">
+                    <span class="step-label">i = 0, value 3</span>
+                    <div class="array-block">
+                        <div class="array-row">
+                            <div class="mini-cell hit">3</div>
+                            <div class="mini-cell miss">2</div>
+                            <div class="mini-cell hit">3</div>
+                        </div>
+                        <div class="index-row">
+                            <div class="mini-cell" style="border:none;background:transparent;font-size:10px;color:#636e72;">0</div>
+                            <div class="mini-cell" style="border:none;background:transparent;font-size:10px;color:#636e72;">1</div>
+                            <div class="mini-cell" style="border:none;background:transparent;font-size:10px;color:#636e72;">2</div>
+                        </div>
+                    </div>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">count(3) = 2 &gt; 1 &check; add 3</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">i = 1, value 2</span>
+                    <div class="array-block">
+                        <div class="array-row">
+                            <div class="mini-cell miss">3</div>
+                            <div class="mini-cell hit">2</div>
+                            <div class="mini-cell miss">3</div>
+                        </div>
+                    </div>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">count(2) = 1, not &gt; 1 &cross;</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">i = 2, value 3</span>
+                    <span class="flow-box neutral">already in the result set &mdash; skip duplicate</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">answer = [3]</span>
+                </div>
+                <p style="font-size:13px; margin-top:8px;">Two nested loops cost ~<code>n&sup2;/2</code> comparisons: about 1.25 billion for <code>n = 5&middot;10<sup>4</sup></code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Hash Map Counting (Implemented)</h2>
+            <p><strong>Intuition:</strong> make one pass and keep a running frequency per value. Once a frequency passes <code>n / 3</code> it can never fall back, so the value can be added immediately.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">State after each index &mdash; nums = [1,1,1,3,3,2,2,2], target = 2.67</div>
+
+                <div class="step-row">
+                    <span class="step-label">i = 0 &rarr; 1</span>
+                    <div class="map-grid">
+                        <div class="map-entry pending"><span class="k">1</span><span class="v">1</span></div>
+                    </div>
+                    <span class="action">1 &le; 2.67 &mdash; keep waiting</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">i = 2 &rarr; 1</span>
+                    <div class="map-grid">
+                        <div class="map-entry pass"><span class="k">1</span><span class="v">3</span></div>
+                    </div>
+                    <span class="action">3 &gt; 2.67 &mdash; add <strong>1</strong> to the set</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">i = 4 &rarr; 3</span>
+                    <div class="map-grid">
+                        <div class="map-entry pass"><span class="k">1</span><span class="v">3</span></div>
+                        <div class="map-entry pending"><span class="k">3</span><span class="v">2</span></div>
+                    </div>
+                    <span class="action">3 stays below the threshold</span>
+                </div>
+
+                <div class="step-row current">
+                    <span class="step-label">i = 7 &rarr; 2</span>
+                    <div class="map-grid">
+                        <div class="map-entry pass"><span class="k">1</span><span class="v">3</span></div>
+                        <div class="map-entry pending"><span class="k">3</span><span class="v">2</span></div>
+                        <div class="map-entry pass"><span class="k">2</span><span class="v">3</span></div>
+                    </div>
+                    <span class="action">3 &gt; 2.67 &mdash; add <strong>2</strong></span>
+                </div>
+
+                <div class="flow-row" style="margin-top:12px;">
+                    <span class="flow-box result">result set = {1, 2} &rarr; return [1, 2]</span>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> count above n/3</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffffff;"></div> count at or below n/3</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Sort, Then Measure Runs</h2>
+            <p><strong>Intuition:</strong> sorting groups equal values together, so each candidate becomes a contiguous run. A value qualifies exactly when its run is longer than <code>n / 3</code>.</p>
+            <span class="badge badge-time">Time: O(n log n)</span>
+            <span class="badge badge-space">Space: O(1) extra (in place)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Sorted nums &mdash; run lengths compared with 2.67</div>
+
+                <div class="array-row" style="margin-bottom:4px;">
+                    <div class="array-cell cand" style="background:#b5ead7;border-color:#9fd8c2;color:#2d3436;">1</div>
+                    <div class="array-cell cand" style="background:#b5ead7;border-color:#9fd8c2;color:#2d3436;">1</div>
+                    <div class="array-cell cand" style="background:#b5ead7;border-color:#9fd8c2;color:#2d3436;">1</div>
+                    <div class="array-cell" style="background:#f0eef6;">2</div>
+                    <div class="array-cell" style="background:#f0eef6;">2</div>
+                    <div class="array-cell" style="background:#f0eef6;">2</div>
+                    <div class="array-cell" style="background:#ffd3b6;">3</div>
+                    <div class="array-cell" style="background:#ffd3b6;">3</div>
+                </div>
+                <div class="index-row">
+                    <div class="index-cell">0</div><div class="index-cell">1</div><div class="index-cell">2</div>
+                    <div class="index-cell">3</div><div class="index-cell">4</div><div class="index-cell">5</div>
+                    <div class="index-cell">6</div><div class="index-cell">7</div>
+                </div>
+
+                <div class="flow-row" style="margin-top:16px;">
+                    <span class="flow-box valid">run of 1: length 3 &gt; 2.67 &check;</span>
+                    <span class="flow-box valid">run of 2: length 3 &gt; 2.67 &check;</span>
+                    <span class="flow-box invalid">run of 3: length 2 &le; 2.67 &cross;</span>
+                </div>
+
+                <div class="flow-row">
+                    <span class="flow-box result">return [1, 2]</span>
+                    <span class="action">Sorting costs O(n log n) and, if done in place, reorders the caller's array.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Boyer-Moore Voting with Two Candidates (Optimal)</h2>
+            <p><strong>Intuition:</strong> track two candidates and two counters. A value matching a candidate reinforces it; a third distinct value cancels one vote from <em>each</em> candidate. Whatever survives must be a candidate for a &gt; n/3 answer &mdash; but it still has to be verified.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Phase 1 &mdash; cancellation over [1,1,1,3,3,2,2,2]</div>
+
+                <div class="step-row">
+                    <span class="step-label">x = 1</span>
+                    <div class="array-row"><div class="mini-cell hit">1</div></div>
+                    <span class="candidate empty">c1 = &mdash; <span class="count">0</span></span>
+                    <span class="candidate empty">c2 = &mdash; <span class="count">0</span></span>
+                    <span class="action">c1 is empty &rarr; take 1</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">x = 1 (2nd)</span>
+                    <div class="array-row"><div class="mini-cell hit">1</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">2</span></span>
+                    <span class="candidate empty">c2 = &mdash; <span class="count">0</span></span>
+                    <span class="action">matches c1 &rarr; count1++</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">x = 1 (3rd)</span>
+                    <div class="array-row"><div class="mini-cell hit">1</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">3</span></span>
+                    <span class="candidate empty">c2 = &mdash; <span class="count">0</span></span>
+                    <span class="action">matches c1 &rarr; count1++</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">x = 3</span>
+                    <div class="array-row"><div class="mini-cell hit">3</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">3</span></span>
+                    <span class="candidate empty">c2 = &mdash; <span class="count">0</span></span>
+                    <span class="action">c2 is empty &rarr; take 3</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">x = 3 (2nd)</span>
+                    <div class="array-row"><div class="mini-cell hit">3</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">3</span></span>
+                    <span class="candidate">c2 = 3 <span class="count">2</span></span>
+                    <span class="action">matches c2 &rarr; count2++</span>
+                </div>
+
+                <div class="step-row current">
+                    <span class="step-label">x = 2</span>
+                    <div class="array-row"><div class="mini-cell hit">2</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">2</span></span>
+                    <span class="candidate">c2 = 3 <span class="count">1</span></span>
+                    <span class="action">matches neither, both counters positive &rarr; cancel both</span>
+                </div>
+
+                <div class="step-row current">
+                    <span class="step-label">x = 2 (2nd)</span>
+                    <div class="array-row"><div class="mini-cell hit">2</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">1</span></span>
+                    <span class="candidate">c2 = 3 <span class="count">0</span></span>
+                    <span class="action">cancel both &mdash; c2's count drops to 0</span>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-label">x = 2 (3rd)</span>
+                    <div class="array-row"><div class="mini-cell hit">2</div></div>
+                    <span class="candidate">c1 = 1 <span class="count">1</span></span>
+                    <span class="candidate">c2 = 2 <span class="count">1</span></span>
+                    <span class="action">c2 is empty &rarr; take 2</span>
+                </div>
+
+                <p style="font-size:13px;margin-top:12px;"><strong>Phase 2 &mdash; verify, never trust candidates blindly:</strong></p>
+                <div class="flow-row">
+                    <span class="flow-box neutral">c1 = 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box neutral">actual count = 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">3 &gt; 2.67 &check;</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box neutral">c2 = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box neutral">actual count = 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">3 &gt; 2.67 &check;</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box result">answer = [1, 2] &mdash; note 3 was eliminated as a candidate by cancellation</span>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2;"></div> current element</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> surviving candidates</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> verified answer</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Why two candidates?</strong> Three values each appearing more than <code>n/3</code> times would need more than <code>n</code> elements in total. So a third candidate is never necessary &mdash; and each cancellation removes three distinct values, preserving the relative majorities of whatever remains.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Mutates input?</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brute Force</strong></td>
+                            <td>O(n&sup2;)</td>
+                            <td>O(1)</td>
+                            <td>No</td>
+                            <td>Too slow for n = 5&middot;10<sup>4</sup></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hash Map</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>No</td>
+                            <td>One pass; easiest linear solution</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sort + runs</strong></td>
+                            <td>O(n log n)</td>
+                            <td>O(1) extra</td>
+                            <td>Yes (in place)</td>
+                            <td>Good if input is already sorted</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Boyer-Moore (2)</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>No</td>
+                            <td>Meets the space follow-up; needs verification</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ol class="step-list">
+                <li><strong>Strict inequality.</strong> A value appearing exactly &lfloor;n/3&rfloor; times is <em>not</em> an answer. Use <code>count &gt; n/3</code> (equivalently <code>count &gt; Math.floor(n/3)</code>).</li>
+                <li><strong>At most two answers, but possibly two.</strong> Do not return early after the first value crosses the threshold.</li>
+                <li><strong>Tiny arrays.</strong> When n &le; 2, &lfloor;n/3&rfloor; = 0, so every distinct value qualifies: <code>[1,2]</code> &rarr; <code>[1,2]</code>.</li>
+                <li><strong>Deduplicate results.</strong> The threshold is crossed once, but every later occurrence also satisfies it &mdash; use a set.</li>
+                <li><strong>Verify Boyer-Moore candidates.</strong> Cancellation can leave values that do not actually exceed n/3; a second counting pass is mandatory.</li>
+                <li><strong>Beware <code>splice</code>-style removal.</strong> Deleting while iterating shifts indices and skips elements; counting needs no mutation at all.</li>
+            </ol>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/majority-element-ii/" target="_blank" rel="noopener">LeetCode 229: Majority Element II</a></li>
+                <li><a href="https://neetcode.io/problems/majority-element-ii" target="_blank" rel="noopener">NeetCode: Majority Element II</a></li>
+                <li><a href="https://www.geeksforgeeks.org/boyer-moore-majority-voting-algorithm/" target="_blank" rel="noopener">Concept: Boyer-Moore Majority Voting Algorithm (GeeksforGeeks)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_majority_vote_algorithm" target="_blank" rel="noopener">Concept: Boyer-Moore majority vote (Wikipedia)</a></li>
+                <li><a href="../majority-element/" >Related in this repo: Majority Element (LeetCode 169, the one-candidate case)</a></li>
+                <li><a href="../duplicate-integer/README.md">Related in this repo: Duplicate Integer (hash-set frequency reasoning)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
