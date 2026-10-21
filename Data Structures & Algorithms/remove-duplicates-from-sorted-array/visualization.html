@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Duplicates from Sorted Array - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-block { display: inline-block; vertical-align: top; }
+        .array-row { display: flex; gap: 4px; }
+        .array-cell { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; background: #ffffff; color: #2d3436; flex: 0 0 auto; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.unique { background: #b5ead7; border-color: #9fd8c2; }
+        .array-cell.duplicate { background: #ff9aa2; border-color: #e8878f; color: #fff; }
+        .array-cell.written { background: #aa96da; border-color: #8f79c9; color: #fff; }
+        .array-cell.stale { background: #f0eef6; border-color: #dfe6e9; color: #a0a8ac; }
+        .array-cell.out { background: #f0eef6; border-color: #dfe6e9; color: #c4cbcf; text-decoration: line-through; }
+        .array-cell.empty { border-style: dashed; border-color: #dfe6e9; background: #ffffff; color: #b0b8bc; }
+        .index-row { display: flex; gap: 4px; margin-top: 2px; }
+        .index-cell { width: 40px; text-align: center; font-size: 10px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .pointer-row { display: flex; gap: 4px; margin-bottom: 2px; }
+        .pointer-cell { width: 40px; text-align: center; font-size: 12px; font-weight: 700; color: #aa96da; height: 18px; }
+        .pointer-cell.read { color: #d97b83; }
+        .pointer-cell.write { color: #4a9ab5; }
+        .step-row { padding: 10px 12px; margin: 8px 0; background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; }
+        .step-row.current { background: #ffffd8; border-color: #f0c929; }
+        .step-title { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.neutral { background: #f0eef6; border-color: #dfe6e9; }
+        .arrow { color: #aa96da; font-weight: 700; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 2px 8px 2px 0; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 12px; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .array-cell, .index-cell, .pointer-cell { width: 32px; }
+            .array-cell { height: 34px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Remove Duplicates from Sorted Array</h1>
+            <p class="subtitle">LeetCode 26 &mdash; Compact the unique values into the first <em>k</em> cells</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Two Pointers</span>
+                <span class="tag purple">In-Place</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Because <code>nums</code> is sorted, duplicates are adjacent. Overwrite the front of the array with one copy of each distinct value, in order, and return how many there are. Everything after index <code>k - 1</code> is ignored.</p>
+            <div class="code-block">Input:  nums = [0,0,1,1,1,2,2,3,3,4]
+Output: k = 5, nums = [0,1,2,3,4,_,_,_,_,_]
+                              ^ checked  ^ ignored (any values)
+
+Only nums[0..k-1] is validated &mdash; the tail may keep stale duplicates.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Set, Sort, Copy Back (Implemented)</h2>
+            <p><strong>Intuition:</strong> let a <code>Set</code> remove duplicates, sort the unique values, then overwrite the first <code>k</code> cells of <code>nums</code> with them.</p>
+            <span class="badge badge-time">Time: O(n log n)</span>
+            <span class="badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [0,0,1,1,1,2,2,3,3,4]</div>
+
+                <div class="step-row">
+                    <div class="step-title">Step 1 &mdash; new Set(nums): first occurrence wins, repeats are dropped</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell duplicate">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell duplicate">1</div>
+                        <div class="array-cell duplicate">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell duplicate">2</div>
+                        <div class="array-cell unique">3</div>
+                        <div class="array-cell duplicate">3</div>
+                        <div class="array-cell unique">4</div>
+                    </div>
+                    <div class="index-row">
+                        <div class="index-cell">0</div><div class="index-cell">1</div><div class="index-cell">2</div>
+                        <div class="index-cell">3</div><div class="index-cell">4</div><div class="index-cell">5</div>
+                        <div class="index-cell">6</div><div class="index-cell">7</div><div class="index-cell">8</div>
+                        <div class="index-cell">9</div>
+                    </div>
+                    <div class="flow-row" style="margin-top:8px;">
+                        <span class="flow-box valid">set = {0, 1, 2, 3, 4}</span>
+                        <span class="flow-box neutral">insertion order is already sorted here</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">Step 2 &mdash; spread and sort</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell unique">3</div>
+                        <div class="array-cell unique">4</div>
+                    </div>
+                    <div class="flow-row" style="margin-top:6px;">
+                        <span class="flow-box neutral">[0,1,2,3,4].sort((a,b) =&gt; a - b)</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box valid">[0,1,2,3,4] (no change: input was sorted)</span>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">Step 3 &mdash; write the unique values into the prefix; return 5</div>
+                    <div class="array-row">
+                        <div class="array-cell written">0</div>
+                        <div class="array-cell written">1</div>
+                        <div class="array-cell written">2</div>
+                        <div class="array-cell written">3</div>
+                        <div class="array-cell written">4</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell stale">3</div>
+                        <div class="array-cell stale">3</div>
+                        <div class="array-cell stale">4</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell" style="color:#636e72;">k = 5</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">return 5</span>
+                        <span class="flow-box neutral">the purple tail is never checked</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> kept unique value</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ff9aa2;"></div> duplicate dropped</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> written prefix</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#f0eef6;"></div> stale / ignored</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Observation:</strong> since <code>nums</code> is sorted, the <code>Set</code> already yields values in non-decreasing order. The <code>.sort()</code> is therefore redundant for valid inputs &mdash; removing it turns this solution into an <code>O(n)</code> one (still <code>O(n)</code> space).</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Read and Write Pointers (Optimal)</h2>
+            <p><strong>Intuition:</strong> <code>read</code> scans every cell; <code>write</code> marks the next free slot for a unique value. Copy <code>nums[read]</code> forward only when it differs from the last value written.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Walk nums once &mdash; w = number of unique values placed</div>
+
+                <div class="step-row">
+                    <div class="step-title">Start: index 0 is always kept; r = 1 scans from the second cell</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell active">0</div>
+                        <div class="array-cell">1</div>
+                        <div class="array-cell">1</div>
+                        <div class="array-cell">1</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">4</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell write">kept</div>
+                        <div class="pointer-cell read">r</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box invalid">nums[1] = 0 equals last unique 0 &rarr; skip</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">r = 2 (value 1): differs from nums[w-1] = 0 &rarr; copy to nums[1], w = 2</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell written">1</div>
+                        <div class="array-cell out">1</div>
+                        <div class="array-cell">1</div>
+                        <div class="array-cell">1</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">4</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w</div>
+                        <div class="pointer-cell read">r</div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box valid">write nums[1] = 1</span>
+                        <span class="flow-box neutral">the old 1 at index 2 is now a duplicate in the unread region</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">r = 5 (value 2): 2 != 1 &rarr; nums[2] = 2, w = 3</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell written">2</div>
+                        <div class="array-cell out">1</div>
+                        <div class="array-cell out">1</div>
+                        <div class="array-cell active">2</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">4</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell read">r</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">r = 7 (value 3): 3 != nums[2] = 2 &rarr; nums[3] = 3, w = 4</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell written">3</div>
+                        <div class="array-cell out">1</div>
+                        <div class="array-cell out">2</div>
+                        <div class="array-cell out">2</div>
+                        <div class="array-cell active">3</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">4</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell read">r</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">r = 9 (value 4): 4 != nums[3] = 3 &rarr; nums[4] = 4, w = 5</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell unique">3</div>
+                        <div class="array-cell written">4</div>
+                        <div class="array-cell out">2</div>
+                        <div class="array-cell out">2</div>
+                        <div class="array-cell out">3</div>
+                        <div class="array-cell out">3</div>
+                        <div class="array-cell active">4</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell read">r</div>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">r reaches the end &mdash; return w = 5</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell unique">3</div>
+                        <div class="array-cell unique">4</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell stale">3</div>
+                        <div class="array-cell stale">3</div>
+                        <div class="array-cell stale">4</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">nums[0..4] = [0,1,2,3,4], k = 5</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> finalized unique prefix</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> just written</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2;"></div> read pointer</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#f0eef6;"></div> overwritten / stale</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Why it is safe:</strong> <code>read</code> is always at or ahead of <code>write</code>. Copying <code>nums[read]</code> to <code>nums[write]</code> can only overwrite a cell that <code>read</code> has already passed, so no unread value is destroyed. The last unique value stays at <code>nums[write - 1]</code>, which is the value compared against.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Repeated <code>splice</code></h2>
+            <p><strong>Intuition:</strong> whenever the current element equals the previous one, delete it. Correct, but each deletion shifts the whole tail left.</p>
+            <span class="badge badge-time">Time: O(n&sup2;)</span>
+            <span class="badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [1,1,2] &mdash; delete at i = 1, then re-check index 1</div>
+
+                <div class="step-row">
+                    <div class="step-title">i = 1: nums[1] = 1 equals nums[0] = 1 &rarr; splice(1, 1)</div>
+                    <div class="array-row">
+                        <div class="array-cell">1</div>
+                        <div class="array-cell duplicate">1</div>
+                        <div class="array-cell">2</div>
+                        <span class="arrow">&rarr;</span>
+                        <div class="array-cell">1</div>
+                        <div class="array-cell active">2</div>
+                        <div class="array-cell empty">&mdash;</div>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">Do <strong>not</strong> increment i: the next element slid into index 1. Here 2 != 1, so i++ and the loop ends.</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell empty">&mdash;</div>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box result">return nums.length = 2</span>
+                    </div>
+                </div>
+
+                <p style="font-size:13px;margin-top:8px;">For <code>[0,0,1,1,1,2,2,3,3,4]</code> this performs five deletions. Each one moves up to nine elements, so the total work is quadratic &mdash; and forgetting the "don't increment after deleting" rule silently skips duplicates.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: New Array, Then Copy Back</h2>
+            <p><strong>Intuition:</strong> collect the uniques in a fresh array during one pass, then copy that array into the front of <code>nums</code>. No sorting and no set hashing &mdash; just an adjacency check.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Build [0,1,2,3,4] from left to right, then copy it into the prefix</div>
+
+                <div class="step-row">
+                    <div class="step-title">Scan and push only when the value changes</div>
+                    <div class="array-row">
+                        <div class="array-cell unique">0</div>
+                        <div class="array-cell out">0</div>
+                        <div class="array-cell unique">1</div>
+                        <div class="array-cell out">1</div>
+                        <div class="array-cell out">1</div>
+                        <div class="array-cell unique">2</div>
+                        <div class="array-cell out">2</div>
+                        <div class="array-cell unique">3</div>
+                        <div class="array-cell out">3</div>
+                        <div class="array-cell unique">4</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box valid">unique = [0, 1, 2, 3, 4]</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box result">copy back &rarr; nums[0..4] = [0,1,2,3,4], k = 5</span>
+                    </div>
+                </div>
+
+                <p style="font-size:13px;margin-top:8px;">The extra array makes this <code>O(n)</code> in both time and space &mdash; better than the implemented set-plus-sort on time, worse than the two pointers on space.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>In place?</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Set + sort + copy</strong> (implemented)</td>
+                            <td>O(n log n)</td>
+                            <td>O(n)</td>
+                            <td>Yes (writes back)</td>
+                            <td>Short; sorts data that is already sorted</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Read/write pointers</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Yes</td>
+                            <td>Optimal; exploits adjacency of duplicates</td>
+                        </tr>
+                        <tr>
+                            <td><strong>New array + copy back</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>Yes (writes back)</td>
+                            <td>Clear one-pass dedupe; allocates</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Repeated splice</strong></td>
+                            <td>O(n&sup2;)</td>
+                            <td>O(1)</td>
+                            <td>Yes</td>
+                            <td>Quadratic shifting; easy to skip elements</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ol class="step-list">
+                <li><strong>Returning the array.</strong> The answer is <code>k</code>; the judge reads the mutated <code>nums</code> separately.</li>
+                <li><strong>Forgetting to write back.</strong> A deduplicated copy that never touches <code>nums</code> fails the in-place check.</li>
+                <li><strong>Clearing the tail.</strong> Unnecessary. Only <code>nums[0..k-1]</code> is verified; stale values are fine.</li>
+                <li><strong>Lexicographic sort.</strong> If you sort, pass <code>(a, b) =&gt; a - b</code>; the default compares strings and misorders negatives and multi-digit values.</li>
+                <li><strong>Incrementing after <code>splice</code>.</strong> The next element shifts into the current index, so the loop must re-check the same position.</li>
+                <li><strong>Comparing the wrong neighbor.</strong> With two pointers, compare against <code>nums[write - 1]</code> (last kept) or <code>nums[read - 1]</code> (previous input) &mdash; both work on sorted input; mixing them does not.</li>
+                <li><strong>Starting <code>write</code> at 0.</strong> Index 0 is always unique; starting at 0 and comparing to <code>nums[-1]</code> is <code>undefined</code> and quietly writes wrong values.</li>
+                <li><strong>Assuming the array shrinks.</strong> JavaScript keeps the original length; <code>k</code> is a logical prefix boundary.</li>
+            </ol>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/remove-duplicates-from-sorted-array/" target="_blank" rel="noopener">LeetCode 26: Remove Duplicates from Sorted Array</a></li>
+                <li><a href="https://neetcode.io/problems/remove-duplicates-from-sorted-array" target="_blank" rel="noopener">NeetCode: Remove Duplicates from Sorted Array</a></li>
+                <li><a href="https://www.geeksforgeeks.org/remove-duplicates-sorted-array/" target="_blank" rel="noopener">Concept: Remove duplicates from a sorted array (GeeksforGeeks)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/In-place_algorithm" target="_blank" rel="noopener">Concept: In-place algorithm (Wikipedia)</a></li>
+                <li><a href="../remove-element/README.md">Related in this repo: Remove Element (same read/write compaction, arbitrary value)</a></li>
+                <li><a href="../two-integer-sum-ii/README.md">Related in this repo: Two Integer Sum II (two pointers on sorted data)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
