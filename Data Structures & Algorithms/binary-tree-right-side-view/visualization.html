@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Right Side View - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; color: #ffffff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card strong { color: #2d3436; }
+        code { background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 460px; margin: 0 auto; display: block; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-edge.dim { stroke: #dfe6e9; stroke-width: 2px; }
+        .tree-edge.strong { stroke: #ff9aa2; stroke-width: 3px; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2px; }
+        .tree-node.active { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-node.done { fill: #b5ead7; stroke: #b5ead7; }
+        .tree-node.hidden { fill: #ffffff; stroke: #dfe6e9; }
+        .tree-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .tree-label.muted { fill: #b2bec3; }
+        .tree-note { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #636e72; text-anchor: middle; }
+        .badge { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .badge-bg { fill: #ffffd8; stroke: #f0c929; stroke-width: 1px; }
+        .badge-bg.green { fill: #b5ead7; stroke: #b5ead7; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 20px; font-weight: 700; }
+        .level-row { display: flex; align-items: center; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
+        .level-label { width: 82px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; color: #636e72; flex-shrink: 0; }
+        .cells { display: flex; gap: 4px; flex-wrap: wrap; }
+        .cell { min-width: 38px; height: 38px; padding: 0 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; }
+        .cell.last { background: #b5ead7; border-color: #b5ead7; }
+        .cell.queue { background: #ffffd8; border-color: #f0c929; }
+        .cell.empty { border-style: dashed; border-color: #dfe6e9; color: #b2bec3; font-weight: 400; font-size: 12px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #dfe6e9; }
+        .pill-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+        .pill { background: #ffffff; border-left: 4px solid #a8d8ea; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 14px; color: #636e72; }
+        .pill.warn { border-left-color: #ff9aa2; }
+        .pill.good { border-left-color: #b5ead7; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; font-size: 14px; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .card h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Binary Tree Right Side View</h1>
+            <p class="subtitle">LeetCode 199 &mdash; the rightmost node at every depth</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">BFS</span>
+                <span class="tag">DFS</span>
+                <span class="tag alt">Binary Tree</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Standing to the right of the tree, return the values you can see from top to bottom. That is the <strong>rightmost existing node at each depth</strong> &mdash; not a chain of right-child pointers, because a left child becomes visible when its level has nothing further right.</p>
+            <div class="code-block">Input:  root = [1, 2, 3, null, 5, null, 4]
+
+            1
+          /   \
+         2     3
+          \     \
+           5     4
+
+Depth 0: [1]     -> 1
+Depth 1: [2, 3]  -> 3
+Depth 2: [5, 4]  -> 4
+
+Output: [1, 3, 4]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force &mdash; Scan Once per Depth</h2>
+            <p><strong>Intuition:</strong> Compute the height, then for each depth do a full left-to-right walk and remember the last node seen at that depth.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; h)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">One full tree scan per visible level</div>
+                <div class="level-row">
+                    <span class="level-label">depth 0</span>
+                    <span class="cells"><span class="cell last">1</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">scan all nodes, keep last at depth 0 = 1</span>
+                </div>
+                <div class="level-row">
+                    <span class="level-label">depth 1</span>
+                    <span class="cells"><span class="cell">2</span><span class="cell last">3</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">rescan, keep last at depth 1 = 3</span>
+                </div>
+                <div class="level-row">
+                    <span class="level-label">depth 2</span>
+                    <span class="cells"><span class="cell">5</span><span class="cell last">4</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">rescan, keep last at depth 2 = 4</span>
+                </div>
+                <p style="font-size: 13px; margin-top: 8px;">A tree with height <code>h</code> is walked <code>h</code> times, so this is <code>O(n &middot; h)</code> &mdash; correct but wasteful.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: BFS Level Order</h2>
+            <p><strong>Intuition:</strong> Process the tree one level at a time. Dequeue exactly the nodes currently in the queue; the last one dequeued is the rightmost node of that level.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(w)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Queue contents at the start of each level</div>
+                <div class="level-row">
+                    <span class="level-label">level 0</span>
+                    <span class="cells"><span class="cell queue">1</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">last = 1; enqueue 2, 3</span>
+                </div>
+                <div class="level-row">
+                    <span class="level-label">level 1</span>
+                    <span class="cells"><span class="cell queue">2</span><span class="cell queue">3</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">last = 3; enqueue 5, 4</span>
+                </div>
+                <div class="level-row">
+                    <span class="level-label">level 2</span>
+                    <span class="cells"><span class="cell queue">5</span><span class="cell queue">4</span></span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">last = 4; no children</span>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box result">view = [1, 3, 4]</span>
+                </div>
+                <p style="font-size: 13px; margin-top: 8px;">The queue holds at most the widest level <code>w</code>; no per-level arrays are retained.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: DFS Left-to-Right, Collect Every Level (Implemented)</h2>
+            <p><strong>Intuition:</strong> Group nodes by depth in a 2D array while traversing left first. Each level is filled left-to-right, so its <strong>last</strong> entry is the rightmost node. Extract it with <code>map</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Preorder visits and the level buckets they fill</div>
+                <svg class="tree-svg" viewBox="0 0 480 300" role="img" aria-label="Tree 1 with children 2 and 3, node 2 has right child 5, node 3 has right child 4. Visit order 1, 2, 5, 3, 4 fills level buckets.">
+                    <line class="tree-edge" x1="250" y1="55" x2="160" y2="140" />
+                    <line class="tree-edge" x1="250" y1="55" x2="340" y2="140" />
+                    <line class="tree-edge" x1="160" y1="140" x2="210" y2="225" />
+                    <line class="tree-edge" x1="340" y1="140" x2="390" y2="225" />
+
+                    <circle class="tree-node active" cx="250" cy="55" r="22" />
+                    <text class="tree-label" x="250" y="60">1</text>
+                    <rect class="badge-bg" x="280" y="15" width="58" height="24" rx="6" />
+                    <text class="badge" x="309" y="31">visit 1</text>
+
+                    <circle class="tree-node" cx="160" cy="140" r="22" />
+                    <text class="tree-label" x="160" y="145">2</text>
+                    <rect class="badge-bg" x="86" y="100" width="58" height="24" rx="6" />
+                    <text class="badge" x="115" y="116">visit 2</text>
+
+                    <circle class="tree-node" cx="210" cy="225" r="22" />
+                    <text class="tree-label" x="210" y="230">5</text>
+                    <rect class="badge-bg" x="236" y="213" width="58" height="24" rx="6" />
+                    <text class="badge" x="265" y="229">visit 3</text>
+
+                    <circle class="tree-node" cx="340" cy="140" r="22" />
+                    <text class="tree-label" x="340" y="145">3</text>
+                    <rect class="badge-bg" x="356" y="100" width="58" height="24" rx="6" />
+                    <text class="badge" x="385" y="116">visit 4</text>
+
+                    <circle class="tree-node" cx="390" cy="225" r="22" />
+                    <text class="tree-label" x="390" y="230">4</text>
+                    <rect class="badge-bg" x="414" y="213" width="58" height="24" rx="6" />
+                    <text class="badge" x="443" y="229">visit 5</text>
+                </svg>
+
+                <div class="level-row">
+                    <span class="level-label">level 0</span>
+                    <span class="cells"><span class="cell last">1</span></span>
+                    <span class="flow-box">last = 1</span>
+                </div>
+                <div class="level-row">
+                    <span class="level-label">level 1</span>
+                    <span class="cells"><span class="cell">2</span><span class="cell last">3</span></span>
+                    <span class="flow-box">last = 3</span>
+                </div>
+                <div class="level-row">
+                    <span class="level-label">level 2</span>
+                    <span class="cells"><span class="cell">5</span><span class="cell last">4</span></span>
+                    <span class="flow-box">last = 4</span>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box result">map(last) = [1, 3, 4]</span>
+                </div>
+                <p style="font-size: 13px; margin-top: 8px;">The 2D array stores all five values, although only three are needed. That is the <code>O(n)</code> space trade-off.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: DFS Right-First, First Visit Wins</h2>
+            <p><strong>Intuition:</strong> Visit the right child before the left. The first node reached at a new depth is necessarily the rightmost node at that depth, so record it and never overwrite.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Visit order 1 &rarr; 3 &rarr; 4 &rarr; 2 &rarr; 5; first visit per depth is the answer</div>
+                <svg class="tree-svg" viewBox="0 0 480 300" role="img" aria-label="Right-first traversal visits 1, then 3, then 4, then 2, then 5. The first node seen at each depth is 1, 3 and 4.">
+                    <line class="tree-edge strong" x1="250" y1="55" x2="340" y2="140" />
+                    <line class="tree-edge strong" x1="340" y1="140" x2="390" y2="225" />
+                    <line class="tree-edge dim" x1="250" y1="55" x2="160" y2="140" />
+                    <line class="tree-edge dim" x1="160" y1="140" x2="210" y2="225" />
+
+                    <circle class="tree-node done" cx="250" cy="55" r="22" />
+                    <text class="tree-label" x="250" y="60">1</text>
+                    <rect class="badge-bg green" x="280" y="15" width="58" height="24" rx="6" />
+                    <text class="badge" x="309" y="31">depth 0</text>
+
+                    <circle class="tree-node done" cx="340" cy="140" r="22" />
+                    <text class="tree-label" x="340" y="145">3</text>
+                    <rect class="badge-bg green" x="356" y="100" width="58" height="24" rx="6" />
+                    <text class="badge" x="385" y="116">depth 1</text>
+
+                    <circle class="tree-node done" cx="390" cy="225" r="22" />
+                    <text class="tree-label" x="390" y="230">4</text>
+                    <rect class="badge-bg green" x="414" y="213" width="58" height="24" rx="6" />
+                    <text class="badge" x="443" y="229">depth 2</text>
+
+                    <circle class="tree-node hidden" cx="160" cy="140" r="22" />
+                    <text class="tree-label muted" x="160" y="145">2</text>
+                    <circle class="tree-node hidden" cx="210" cy="225" r="22" />
+                    <text class="tree-label muted" x="210" y="230">5</text>
+                    <text class="tree-note" x="90" y="250">visited later, already covered</text>
+                </svg>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> First at its depth &rarr; visible</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #ffffff;"></div> Depth already recorded</div>
+                </div>
+            </div>
+
+            <div class="code-block">function dfs(node, depth) {
+  if (!node) return;
+  if (depth === result.length) result.push(node.val); // first visit
+  dfs(node.right, depth + 1);
+  dfs(node.left, depth + 1);
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brute Force</strong> (per depth)</td>
+                            <td>O(n &middot; h)</td>
+                            <td>O(h)</td>
+                            <td>Easy to reason about</td>
+                            <td>Re-walks the tree h times</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BFS Level Order</strong></td>
+                            <td>O(n)</td>
+                            <td>O(w)</td>
+                            <td>Direct definition; no full-tree storage</td>
+                            <td>Queue can hold a wide level</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DFS Left-to-Right, collect all</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>Clean grouping; easy to switch to left view</td>
+                            <td>Stores every node value</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DFS Right-First</strong></td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>One value per level, optimal memory</td>
+                            <td>Must get right-before-left order correct</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insight &amp; Common Pitfalls</h2>
+            <div class="pill-list">
+                <div class="pill good"><strong>Key insight:</strong> the view is one node per depth &mdash; the rightmost one that exists. A left child is visible whenever its level has nothing to its right (see <code>[1,2,3,4,null,null,null,5]</code>, where 4 and 5 are visible).</div>
+                <div class="pill warn"><strong>Pitfall:</strong> following right-child pointers and stopping at null gives the wrong answer; you must consider every level.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> taking the first node in a left-to-right traversal gives the <em>left</em> side view. Either take the last of each level, or traverse right-first and take the first.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> in BFS, snapshot the queue length before processing a level; otherwise levels blur together.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> the implemented version keeps every node value (<code>O(n)</code>), not just one per level. For huge trees, prefer BFS or right-first DFS.</div>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/binary-tree-right-side-view/" target="_blank" rel="noopener">LeetCode 199: Binary Tree Right Side View</a></li>
+                <li><a href="https://neetcode.io/problems/binary-tree-right-side-view" target="_blank" rel="noopener">NeetCode: Binary Tree Right Side View</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Tree_traversal" target="_blank" rel="noopener">Concept: Tree Traversal (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/" target="_blank" rel="noopener">GeeksforGeeks: Tree Traversal Techniques</a></li>
+                <li><a href="../level-order-traversal-of-binary-tree/">Related in this repo: Level Order Traversal of Binary Tree</a></li>
+                <li><a href="../count-good-nodes-in-binary-tree/">Related in this repo: Count Good Nodes in Binary Tree (LeetCode 1448)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
