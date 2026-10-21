@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtree of Another Tree - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #2d3436;  white-space: pre;}
+        .code-block .match { background: #b5ead7; border-radius: 4px; padding: 1px 3px; }
+        .code-block .mismatch { background: #ff9aa2; border-radius: 4px; padding: 1px 3px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; min-width: 560px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-grid { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; justify-content: center; }
+        .tree-panel { flex: 1 1 260px; max-width: 380px; }
+        .tree-panel .caption { text-align: center; font-size: 13px; color: #636e72; margin-top: 4px; }
+        svg { width: 100%; height: auto; display: block; }
+        .tree-panel svg { max-height: 232px; }
+        .edge { stroke: #aa96da; stroke-width: 2; fill: none; }
+        .edge.matched { stroke: #2f9e78; stroke-width: 3; }
+        .node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2; }
+        .node.candidate { fill: #ffffd8; stroke: #d9b64a; }
+        .node.match { fill: #b5ead7; stroke: #2f9e78; }
+        .node.other { fill: #ffffff; stroke: #dfe6e9; }
+        .node-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .node-tag { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10px; fill: #636e72; text-anchor: middle; }
+        .hash-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 10px; fill: #7a5fb5; text-anchor: middle; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #d9b64a; font-weight: 600; }
+        .flow-box small { font-family: 'Segoe UI', system-ui, sans-serif; color: #636e72; }
+        .arrow { color: #aa96da; font-size: 18px; }
+        .level { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+        .level-label { width: 64px; font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; flex: none; }
+        .queue-node { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 50%; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; }
+        .queue-node.match { background: #b5ead7; border-color: #2f9e78; }
+        .queue-node.skip { background: #ffffff; border-color: #dfe6e9; color: #b2bec3; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-note { background: #ffd3b6; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .insight { border-left: 4px solid #aa96da; background: #f0eef6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 12px; font-size: 14px; }
+        .insight strong { color: #2d3436; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; margin-top: 8px; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        ul.pitfalls { padding-left: 22px; color: #636e72; }
+        ul.pitfalls li { margin-bottom: 10px; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .level-label { width: 52px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Subtree of Another Tree</h1>
+            <p class="subtitle">LeetCode 572 &mdash; Does <code>subRoot</code> appear as an exact subtree of <code>root</code>?</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">Binary Tree</span>
+                <span class="tag purple">String Matching</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>A <strong>subtree</strong> of <code>root</code> is a node together with <em>all</em> of its descendants. We must decide whether some node in <code>root</code> roots a tree that is identical to <code>subRoot</code> &mdash; same values and same shape, including every missing child.</p>
+            <div class="code-block">Input:  root = [3,4,5,1,2], subRoot = [4,1,2]
+Output: true   (the subtree rooted at 4 matches exactly)
+
+Input:  root = [3,4,5,1,2,null,null,null,null,0], subRoot = [4,1,2]
+Output: false  (the matching node 4 now has an extra descendant 0)</div>
+            <p>The subtle part is that a subtree cannot be "part of" a larger branch: if the candidate node has an extra child, the comparison fails.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: DFS at Every Candidate Node (Implemented)</h2>
+            <p><strong>Intuition:</strong> Every node of <code>root</code> is a candidate subtree root. Walk all of them; whenever the value matches <code>subRoot.val</code>, compare both trees node-for-node.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; m)</span>
+            <span class="complexity-badge badge-space">Space: O(h<sub>root</sub> + h<sub>sub</sub>)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Example 1 &mdash; candidate nodes and the successful comparison</div>
+                <div class="diagram-grid">
+                    <div class="tree-panel">
+                        <svg viewBox="0 0 360 220" role="img" aria-label="Root tree [3,4,5,1,2] with node 4 highlighted as the matching subtree">
+                            <line class="edge" x1="180" y1="40" x2="90" y2="110" />
+                            <line class="edge" x1="180" y1="40" x2="270" y2="110" />
+                            <line class="edge matched" x1="90" y1="110" x2="50" y2="180" />
+                            <line class="edge matched" x1="90" y1="110" x2="130" y2="180" />
+                            <circle class="node other" cx="180" cy="40" r="21" />
+                            <text class="node-label" x="180" y="45">3</text>
+                            <text class="node-tag" x="180" y="76">candidate: no</text>
+                            <circle class="node match" cx="90" cy="110" r="21" />
+                            <text class="node-label" x="90" y="115">4</text>
+                            <text class="node-tag" x="90" y="146">MATCH</text>
+                            <circle class="node other" cx="270" cy="110" r="21" />
+                            <text class="node-label" x="270" y="115">5</text>
+                            <text class="node-tag" x="270" y="146">candidate: no</text>
+                            <circle class="node candidate" cx="50" cy="180" r="21" />
+                            <text class="node-label" x="50" y="185">1</text>
+                            <circle class="node candidate" cx="130" cy="180" r="21" />
+                            <text class="node-label" x="130" y="185">2</text>
+                        </svg>
+                        <p class="caption">root = [3,4,5,1,2]</p>
+                    </div>
+                    <div class="tree-panel">
+                        <svg viewBox="0 0 220 200" role="img" aria-label="Subroot tree 4 with children 1 and 2">
+                            <line class="edge matched" x1="110" y1="40" x2="60" y2="120" />
+                            <line class="edge matched" x1="110" y1="40" x2="160" y2="120" />
+                            <circle class="node match" cx="110" cy="40" r="21" />
+                            <text class="node-label" x="110" y="45">4</text>
+                            <circle class="node match" cx="60" cy="120" r="21" />
+                            <text class="node-label" x="60" y="125">1</text>
+                            <circle class="node match" cx="160" cy="120" r="21" />
+                            <text class="node-label" x="160" y="125">2</text>
+                        </svg>
+                        <p class="caption">subRoot = [4,1,2]</p>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top: 16px;">
+                    <span class="flow-box">compareTrees(3, 4)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">3 &ne; 4, reject candidate</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">compareTrees(4, 4)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">4 = 4, then 1 = 1, then 2 = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">true</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">compareTrees(5, 4)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">5 &ne; 4</span>
+                </div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;border-color:#2f9e78;"></div> Matched subtree</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffffd8;border-color:#d9b64a;"></div> Visited, value differs</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffffff;border-color:#dfe6e9;"></div> Other nodes</div>
+                </div>
+            </div>
+
+            <h3>Why Example 2 fails</h3>
+            <div class="diagram">
+                <div class="diagram-title">Same candidate value, different shape</div>
+                <div class="diagram-grid">
+                    <div class="tree-panel">
+                        <svg viewBox="0 0 340 230" role="img" aria-label="Root tree with node 4 whose right child 2 has a left child 0">
+                            <line class="edge" x1="170" y1="35" x2="85" y2="100" />
+                            <line class="edge" x1="170" y1="35" x2="255" y2="100" />
+                            <line class="edge" x1="85" y1="100" x2="45" y2="165" />
+                            <line class="edge" x1="85" y1="100" x2="125" y2="165" />
+                            <line class="edge" x1="125" y1="165" x2="105" y2="215" />
+                            <circle class="node other" cx="170" cy="35" r="19" />
+                            <text class="node-label" x="170" y="40">3</text>
+                            <circle class="node" cx="85" cy="100" r="19" />
+                            <text class="node-label" x="85" y="105">4</text>
+                            <circle class="node other" cx="255" cy="100" r="19" />
+                            <text class="node-label" x="255" y="105">5</text>
+                            <circle class="node" cx="45" cy="165" r="19" />
+                            <text class="node-label" x="45" y="170">1</text>
+                            <circle class="node" cx="125" cy="165" r="19" />
+                            <text class="node-label" x="125" y="170">2</text>
+                            <circle class="node" cx="105" cy="215" r="19" />
+                            <text class="node-label" x="105" y="220">0</text>
+                        </svg>
+                        <p class="caption">root &mdash; node 2 has an extra left child</p>
+                    </div>
+                    <div class="tree-panel">
+                        <svg viewBox="0 0 220 200" role="img" aria-label="Subroot 4 with children 1 and 2, node 2 has no children">
+                            <line class="edge" x1="110" y1="40" x2="60" y2="120" />
+                            <line class="edge" x1="110" y1="40" x2="160" y2="120" />
+                            <circle class="node" cx="110" cy="40" r="21" />
+                            <text class="node-label" x="110" y="45">4</text>
+                            <circle class="node" cx="60" cy="120" r="21" />
+                            <text class="node-label" x="60" y="125">1</text>
+                            <circle class="node" cx="160" cy="120" r="21" />
+                            <text class="node-label" x="160" y="125">2</text>
+                            <text class="node-tag" x="160" y="154">no child</text>
+                        </svg>
+                        <p class="caption">subRoot = [4,1,2]</p>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box">4 = 4, 1 = 1, 2 = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">left: node 0 vs null &rarr; mismatch</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">return false</span>
+                </div>
+            </div>
+
+            <ol class="step-list">
+                <li>Traverse every node of <code>root</code> (preorder in the implementation).</li>
+                <li>At each node, if <code>node.val === subRoot.val</code>, call <code>compareTrees</code>.</li>
+                <li><code>compareTrees</code>: both null &rarr; true; both non-null with equal values &rarr; recurse on both child pairs; anything else &rarr; false.</li>
+                <li>Remember a success in a flag and keep traversing. Return the flag.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: BFS at Every Node</h2>
+            <p><strong>Intuition:</strong> The candidate search can be level-by-level. A queue visits every node; the same <code>compareTrees</code> helper checks matches.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; m)</span>
+            <span class="complexity-badge badge-space">Space: O(w + h<sub>sub</sub>)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">BFS order on root = [3,4,5,1,2]</div>
+                <div class="level">
+                    <span class="level-label">level 0</span>
+                    <span class="queue-node skip">3</span>
+                    <span class="flow-box invalid" style="font-size:12px;">3 &ne; 4</span>
+                </div>
+                <div class="level">
+                    <span class="level-label">level 1</span>
+                    <span class="queue-node match">4</span>
+                    <span class="flow-box valid" style="font-size:12px;">compare &rarr; true</span>
+                    <span class="queue-node skip">5</span>
+                    <span class="flow-box invalid" style="font-size:12px;">5 &ne; 4</span>
+                </div>
+                <div class="level">
+                    <span class="level-label">level 2</span>
+                    <span class="queue-node skip">1</span>
+                    <span class="queue-node skip">2</span>
+                    <span class="flow-box" style="font-size:12px;">queued, then visited</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">BFS checks shallow candidates first, which can find a match sooner, but the worst-case bound is unchanged.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Serialize + Substring Search</h2>
+            <p><strong>Intuition:</strong> Preorder with explicit <code>#</code> null markers gives every tree a unique string. Then "is a subtree" becomes "is a substring".</p>
+            <span class="complexity-badge badge-time">Time: O(n + m) with KMP</span>
+            <span class="complexity-badge badge-space">Space: O(n + m)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Example 1 serialization (tokens separated by commas)</div>
+                <div class="code-block">root    = ,3,4,1,#,#,2,#,#,5,#,#,
+subRoot = ,4,1,#,#,2,#,#,
+
+                     <span class="match">,4,1,#,#,2,#,#,</span>
+root:  ,3,<span class="match">4,1,#,#,2,#,#,</span>5,#,#,
+              ^^^^^^^^^^^^^ substring found &rarr; true</div>
+                <div class="diagram-title" style="margin-top:16px;">Example 2 serialization</div>
+                <div class="code-block">root    = ,3,4,1,#,#,2,0,#,#,#,5,#,#,
+subRoot = ,4,1,#,#,2,#,#,
+
+root:  ,3,4,1,#,#,2,<span class="mismatch">0,#,#,#</span>,5,#,#,
+                     ^ the extra 0 changes the encoding &rarr; no match &rarr; false</div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">The leading comma prevents a match from starting inside a multi-digit value (e.g. <code>12</code> inside <code>512</code>). KMP keeps the search linear; a naive <code>includes</code> can degrade to O(n &middot; m).</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Subtree Hashing (Merkle-Style)</h2>
+            <p><strong>Intuition:</strong> Compute a hash for every subtree bottom-up. Identical trees produce identical hashes, so matching the hash of <code>subRoot</code> against the hashes of all subtrees of <code>root</code> answers the question.</p>
+            <span class="complexity-badge badge-time">Time: O(n + m) expected</span>
+            <span class="complexity-badge badge-space">Space: O(n + m)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Bottom-up hashes for root = [3,4,5,1,2]</div>
+                <svg viewBox="0 0 420 250" role="img" aria-label="Tree with hash labels computed bottom-up for every subtree">
+                    <line class="edge" x1="210" y1="45" x2="110" y2="120" />
+                    <line class="edge" x1="210" y1="45" x2="310" y2="120" />
+                    <line class="edge" x1="110" y1="120" x2="60" y2="195" />
+                    <line class="edge" x1="110" y1="120" x2="160" y2="195" />
+                    <circle class="node" cx="210" cy="45" r="24" />
+                    <text class="node-label" x="210" y="50">3</text>
+                    <text class="hash-label" x="210" y="88">H(3) = 0x9f2</text>
+                    <circle class="node" cx="110" cy="120" r="24" />
+                    <text class="node-label" x="110" y="125">4</text>
+                    <text class="hash-label" x="110" y="163">H(4) = 0x4c1</text>
+                    <circle class="node" cx="310" cy="120" r="24" />
+                    <text class="node-label" x="310" y="125">5</text>
+                    <text class="hash-label" x="310" y="163">H(5) = 0x71a</text>
+                    <circle class="node" cx="60" cy="195" r="24" />
+                    <text class="node-label" x="60" y="200">1</text>
+                    <text class="hash-label" x="60" y="238">0x1d0</text>
+                    <circle class="node" cx="160" cy="195" r="24" />
+                    <text class="node-label" x="160" y="200">2</text>
+                    <text class="hash-label" x="160" y="238">0x2e7</text>
+                </svg>
+                <div class="flow-row" style="margin-top:8px;">
+                    <span class="flow-box">hash(4) = mix(4, hash(1), hash(2))</span>
+                    <span class="arrow">=</span>
+                    <span class="flow-box valid">same as hash(subRoot) &rarr; true</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">Hash values above are illustrative. A real implementation mixes values with multiplication/xor, not addition, and should verify a hash hit because collisions are possible.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>DFS at every node</strong> (implemented)</td>
+                            <td>O(n &middot; m)</td>
+                            <td>O(h<sub>root</sub> + h<sub>sub</sub>)</td>
+                            <td>Direct definition; short; no auxiliary structures</td>
+                            <td>Repeats comparisons when values duplicate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BFS at every node</strong></td>
+                            <td>O(n &middot; m)</td>
+                            <td>O(w + h<sub>sub</sub>)</td>
+                            <td>Iterative; shallow matches found early</td>
+                            <td>Queue can grow to O(n); same repeated work</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Serialize + KMP</strong></td>
+                            <td>O(n + m)</td>
+                            <td>O(n + m)</td>
+                            <td>Optimal; tree equality becomes string search</td>
+                            <td>Delimiter details; extra memory; KMP needed for the bound</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Subtree hashing</strong></td>
+                            <td>O(n + m) expected</td>
+                            <td>O(n + m)</td>
+                            <td>Fast; hashes reusable across many queries</td>
+                            <td>Collision risk; needs careful mixing/verification</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Common Pitfalls</h2>
+            <div class="insight">
+                <strong>The one-sentence rule:</strong> a subtree must match the candidate node's <em>entire</em> descendant structure. Extra children break the match, even if all the values in <code>subRoot</code> are present.
+            </div>
+            <ul class="pitfalls" style="margin-top:14px;">
+                <li><strong>Null positions matter.</strong> <code>compareTrees</code> must return false when exactly one side is <code>null</code>. Comparing values without shape accepts "substructures" that are not subtrees.</li>
+                <li><strong>One failed candidate is not the answer.</strong> Duplicate values mean several nodes can be candidates; keep searching after a mismatch.</li>
+                <li><strong>The value filter is necessary for speed.</strong> Without checking <code>root.val === subRoot.val</code> first, the comparison runs at every node and the constant factor grows.</li>
+                <li><strong>Early exit is optional here.</strong> The submission stores success in <code>isSubTree</code> and keeps traversing; returning immediately would be faster but does not change correctness.</li>
+                <li><strong><code>subRoot</code> is non-empty by constraint.</strong> The code reads <code>subRoot.val</code> directly. A defensive version would handle <code>subRoot === null</code> first.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/subtree-of-another-tree/" target="_blank" rel="noopener">LeetCode 572: Subtree of Another Tree</a></li>
+                <li><a href="https://neetcode.io/problems/subtree-of-a-binary-tree" target="_blank" rel="noopener">NeetCode: Subtree of Another Tree</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_tree" target="_blank" rel="noopener">Concept: Binary Tree (Wikipedia)</a></li>
+                <li><a href="../binary-tree-diameter/README.md">Related in this repo: Binary Tree Diameter (DFS over trees)</a></li>
+                <li><a href="../invert-a-binary-tree/README.md">Related in this repo: Invert a Binary Tree (recursive tree rewriting)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
