@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Binary Search Tree - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.6; color: #2d3436;  white-space: pre;}
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; min-width: 580px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-grid { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; justify-content: center; }
+        .tree-panel { flex: 1 1 300px; max-width: 430px; }
+        .tree-panel .caption { text-align: center; font-size: 13px; color: #636e72; margin-top: 4px; }
+        svg { width: 100%; height: auto; display: block; }
+        .edge { stroke: #aa96da; stroke-width: 2; fill: none; }
+        .edge.red { stroke: #e05c6a; stroke-width: 3; }
+        .edge.dashed { stroke: #aa96da; stroke-width: 2; stroke-dasharray: 6 5; fill: none; }
+        .node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2; }
+        .node.valid { fill: #b5ead7; stroke: #2f9e78; }
+        .node.bad { fill: #ff9aa2; stroke: #c94b5a; }
+        .node.grey { fill: #f4f4f4; stroke: #dfe6e9; }
+        .node.scan { fill: #ffffd8; stroke: #d9b64a; }
+        .node-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .range { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; fill: #7a5fb5; text-anchor: middle; }
+        .range.bad { fill: #c94b5a; font-weight: 700; }
+        .note { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11px; fill: #636e72; text-anchor: middle; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #d9b64a; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; }
+        .array-container { display: flex; gap: 6px; margin: 14px 0; flex-wrap: wrap; align-items: center; }
+        .array-cell { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffff; color: #2d3436; }
+        .array-cell.ok { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.bad { background: #ff9aa2; border-color: #c94b5a; font-weight: 700; }
+        .array-index { font-size: 11px; color: #636e72; text-align: center; margin-top: 2px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-note { background: #ffd3b6; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .insight { border-left: 4px solid #aa96da; background: #f0eef6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 12px; font-size: 14px; }
+        ul.pitfalls { padding-left: 22px; color: #636e72; }
+        ul.pitfalls li { margin-bottom: 10px; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; margin-top: 8px; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Valid Binary Search Tree</h1>
+            <p class="subtitle">LeetCode 98 &mdash; Every node must respect the bounds of all its ancestors</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">BST</span>
+                <span class="tag purple">Recursion</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>A binary tree is a valid BST only if, for <em>every</em> node, all keys in its left subtree are strictly smaller and all keys in its right subtree are strictly greater. Checking a node against its immediate children is not enough &mdash; the constraint comes from the whole ancestor chain.</p>
+            <div class="code-block">Input:  root = [2,1,3]
+Output: true
+
+Input:  root = [5,1,4,null,null,3,6]
+Output: false   (4 is a right child of 5, but 4 &lt; 5)
+
+Input:  root = [5,4,6,null,null,3,7]
+Output: false   (3 is locally below 6, but it lies in the right subtree of 5)</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force &mdash; Scan Subtrees at Every Node</h2>
+            <p><strong>Intuition:</strong> Translate the definition directly. For every node, find the maximum of its left subtree and the minimum of its right subtree, then recurse.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;) worst</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Tree [10,5,15,3,7,null,20] &mdash; the same nodes are scanned repeatedly</div>
+                <div class="diagram-grid">
+                    <div class="tree-panel">
+                        <svg viewBox="0 0 400 260" role="img" aria-label="Balanced BST with 10 at the root; subtree scan regions highlighted">
+                            <rect x="18" y="65" width="145" height="170" rx="12" fill="#ffffd8" opacity="0.75" />
+                            <rect x="235" y="65" width="145" height="170" rx="12" fill="#ffffd8" opacity="0.75" />
+                            <line class="edge" x1="200" y1="40" x2="90" y2="105" />
+                            <line class="edge" x1="200" y1="40" x2="310" y2="105" />
+                            <line class="edge" x1="90" y1="105" x2="50" y2="180" />
+                            <line class="edge" x1="90" y1="105" x2="130" y2="180" />
+                            <line class="edge" x1="310" y1="105" x2="350" y2="180" />
+                            <circle class="node" cx="200" cy="40" r="22" />
+                            <text class="node-label" x="200" y="45">10</text>
+                            <circle class="node scan" cx="90" cy="105" r="22" />
+                            <text class="node-label" x="90" y="110">5</text>
+                            <circle class="node scan" cx="310" cy="105" r="22" />
+                            <text class="node-label" x="310" y="110">15</text>
+                            <circle class="node scan" cx="50" cy="180" r="22" />
+                            <text class="node-label" x="50" y="185">3</text>
+                            <circle class="node scan" cx="130" cy="180" r="22" />
+                            <text class="node-label" x="130" y="185">7</text>
+                            <circle class="node scan" cx="350" cy="180" r="22" />
+                            <text class="node-label" x="350" y="185">20</text>
+                            <text class="note" x="90" y="240">max(left of 10) = 7 &lt; 10 ✓</text>
+                            <text class="note" x="310" y="240">min(right of 10) = 15 &gt; 10 ✓</text>
+                        </svg>
+                        <p class="caption">Shaded boxes = subtrees scanned to validate the root</p>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top:12px;">
+                    <span class="flow-box">validate(10): scan 5,3,7 and 15,20</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">validate(5): scan 3,7 again</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">validate(15): scan 20 again</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box invalid">Node 3 and node 7 are re-checked at every ancestor &rarr; O(n&sup2;) for a skewed tree</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Bounds Propagation DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> Carry the allowed open interval down the recursion. Every node must satisfy <code>min &lt; node.val &lt; max</code>; going left lowers the upper bound, going right raises the lower bound.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Example 2 with inherited intervals &mdash; node 4 is impossible before its subtree is touched</div>
+                <svg viewBox="0 0 620 300" role="img" aria-label="Tree 5,1,4 with allowed intervals; node 4 fails because its interval is 5 to infinity">
+                    <line class="edge" x1="310" y1="55" x2="170" y2="145" />
+                    <line class="edge red" x1="310" y1="55" x2="450" y2="145" />
+                    <line class="edge dashed" x1="450" y1="145" x2="390" y2="235" />
+                    <line class="edge dashed" x1="450" y1="145" x2="510" y2="235" />
+                    <circle class="node valid" cx="310" cy="55" r="24" />
+                    <text class="node-label" x="310" y="60">5</text>
+                    <text class="range" x="310" y="22">(-&infin;, +&infin;)</text>
+                    <circle class="node valid" cx="170" cy="145" r="24" />
+                    <text class="node-label" x="170" y="150">1</text>
+                    <text class="range" x="170" y="112">(-&infin;, 5)</text>
+                    <circle class="node bad" cx="450" cy="145" r="24" />
+                    <text class="node-label" x="450" y="150">4</text>
+                    <text class="range bad" x="450" y="112">(5, +&infin;) &mdash; 4 &lt; 5 ✗</text>
+                    <circle class="node grey" cx="390" cy="235" r="22" />
+                    <text class="node-label" x="390" y="240">3</text>
+                    <text class="note" x="390" y="275">never visited</text>
+                    <circle class="node grey" cx="510" cy="235" r="22" />
+                    <text class="node-label" x="510" y="240">6</text>
+                    <text class="note" x="510" y="275">never visited</text>
+                </svg>
+                <div class="flow-row" style="margin-top:8px;">
+                    <span class="flow-box valid">isValid(5, -&infin;, &infin;) → pass</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">isValid(1, -&infin;, 5) → pass</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">isValid(4, 5, &infin;) → false</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">Because the check happens before recursing, the failure at <code>4</code> short-circuits the whole right branch. Nodes <code>3</code> and <code>6</code> are never examined.</p>
+            </div>
+
+            <h3>Why Example 3 needs the inherited bound</h3>
+            <div class="diagram">
+                <div class="diagram-title">Node 3 is inside (5, 6), not merely below 6</div>
+                <svg viewBox="0 0 620 300" role="img" aria-label="Tree 5,4,6,3,7 with node 3 failing the interval 5 to 6">
+                    <line class="edge" x1="310" y1="55" x2="180" y2="145" />
+                    <line class="edge" x1="310" y1="55" x2="440" y2="145" />
+                    <line class="edge" x1="440" y1="145" x2="380" y2="235" />
+                    <line class="edge" x1="440" y1="145" x2="500" y2="235" />
+                    <circle class="node valid" cx="310" cy="55" r="24" />
+                    <text class="node-label" x="310" y="60">5</text>
+                    <text class="range" x="310" y="22">(-&infin;, +&infin;)</text>
+                    <circle class="node valid" cx="180" cy="145" r="24" />
+                    <text class="node-label" x="180" y="150">4</text>
+                    <text class="range" x="180" y="112">(-&infin;, 5)</text>
+                    <circle class="node valid" cx="440" cy="145" r="24" />
+                    <text class="node-label" x="440" y="150">6</text>
+                    <text class="range" x="440" y="112">(5, +&infin;)</text>
+                    <circle class="node bad" cx="380" cy="235" r="24" />
+                    <text class="node-label" x="380" y="240">3</text>
+                    <text class="range bad" x="380" y="202">(5, 6)</text>
+                    <text class="note" x="380" y="277">3 &gt; 5 fails</text>
+                    <circle class="node valid" cx="500" cy="235" r="24" />
+                    <text class="node-label" x="500" y="240">7</text>
+                    <text class="range" x="500" y="202">(6, +&infin;)</text>
+                </svg>
+            </div>
+
+            <ol class="step-list">
+                <li>Call <code>isValid(root, -Infinity, Infinity)</code>.</li>
+                <li>If the node is <code>null</code>, return <code>true</code>.</li>
+                <li>If <code>node.val &lt;= min</code> or <code>node.val &gt;= max</code>, return <code>false</code>.</li>
+                <li>Left child inherits <code>(min, node.val)</code>.</li>
+                <li>Right child inherits <code>(node.val, max)</code>.</li>
+                <li>Return the <code>&amp;&amp;</code> of both recursive results.</li>
+            </ol>
+
+            <div class="code-block">isValid(root, min, max) {
+  if (root === null) return true;
+  if (root.val &gt; min &amp;&amp; root.val &lt; max) {
+    return isValid(root.left, min, root.val) &amp;&amp;
+           isValid(root.right, root.val, max);
+  }
+  return false;
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: In-Order Traversal</h2>
+            <p><strong>Intuition:</strong> A valid BST's in-order traversal is strictly increasing. Walk left &rarr; node &rarr; right and compare each value with the previous one.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n) or O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Example 2 &mdash; in-order output of [5,1,4,null,null,3,6]</div>
+                <div class="array-container">
+                    <div>
+                        <div class="array-cell ok">1</div>
+                        <div class="array-index">idx 0</div>
+                    </div>
+                    <div>
+                        <div class="array-cell ok">5</div>
+                        <div class="array-index">idx 1</div>
+                    </div>
+                    <div>
+                        <div class="array-cell bad">3</div>
+                        <div class="array-index">idx 2</div>
+                    </div>
+                    <div>
+                        <div class="array-cell">4</div>
+                        <div class="array-index">idx 3</div>
+                    </div>
+                    <div>
+                        <div class="array-cell">6</div>
+                        <div class="array-index">idx 4</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">1 &lt; 5 ✓</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">3 &lt; 5 ✗ not strictly increasing</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">false</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">The array is shown for clarity. A single <code>prev</code> variable gives the same check with O(h) space; no array is required.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Morris In-Order Traversal (O(1) Space)</h2>
+            <p><strong>Intuition:</strong> Thread each node's in-order predecessor back to it, so the traversal can return to an ancestor without a stack. Remove the thread when it is used.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Threading the predecessor of 5 (node 4) before descending left</div>
+                <div class="diagram-grid">
+                    <div class="tree-panel">
+                        <svg viewBox="0 0 420 280" role="img" aria-label="Tree 5 with left child 4; a dashed thread goes from 4 back to 5">
+                            <line class="edge" x1="210" y1="55" x2="100" y2="145" />
+                            <line class="edge" x1="210" y1="55" x2="320" y2="145" />
+                            <path class="edge dashed" d="M 100 145 C 40 210, 150 245, 200 78" />
+                            <circle class="node" cx="210" cy="55" r="24" />
+                            <text class="node-label" x="210" y="60">5</text>
+                            <circle class="node scan" cx="100" cy="145" r="24" />
+                            <text class="node-label" x="100" y="150">4</text>
+                            <circle class="node" cx="320" cy="145" r="24" />
+                            <text class="node-label" x="320" y="150">6</text>
+                            <text class="note" x="145" y="250">4.right = 5 (thread)</text>
+                        </svg>
+                        <p class="caption">No left child for 4 &rarr; visit 4, follow the thread to 5</p>
+                    </div>
+                    <div class="tree-panel" style="flex: 1 1 220px; max-width: 280px;">
+                        <div class="code-block" style="font-size:12px;">while (cur) {
+  if (!cur.left) {
+    visit(cur);
+    cur = cur.right;
+  } else {
+    pre = cur.left;
+    while (pre.right &amp;&amp; pre.right !== cur)
+      pre = pre.right;
+    if (!pre.right) {
+      pre.right = cur;   // thread
+      cur = cur.left;
+    } else {
+      pre.right = null;  // unthread
+      visit(cur);
+      cur = cur.right;
+    }
+  }
+}</div>
+                    </div>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">Each edge is walked at most twice, so the time stays O(n). The tree is restored before the traversal finishes. This is the only approach with O(1) auxiliary space.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brute force scans</strong></td>
+                            <td>O(n&sup2;) worst</td>
+                            <td>O(h)</td>
+                            <td>Literal definition; easy to reason about</td>
+                            <td>Re-scans subtrees; slow on skewed trees</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bounds DFS</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>One pass; early rejection; no extra data structures</td>
+                            <td>Must thread the bounds correctly</td>
+                        </tr>
+                        <tr>
+                            <td><strong>In-order traversal</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n) / O(h)</td>
+                            <td>Simple "sorted order" invariant</td>
+                            <td>Must reach the leftmost node before checking; array costs memory</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Morris traversal</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Constant extra space; no recursion</td>
+                            <td>Temporarily rewires pointers; subtle to implement</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Common Pitfalls</h2>
+            <div class="insight">
+                <strong>One sentence:</strong> a node is valid only if it lies strictly inside the intersection of all ancestor constraints &mdash; that intersection is exactly the open interval passed down the recursion.
+            </div>
+            <ul class="pitfalls" style="margin-top:14px;">
+                <li><strong>Do not check only parent and child.</strong> In <code>[5,4,6,null,null,3,7]</code>, every parent-child pair is ordered correctly, yet <code>3</code> is in the right subtree of <code>5</code>.</li>
+                <li><strong>Use strict inequalities.</strong> Duplicates are invalid, so the guard is <code>min &lt; val &amp;&amp; val &lt; max</code>.</li>
+                <li><strong>Carry both bounds.</strong> A left child keeps the lower bound and takes the parent as its upper bound; a right child keeps the upper bound and takes the parent as its lower bound.</li>
+                <li><strong>Do not use 0 or -1 as "no bound".</strong> Negative node values are legal; use <code>-Infinity</code> / <code>Infinity</code>.</li>
+                <li><strong>Empty trees are valid.</strong> Return <code>true</code> for <code>null</code>; the LeetCode constraints guarantee at least one node, but the base case still matters for leaves.</li>
+                <li><strong>Recursion depth can reach 10<sup>4</sup>.</strong> A skewed tree can exhaust the JS stack; Morris or an explicit stack avoids that.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/validate-binary-search-tree/" target="_blank" rel="noopener">LeetCode 98: Validate Binary Search Tree</a></li>
+                <li><a href="https://neetcode.io/problems/valid-binary-search-tree" target="_blank" rel="noopener">NeetCode: Valid Binary Search Tree</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_search_tree" target="_blank" rel="noopener">Concept: Binary Search Tree (Wikipedia)</a></li>
+                <li><a href="../binary-tree-diameter/README.md">Related in this repo: Binary Tree Diameter (bottom-up DFS)</a></li>
+                <li><a href="../invert-a-binary-tree/README.md">Related in this repo: Invert a Binary Tree (recursive traversal)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
