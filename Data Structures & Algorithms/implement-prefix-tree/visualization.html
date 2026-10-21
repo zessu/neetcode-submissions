@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implement Trie (Prefix Tree) - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: #2d3436; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.ok { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .word-list { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+        .word-chip { display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .word-chip.hit { background: #b5ead7; border-color: #b5ead7; }
+        .word-chip.scan { background: #ffd3b6; border-color: #ff9aa2; }
+        .set-box { border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; padding: 10px 12px; font-family: 'SF Mono', monospace; font-size: 13px; word-break: break-word; }
+        .set-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: #636e72; margin-bottom: 6px; font-weight: 600; }
+        .grid26 { display: grid; grid-template-columns: repeat(13, 1fr); gap: 4px; margin: 12px 0; }
+        .slot { height: 34px; display: flex; align-items: center; justify-content: center; border: 1px solid #dfe6e9; border-radius: 5px; background: #fdf6f0; color: #b2bec3; font-family: 'SF Mono', monospace; font-size: 11px; }
+        .slot.used { background: #a8d8ea; border-color: #a8d8ea; color: #2d3436; font-weight: 700; }
+        .slot.null { background: #ffffff; }
+        .slot.flag { background: #b5ead7; border-color: #b5ead7; color: #2d3436; font-weight: 700; }
+        .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+        .vs-col { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 12px; }
+        .vs-col h4 { font-size: 13px; margin-bottom: 8px; color: #2d3436; }
+        .vs-col p { font-size: 13px; margin: 0; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .pitfalls { list-style: none; padding: 0; margin: 0; }
+        .pitfalls li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid #dfe6e9; }
+        .pitfalls li:last-child { border-bottom: none; }
+        .pitfalls li::before { content: "!"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; background: #ff9aa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #2d3436; }
+        svg { width: 100%; height: auto; display: block; }
+        @media (max-width: 620px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .vs-grid { grid-template-columns: 1fr; }
+            .grid26 { grid-template-columns: repeat(7, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Implement Trie (Prefix Tree)</h1>
+            <p class="subtitle">LeetCode 208 &mdash; insert, search, and startsWith in O(L)</p>
+            <div class="tags">
+                <span class="tag">Trie</span>
+                <span class="tag">Design</span>
+                <span class="tag">String</span>
+                <span class="tag alt">Hash Table</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Store a set of lowercase words so that both complete-word queries and prefix queries take time proportional to the query length. The trie shares the path of every common prefix.</p>
+            <div class="code-block">Input:
+["Trie","insert","search","search","startsWith","insert","search"]
+[[],    ["apple"],["apple"],["app"], ["app"],    ["app"], ["app"]]
+
+Output:
+[null, null, true, false, true, null, true]</div>
+            <p><code>search("app")</code> is <code>false</code> after inserting only <code>"apple"</code> because <code>"app"</code> is a prefix, not a stored word. Inserting <code>"app"</code> later flips the answer to <code>true</code>.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Word List + Linear Scan</h2>
+            <p><strong>Intuition:</strong> Keep every inserted word in a list. A query compares against every word, using <code>startsWith</code> for prefix queries.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; L) per query</span>
+            <span class="complexity-badge badge-space">Space: O(n &middot; L)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">startsWith("app") scans words = ["apple", "ape", "car"]</div>
+                <div class="word-list">
+                    <div class="word-chip scan">"apple" &mdash; starts with "app" &check;</div>
+                    <div class="word-chip">"ape" &mdash; starts with "ape", not "app" &cross;</div>
+                    <div class="word-chip">"car" &mdash; no &cross;</div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">check word 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">match, return true</span>
+                </div>
+                <p class="diagram-note">The scan can stop early on a hit, but a miss (e.g. <code>startsWith("b")</code>) inspects every word. Nothing is shared between <code>"apple"</code> and <code>"ape"</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Hash Sets of Words and Prefixes</h2>
+            <p><strong>Intuition:</strong> Precompute both answers. One set holds complete words (<code>search</code>), another holds every prefix of every inserted word (<code>startsWith</code>).</p>
+            <span class="complexity-badge badge-time">Time: O(L) query, O(L&sup2;) insert</span>
+            <span class="complexity-badge badge-space">Space: O(n &middot; L&sup2;) characters</span>
+
+            <div class="diagram">
+                <div class="diagram-title">After inserting "apple" and "ape"</div>
+                <div class="vs-grid">
+                    <div class="vs-col">
+                        <h4>words</h4>
+                        <div class="set-box">{ "apple", "ape" }</div>
+                        <p style="margin-top: 8px;">search("app") &rarr; false</p>
+                    </div>
+                    <div class="vs-col">
+                        <h4>prefixes</h4>
+                        <div class="set-box">{ "a", "ap", "app", "appl", "apple", "ape" }</div>
+                        <p style="margin-top: 8px;">startsWith("app") &rarr; true</p>
+                    </div>
+                </div>
+                <p class="diagram-note">Every prefix is stored as its own string, so <code>"a"</code>, <code>"ap"</code>, <code>"app"</code>&hellip; are duplicated across words. Queries are a single hash lookup, but insertions pay <code>O(L&sup2;)</code> character copying and memory grows with the sum of all prefix lengths.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Object Trie (Implemented)</h2>
+            <p><strong>Intuition:</strong> Each node maps a character to a child node. Walking a string is following one property per character; an <code>isWord</code> flag marks where a stored word ends.</p>
+            <span class="complexity-badge badge-time">Time: O(L) per operation</span>
+            <span class="complexity-badge badge-space">Space: O(T) total characters</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Trie after inserting "app", "apple", "ape": paths for search("app") and startsWith("ap")</div>
+                <svg viewBox="0 0 600 300" role="img" aria-label="Trie containing apple and app, with the path a-p-p highlighted">
+                    <defs>
+                        <marker id="trie-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L6,3 L0,6 Z" fill="#aa96da"></path>
+                        </marker>
+                    </defs>
+
+                    <!-- edges -->
+                    <line x1="74" y1="150" x2="126" y2="150" stroke="#ff9aa2" stroke-width="2.5" marker-end="url(#trie-arrow)"></line>
+                    <line x1="164" y1="150" x2="216" y2="150" stroke="#ff9aa2" stroke-width="2.5" marker-end="url(#trie-arrow)"></line>
+                    <line x1="254" y1="150" x2="306" y2="150" stroke="#ff9aa2" stroke-width="2.5" marker-end="url(#trie-arrow)"></line>
+                    <line x1="340" y1="140" x2="399" y2="96" stroke="#aa96da" stroke-width="2" marker-end="url(#trie-arrow)"></line>
+                    <line x1="434" y1="85" x2="486" y2="85" stroke="#aa96da" stroke-width="2" marker-end="url(#trie-arrow)"></line>
+                    <line x1="340" y1="160" x2="399" y2="204" stroke="#aa96da" stroke-width="2" marker-end="url(#trie-arrow)"></line>
+
+                    <!-- root -->
+                    <circle cx="56" cy="150" r="18" fill="#f0eef6" stroke="#aa96da" stroke-width="2"></circle>
+                    <text x="56" y="154" text-anchor="middle" font-family="'SF Mono', monospace" font-size="10" fill="#2d3436">root</text>
+
+                    <!-- a -->
+                    <circle cx="145" cy="150" r="19" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"></circle>
+                    <text x="145" y="155" text-anchor="middle" font-family="'SF Mono', monospace" font-size="14" fill="#2d3436">a</text>
+
+                    <!-- p1 -->
+                    <circle cx="235" cy="150" r="19" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"></circle>
+                    <text x="235" y="155" text-anchor="middle" font-family="'SF Mono', monospace" font-size="14" fill="#2d3436">p</text>
+
+                    <!-- p2 -->
+                    <circle cx="325" cy="150" r="19" fill="#b5ead7" stroke="#7fc9ad" stroke-width="2"></circle>
+                    <text x="325" y="155" text-anchor="middle" font-family="'SF Mono', monospace" font-size="14" fill="#2d3436">p</text>
+                    <circle cx="325" cy="150" r="25" fill="none" stroke="#7fc9ad" stroke-width="2" stroke-dasharray="3 3"></circle>
+                    <text x="325" y="122" text-anchor="middle" font-family="'SF Mono', monospace" font-size="11" fill="#2d7a63">isWord</text>
+
+                    <!-- l -->
+                    <circle cx="415" cy="85" r="19" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></circle>
+                    <text x="415" y="90" text-anchor="middle" font-family="'SF Mono', monospace" font-size="14" fill="#2d3436">l</text>
+
+                    <!-- e for apple -->
+                    <circle cx="505" cy="85" r="19" fill="#b5ead7" stroke="#7fc9ad" stroke-width="2"></circle>
+                    <text x="505" y="90" text-anchor="middle" font-family="'SF Mono', monospace" font-size="14" fill="#2d3436">e</text>
+                    <text x="505" y="57" text-anchor="middle" font-family="'SF Mono', monospace" font-size="11" fill="#2d7a63">isWord</text>
+
+                    <!-- e for ape -->
+                    <circle cx="415" cy="215" r="19" fill="#b5ead7" stroke="#7fc9ad" stroke-width="2"></circle>
+                    <text x="415" y="220" text-anchor="middle" font-family="'SF Mono', monospace" font-size="14" fill="#2d3436">e</text>
+                    <text x="415" y="252" text-anchor="middle" font-family="'SF Mono', monospace" font-size="11" fill="#2d7a63">isWord</text>
+
+                    <!-- labels -->
+                    <text x="300" y="285" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#636e72">Orange path: traversal for search("app"). Green ring: terminal marker.</text>
+                </svg>
+                <div class="flow-row">
+                    <span class="flow-box">search("app")</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">a &rarr; p &rarr; p exists</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">isWord = true</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">true</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">startsWith("ap")</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">stops after p</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">true (marker not needed)</span>
+                </div>
+                <p class="diagram-note">The middle <code>p</code> node is the terminal for <code>"app"</code>. Before that insert it only marked the shared prefix <code>"ap"</code>, so <code>search("app")</code> was <code>false</code> while <code>startsWith("app")</code> was already <code>true</code>. The insertion flips one flag; no nodes are duplicated.</p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Path node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Traversed node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Terminal node</div>
+            </div>
+            <div class="code-block">class PrefixTree {
+    root = {};
+
+    insert(word) {
+        let node = this.root;
+        for (const char of word) {
+            if (!node[char]) node[char] = {};
+            node = node[char];
+        }
+        node["isWord"] = true;
+    }
+
+    search(word) {
+        let node = this.root;
+        for (const char of word) {
+            node = node[char];
+            if (!node) return false;
+        }
+        return node["isWord"] || false;
+    }
+
+    startsWith(prefix) {
+        let node = this.root;
+        for (const char of prefix) {
+            node = node[char];
+            if (!node) return false;
+        }
+        return true;
+    }
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: 26-Slot Children Array</h2>
+            <p><strong>Intuition:</strong> The alphabet is fixed at 26 lowercase letters, so each node can use a 26-element array instead of an object. Child lookup becomes an index calculation: <code>charCodeAt(i) - 97</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(L)</span>
+            <span class="complexity-badge badge-space">Space: O(26 &middot; T)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Children array of the node reached after "ap"</div>
+                <div class="grid26">
+                    <div class="slot used">a</div>
+                    <div class="slot null">b</div>
+                    <div class="slot null">c</div>
+                    <div class="slot null">d</div>
+                    <div class="slot null">e</div>
+                    <div class="slot null">f</div>
+                    <div class="slot null">g</div>
+                    <div class="slot null">h</div>
+                    <div class="slot null">i</div>
+                    <div class="slot null">j</div>
+                    <div class="slot null">k</div>
+                    <div class="slot null">l</div>
+                    <div class="slot null">m</div>
+                    <div class="slot null">n</div>
+                    <div class="slot null">o</div>
+                    <div class="slot used">p</div>
+                    <div class="slot null">q</div>
+                    <div class="slot null">r</div>
+                    <div class="slot null">s</div>
+                    <div class="slot null">t</div>
+                    <div class="slot null">u</div>
+                    <div class="slot null">v</div>
+                    <div class="slot null">w</div>
+                    <div class="slot null">x</div>
+                    <div class="slot null">y</div>
+                    <div class="slot null">z</div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">child 'p'</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">children[112 - 97]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">children[15]</span>
+                </div>
+                <p class="diagram-note">Only 2 of the 26 slots are used here, yet all 26 pointers are allocated. The trade is a faster lookup constant for roughly 13x more pointer memory. (The <code>isWord</code> flag lives beside the array, not inside it.)</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>insert</th><th>search</th><th>startsWith</th><th>Space</th><th>When to use</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Word list + scan</strong></td>
+                            <td>O(1)</td><td>O(n &middot; L)</td><td>O(n &middot; L)</td><td>O(n &middot; L)</td>
+                            <td>Tiny dictionaries</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hash sets (words + prefixes)</strong></td>
+                            <td>O(L&sup2;) chars</td><td>O(L)</td><td>O(L)</td><td>O(n &middot; L&sup2;)</td>
+                            <td>Static, read-heavy, memory available</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Object trie (implemented)</strong></td>
+                            <td>O(L)</td><td>O(L)</td><td>O(L)</td><td>O(T)</td>
+                            <td>General-purpose, prefix sharing</td>
+                        </tr>
+                        <tr>
+                            <td><strong>26-slot array trie</strong></td>
+                            <td>O(L)</td><td>O(L)</td><td>O(L)</td><td>O(26 &middot; T)</td>
+                            <td>Speed-critical, dense alphabet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="diagram-note"><code>n</code> = number of inserted words, <code>L</code> = query length, <code>T</code> = total characters stored.</p>
+        </div>
+
+        <div class="card">
+            <h2>Key Insight &amp; Common Pitfalls</h2>
+            <p><strong>Key insight:</strong> a trie stores <em>characters</em>, not words. The path is shared by every word with that prefix, and a single boolean at the end of a path distinguishes a word from a mere prefix.</p>
+            <ul class="pitfalls">
+                <li><strong>Returning <code>true</code> from <code>search</code> whenever the path exists</strong> &mdash; that answers <code>startsWith</code>, not <code>search</code>. The terminal flag is mandatory.</li>
+                <li><strong>Marking the wrong node:</strong> set <code>isWord</code> after consuming the last character, not on the root or the parent.</li>
+                <li><strong>Overwriting shared children:</strong> only create <code>node[char]</code> when it is missing; never replace an existing subtree.</li>
+                <li><strong>Continuing after a missing child:</strong> return <code>false</code> immediately; <code>node[char]</code> is <code>undefined</code>.</li>
+                <li><strong>Boolean coercion:</strong> an absent flag is <code>undefined</code>; <code>|| false</code> (or <code>Boolean()</code>) keeps the return type a real boolean.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/implement-trie-prefix-tree/" target="_blank" rel="noopener">LeetCode 208: Implement Trie (Prefix Tree)</a></li>
+                <li><a href="https://neetcode.io/problems/implement-prefix-tree" target="_blank" rel="noopener">NeetCode: Implement Prefix Tree</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Trie" target="_blank" rel="noopener">Concept: Trie (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/trie-insert-and-search/" target="_blank" rel="noopener">Concept: Trie Insert and Search (GeeksforGeeks)</a></li>
+                <li><a href="../string-encode-and-decode/visualization.html">Related in this repo: String Encode and Decode (LeetCode 271)</a></li>
+                <li><a href="../lru-cache/visualization.html">Related in this repo: LRU Cache (LeetCode 146)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
