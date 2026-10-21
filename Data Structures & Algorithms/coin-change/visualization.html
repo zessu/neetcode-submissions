@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Change - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: #2d3436; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        svg { width: 100%; height: auto; display: block; }
+        .tree { margin: 8px 0 0 4px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .tree-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; flex-wrap: wrap; }
+        .tree-indent { color: #b2bec3; }
+        .call { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 4px 10px; }
+        .call.solved { background: #b5ead7; border-color: #7fc9ad; }
+        .call.hit { background: #ffffd8; border-color: #f0c929; }
+        .call.fail { background: #ff9aa2; border-color: #e07a83; }
+        .call.current { background: #ffd3b6; border-color: #ff9aa2; }
+        .tag-small { font-size: 11px; color: #636e72; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .level-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+        .level-label { width: 66px; font-family: 'SF Mono', monospace; font-size: 12px; color: #636e72; flex: 0 0 auto; }
+        .amount-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 32px; padding: 0 8px; border-radius: 16px; background: #ffffff; border: 2px solid #a8d8ea; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .amount-pill.seen { background: #f0eef6; border-color: #dfe6e9; color: #b2bec3; }
+        .amount-pill.found { background: #b5ead7; border-color: #7fc9ad; font-weight: 700; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.ok { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .pitfalls { list-style: none; padding: 0; margin: 0; }
+        .pitfalls li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid #dfe6e9; }
+        .pitfalls li:last-child { border-bottom: none; }
+        .pitfalls li::before { content: "!"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; background: #ff9aa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #2d3436; }
+        @media (max-width: 620px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .level-label { width: 54px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Coin Change</h1>
+            <p class="subtitle">LeetCode 322 &mdash; fewest coins to reach an amount, with unlimited coins</p>
+            <div class="tags">
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag">Memoization</span>
+                <span class="tag">BFS</span>
+                <span class="tag alt">Array</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given unlimited coins of the listed denominations, return the minimum number of coins that sum to <code>amount</code>, or <code>-1</code> if it is impossible. <code>amount = 0</code> needs zero coins.</p>
+            <div class="code-block">Input:  coins = [1, 2, 5], amount = 11
+Output: 3          (11 = 5 + 5 + 1)
+
+Input:  coins = [2], amount = 3
+Output: -1         (every reachable sum is even)
+
+Input:  coins = [1], amount = 0
+Output: 0</div>
+            <p>Greedy fails in general: for <code>coins = [1, 3, 4]</code> and <code>amount = 6</code>, taking <code>4</code> first gives 3 coins, while <code>3 + 3</code> uses only 2.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute-Force Recursion</h2>
+            <p><strong>Intuition:</strong> Try every coin at every step and recurse on the remaining amount. The answer is one plus the best answer for the remainder.</p>
+            <span class="complexity-badge badge-time">Time: exponential</span>
+            <span class="complexity-badge badge-space">Space: O(amount / min coin) stack</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Call tree for amount 6 with coins [1, 2, 5] &mdash; duplicate work in red</div>
+                <div class="tree">
+                    <div class="tree-row"><span class="call current">dfs(6)</span></div>
+                    <div class="tree-row"><span class="tree-indent">├─</span><span class="call">dfs(5)</span><span class="tag-small">coin 1</span></div>
+                    <div class="tree-row"><span class="tree-indent">&nbsp;&nbsp;├─</span><span class="call">dfs(4)</span></div>
+                    <div class="tree-row"><span class="tree-indent">&nbsp;&nbsp;│&nbsp;&nbsp;├─</span><span class="call">dfs(3)</span></div>
+                    <div class="tree-row"><span class="tree-indent">&nbsp;&nbsp;│&nbsp;&nbsp;│&nbsp;&nbsp;└─</span><span class="call">dfs(2)</span><span class="tag-small">... keeps branching</span></div>
+                    <div class="tree-row"><span class="tree-indent">├─</span><span class="call fail">dfs(4) again</span><span class="tag-small">same state, recomputed</span></div>
+                    <div class="tree-row"><span class="tree-indent">└─</span><span class="call fail">dfs(1) again</span><span class="tag-small">already solved inside dfs(4)</span></div>
+                </div>
+                <p class="diagram-note">Every branch re-explores the same smaller amounts. With <code>amount = 11</code> the duplication is already substantial; with <code>amount = 10^4</code> it is catastrophic.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Memoized DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> The recursion has overlapping subproblems, so cache the answer for each remaining amount. The first call solves it; later calls are an <code>O(1)</code> lookup.</p>
+            <span class="complexity-badge badge-time">Time: O(amount &middot; coins)</span>
+            <span class="complexity-badge badge-space">Space: O(amount) cache + recursion</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Solving dfs(6) with a cache: repeated states become hits</div>
+                <div class="tree">
+                    <div class="tree-row"><span class="call current">splitChange(6)</span></div>
+                    <div class="tree-row"><span class="tree-indent">├─</span><span class="call">splitChange(5)</span><span class="tag-small">coin 1 &rarr; computes 5, 4, 3, 2, 1, 0</span></div>
+                    <div class="tree-row"><span class="tree-indent">│&nbsp;&nbsp;└─</span><span class="call solved">splitChange(4)</span><span class="tag-small">cached = 2</span></div>
+                    <div class="tree-row"><span class="tree-indent">├─</span><span class="call hit">splitChange(4)</span><span class="tag-small">coin 2 &rarr; cache hit, no recursion</span></div>
+                    <div class="tree-row"><span class="tree-indent">└─</span><span class="call hit">splitChange(1)</span><span class="tag-small">coin 5 &rarr; cache hit</span></div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">splitChange(6)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">1 + dp[5] = 2</span>
+                    <span class="flow-box ok">1 + dp[4] = 3</span>
+                    <span class="flow-box ok">1 + dp[1] = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">min = 2</span>
+                </div>
+                <p class="diagram-note">The cache stores <code>Infinity</code> too, so impossible amounts are also solved only once. Negative remainders return <code>Infinity</code> immediately and are never cached, since they are branch failures rather than states.</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Cache contents for coins [1, 2, 5] after solving amount 11</div>
+                <svg viewBox="0 0 800 190" role="img" aria-label="Memo table for amounts 0 through 11">
+                    <g font-family="'SF Mono', monospace">
+                        <!-- amount labels -->
+                        <text x="38" y="28" text-anchor="middle" font-size="12" fill="#636e72">0</text>
+                        <text x="102" y="28" text-anchor="middle" font-size="12" fill="#636e72">1</text>
+                        <text x="166" y="28" text-anchor="middle" font-size="12" fill="#636e72">2</text>
+                        <text x="230" y="28" text-anchor="middle" font-size="12" fill="#636e72">3</text>
+                        <text x="294" y="28" text-anchor="middle" font-size="12" fill="#636e72">4</text>
+                        <text x="358" y="28" text-anchor="middle" font-size="12" fill="#636e72">5</text>
+                        <text x="422" y="28" text-anchor="middle" font-size="12" fill="#636e72">6</text>
+                        <text x="486" y="28" text-anchor="middle" font-size="12" fill="#636e72">7</text>
+                        <text x="550" y="28" text-anchor="middle" font-size="12" fill="#636e72">8</text>
+                        <text x="614" y="28" text-anchor="middle" font-size="12" fill="#636e72">9</text>
+                        <text x="678" y="28" text-anchor="middle" font-size="12" fill="#636e72">10</text>
+                        <text x="742" y="28" text-anchor="middle" font-size="12" fill="#636e72">11</text>
+
+                        <!-- cells -->
+                        <rect x="12" y="44" width="52" height="48" rx="8" fill="#b5ead7" stroke="#7fc9ad" stroke-width="2"></rect>
+                        <rect x="76" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="140" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="204" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="268" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="332" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="396" y="44" width="52" height="48" rx="8" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"></rect>
+                        <rect x="460" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="524" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="588" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="652" y="44" width="52" height="48" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <rect x="716" y="44" width="52" height="48" rx="8" fill="#ffffd8" stroke="#f0c929" stroke-width="2"></rect>
+
+                        <!-- values -->
+                        <g font-size="18" text-anchor="middle" fill="#2d3436" font-weight="bold">
+                            <text x="38" y="75">0</text>
+                            <text x="102" y="75">1</text>
+                            <text x="166" y="75">1</text>
+                            <text x="230" y="75">2</text>
+                            <text x="294" y="75">2</text>
+                            <text x="358" y="75">1</text>
+                            <text x="422" y="75">2</text>
+                            <text x="486" y="75">2</text>
+                            <text x="550" y="75">3</text>
+                            <text x="614" y="75">3</text>
+                            <text x="678" y="75">2</text>
+                            <text x="742" y="75">3</text>
+                        </g>
+
+                        <!-- annotations -->
+                        <text x="38" y="116" text-anchor="middle" font-size="10" fill="#2d7a63">base</text>
+                        <text x="422" y="116" text-anchor="middle" font-size="10" fill="#9c4a1a">via 5</text>
+                        <text x="742" y="116" text-anchor="middle" font-size="10" fill="#8a6d00">answer</text>
+
+                        <text x="38" y="148" text-anchor="middle" font-size="11" fill="#636e72">dp[0]=0</text>
+                        <text x="422" y="148" text-anchor="middle" font-size="11" fill="#636e72">dp[6]=2</text>
+                        <text x="742" y="148" text-anchor="middle" font-size="11" fill="#636e72">dp[11]=3</text>
+
+                        <text x="420" y="178" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#636e72">dp[11] = min(dp[10], dp[9], dp[6]) + 1 = min(2, 3, 2) + 1 = 3</text>
+                    </g>
+                </svg>
+                <p class="diagram-note">The memo table after the full call: each amount <code>0..11</code> has exactly one entry. The orange cell is the subproblem used by the winning transition; the yellow cell is the answer. Reconstruction: <code>11 &rarr; 6 &rarr; 1 &rarr; 0</code>, i.e. <code>5 + 5 + 1</code>.</p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Base case</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Best subproblem</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffd8;"></div> Final answer</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff;"></div> Cached state</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Bottom-Up DP (Tabulation)</h2>
+            <p><strong>Intuition:</strong> Fill the same table iteratively from <code>0</code> upward. Each <code>dp[a]</code> depends only on smaller amounts, so no recursion is needed.</p>
+            <span class="complexity-badge badge-time">Time: O(amount &middot; coins)</span>
+            <span class="complexity-badge badge-space">Space: O(amount)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Filling dp for coins [1, 2, 5], one amount at a time</div>
+                <div class="code-block">dp[0] = 0
+for a = 1 .. 11:
+    dp[a] = min over coin <= a of dp[a - coin] + 1
+
+a=1:  dp[0]+1 = 1                       -> 1
+a=2:  dp[1]+1 = 2, dp[0]+1 = 1          -> 1
+a=3:  dp[2]+1 = 2, dp[1]+1 = 2          -> 2
+a=4:  dp[3]+1 = 3, dp[2]+1 = 2          -> 2
+a=5:  dp[4]+1, dp[3]+1, dp[0]+1         -> 1
+...
+a=11: dp[10]+1 = 3, dp[9]+1 = 4, dp[6]+1 = 3  -> 3</div>
+                <div class="flow-row">
+                    <span class="flow-box">dp[6] = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">+ coin 5</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">dp[11] = 3</span>
+                </div>
+                <p class="diagram-note">No call stack, so <code>amount = 10^4</code> is safe. The inner loop can iterate over coins or over amounts; both give <code>O(amount &middot; coins)</code>. Returning <code>-1</code> is a final check on <code>dp[amount] === Infinity</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: BFS over Amounts</h2>
+            <p><strong>Intuition:</strong> Amounts are nodes; adding a coin is an edge of cost 1. The fewest coins is the shortest path from <code>0</code> to <code>amount</code>, so BFS by levels finds it.</p>
+            <span class="complexity-badge badge-time">Time: O(amount &middot; coins)</span>
+            <span class="complexity-badge badge-space">Space: O(amount)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">BFS levels for coins [1, 2, 5], target 11</div>
+                <div class="level-row">
+                    <div class="level-label">level 0</div>
+                    <div class="amount-pill">0</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-label">level 1</div>
+                    <div class="amount-pill">1</div>
+                    <div class="amount-pill">2</div>
+                    <div class="amount-pill">5</div>
+                    <span class="tag-small">new amounts after one coin</span>
+                </div>
+                <div class="level-row">
+                    <div class="level-label">level 2</div>
+                    <div class="amount-pill seen">3</div>
+                    <div class="amount-pill seen">4</div>
+                    <div class="amount-pill seen">6</div>
+                    <div class="amount-pill seen">7</div>
+                    <div class="amount-pill seen">10</div>
+                    <span class="tag-small">duplicates (2, 5, ...) already visited are skipped</span>
+                </div>
+                <div class="level-row">
+                    <div class="level-label">level 3</div>
+                    <div class="amount-pill seen">8</div>
+                    <div class="amount-pill seen">9</div>
+                    <div class="amount-pill found">11</div>
+                    <span class="tag-small">11 = 6 + 5 &rarr; 3 coins, stop</span>
+                </div>
+                <p class="diagram-note">A <code>visited</code> array prevents re-enqueuing amounts, so each of the <code>amount + 1</code> states is expanded once. BFS can stop early, unlike bottom-up DP, but it stores a frontier queue.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Recursion risk</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brute-force recursion</strong></td>
+                            <td>Exponential</td><td>O(A / m)</td><td>High</td>
+                            <td>Recomputes overlapping states</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Memoized DFS (implemented)</strong></td>
+                            <td>O(A &middot; C)</td><td>O(A)</td><td>Depth up to A / m</td>
+                            <td>Natural recurrence; only reachable states</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bottom-up DP</strong></td>
+                            <td>O(A &middot; C)</td><td>O(A)</td><td>None</td>
+                            <td>Safest for maximum input</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BFS over amounts</strong></td>
+                            <td>O(A &middot; C)</td><td>O(A)</td><td>None</td>
+                            <td>Can stop early; queue frontier</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="diagram-note"><code>A</code> = amount, <code>C</code> = number of coin denominations, <code>m</code> = smallest coin.</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul class="pitfalls">
+                <li><strong>Greedy is wrong:</strong> <code>coins = [1, 3, 4], amount = 6</code> &rarr; greedy uses 3 coins, optimal uses 2 (<code>3 + 3</code>).</li>
+                <li><strong>Forgetting amount 0:</strong> the base case is <code>0</code>, not <code>-1</code> and not <code>Infinity</code>.</li>
+                <li><strong>Returning <code>Infinity</code>:</strong> convert to <code>-1</code> at the boundary.</li>
+                <li><strong>Not caching unreachable amounts:</strong> caching <code>Infinity</code> is what prevents exponential recomputation of dead branches.</li>
+                <li><strong>Wrong DP initialization:</strong> <code>fill(Infinity)</code>, then <code>dp[0] = 0</code>. Filling with <code>0</code> makes every amount look reachable.</li>
+                <li><strong>Index out of range:</strong> only read <code>dp[a - coin]</code> when <code>coin &lt;= a</code>.</li>
+                <li><strong>Recursion depth:</strong> top-down depth can reach <code>amount / min(coin)</code> (up to 10,000), which can overflow a default JS call stack. Prefer bottom-up for worst-case inputs.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/coin-change/" target="_blank" rel="noopener">LeetCode 322: Coin Change</a></li>
+                <li><a href="https://neetcode.io/problems/coin-change" target="_blank" rel="noopener">NeetCode: Coin Change</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Change-making_problem" target="_blank" rel="noopener">Concept: Change-making Problem (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/coin-change-dp-7/" target="_blank" rel="noopener">Concept: Coin Change DP (GeeksforGeeks)</a></li>
+                <li><a href="../coin-change-minimum-coins/visualization.html">Related in this repo: Coin Change (Minimum Coins), GeeksforGeeks variant</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
