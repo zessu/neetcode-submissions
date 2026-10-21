@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Maximum Path Sum - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.green { background: #b5ead7; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .tag.red { background: #ff9aa2; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #2d3436; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 540px; margin: 0 auto; display: block; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2px; }
+        .tree-node.active { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-node.good { fill: #b5ead7; stroke: #6fcfae; }
+        .tree-node.bad { fill: #ff9aa2; stroke: #e5737b; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-edge.path { stroke: #6fcfae; stroke-width: 3px; }
+        .tree-edge.recompute { stroke: #ff9aa2; stroke-width: 2px; stroke-dasharray: 5 4; }
+        .tree-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .tree-note { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11px; fill: #636e72; text-anchor: middle; }
+        .tree-note.start { text-anchor: start; }
+        .tree-note.end { text-anchor: end; }
+        .tree-note.green { fill: #2f9e76; font-weight: 700; }
+        .tree-note.red { fill: #e5737b; font-weight: 600; }
+        .recompute-box { fill: none; stroke: #ff9aa2; stroke-width: 2px; stroke-dasharray: 6 4; }
+        .formula-box { background: #ffffd8; border: 1px solid #f0c929; border-radius: 8px; padding: 12px 16px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; margin: 10px 0; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #e5737b; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+        .callout { background: #ffffd8; border-left: 4px solid #f0c929; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .callout p { margin: 0; color: #2d3436; }
+        .pitfalls { padding-left: 20px; color: #636e72; }
+        .pitfalls li { margin-bottom: 10px; }
+        .pitfalls strong { color: #2d3436; }
+        .order-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+        .order-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .order-node { min-width: 46px; height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; }
+        .order-node.done { background: #b5ead7; border-color: #6fcfae; }
+        .order-idx { font-size: 11px; color: #636e72; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.35rem; }
+            .card { padding: 18px; }
+            .card h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Binary Tree Maximum Path Sum</h1>
+            <p class="subtitle">LeetCode 124 &mdash; Find the best non-empty path, which may bend at any node</p>
+            <div class="tags">
+                <span class="tag red">Hard</span>
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag">Tree</span>
+                <span class="tag">Depth-First Search</span>
+                <span class="tag purple">Binary Tree</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>A path is a sequence of connected nodes with no repeats. It may start and end anywhere, and it may bend at one <strong>apex</strong> node: going up from one descendant to the apex, then down into the other side. The path must contain at least one node.</p>
+            <p>The challenge is that the best path may not include the root, and a path that goes up to a parent can use only <em>one</em> of its child branches. Those two facts drive the whole algorithm.</p>
+            <div class="code-block">Input:  root = [-10,9,20,null,null,15,7]
+Output: 42
+
+Best path: 15 &rarr; 20 &rarr; 7
+The root -10 is excluded because it would reduce the sum to 34.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force (Every Node as Apex)</h2>
+            <p><strong>Intuition:</strong> Every path has a unique highest node. Try every node as the apex. For each one, compute the best downward gain on the left and on the right, add both to the node's value, and keep the maximum.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;) worst</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">The subtree at 20 is measured again when -10 is considered</div>
+                <svg class="tree-svg" viewBox="0 0 540 310" role="img" aria-label="Tree with root -10, node 20 highlighted as a subtree that gets recomputed">
+                    <line class="tree-edge" x1="270" y1="50" x2="150" y2="130" />
+                    <line class="tree-edge" x1="270" y1="50" x2="390" y2="130" />
+                    <line class="tree-edge recompute" x1="390" y1="130" x2="320" y2="220" />
+                    <line class="tree-edge recompute" x1="390" y1="130" x2="460" y2="220" />
+
+                    <circle class="tree-node active" cx="270" cy="50" r="24" />
+                    <text class="tree-label" x="270" y="55">-10</text>
+                    <text class="tree-note start" x="302" y="45">apex candidate 34</text>
+
+                    <circle class="tree-node" cx="150" cy="130" r="24" />
+                    <text class="tree-label" x="150" y="135">9</text>
+                    <text class="tree-note" x="150" y="166">gain 9</text>
+
+                    <rect class="recompute-box" x="292" y="96" width="196" height="164" rx="18" />
+                    <text class="tree-note red end" x="490" y="88">gain(20) recomputed</text>
+
+                    <circle class="tree-node" cx="390" cy="130" r="24" />
+                    <text class="tree-label" x="390" y="135">20</text>
+                    <text class="tree-note" x="390" y="166">gain 35</text>
+
+                    <circle class="tree-node" cx="320" cy="220" r="24" />
+                    <text class="tree-label" x="320" y="225">15</text>
+                    <text class="tree-note" x="320" y="252">gain 15</text>
+
+                    <circle class="tree-node" cx="460" cy="220" r="24" />
+                    <text class="tree-label" x="460" y="225">7</text>
+                    <text class="tree-note" x="460" y="252">gain 7</text>
+                </svg>
+
+                <div class="flow-row"><span class="flow-box">apex 9: 9</span><span class="flow-box">apex 15: 15</span><span class="flow-box">apex 7: 7</span></div>
+                <div class="flow-row"><span class="flow-box valid">apex 20: 15 + 20 + 7 = 42</span></div>
+                <div class="flow-row">
+                    <span class="flow-box invalid">apex -10: gain(9)=9, gain(20)=35 &rarr; 34</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">gain(20) was already computed for apex 20</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">On a skewed tree, each apex walks a long chain, so the total work is <code>O(n&sup2;)</code>.</p>
+            </div>
+
+            <ol class="step-list">
+                <li>Define <code>gain(node) = node.val + max(0, gain(left), gain(right))</code>.</li>
+                <li>For each node, compute the left and right gains from scratch.</li>
+                <li>Candidate = <code>node.val + max(0, left) + max(0, right)</code>.</li>
+                <li>Take the maximum candidate over all nodes.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Post-order DFS with a Global Max (Implemented)</h2>
+            <p><strong>Intuition:</strong> Compute each node's downward gain once. On the way back up, record the best path that bends at that node using both branches, then return the best <em>single</em> branch to the parent.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Gains and the best apex for [-10,9,20,null,null,15,7]</div>
+                <svg class="tree-svg" viewBox="0 0 540 330" role="img" aria-label="Tree with gains and the optimal path 15 to 20 to 7 highlighted">
+                    <line class="tree-edge" x1="270" y1="50" x2="150" y2="130" />
+                    <line class="tree-edge" x1="270" y1="50" x2="390" y2="130" />
+                    <line class="tree-edge path" x1="390" y1="130" x2="320" y2="220" />
+                    <line class="tree-edge path" x1="390" y1="130" x2="460" y2="220" />
+
+                    <circle class="tree-node active" cx="270" cy="50" r="24" />
+                    <text class="tree-label" x="270" y="55">-10</text>
+                    <text class="tree-note start" x="302" y="42">return 25</text>
+                    <text class="tree-note" x="190" y="42">candidate 34</text>
+
+                    <circle class="tree-node" cx="150" cy="130" r="24" />
+                    <text class="tree-label" x="150" y="135">9</text>
+                    <text class="tree-note green" x="150" y="166">gain 9</text>
+
+                    <circle class="tree-node good" cx="390" cy="130" r="24" />
+                    <text class="tree-label" x="390" y="135">20</text>
+                    <text class="tree-note green" x="390" y="166">gain 35</text>
+                    <text class="tree-note green start" x="420" y="105">best apex</text>
+
+                    <circle class="tree-node good" cx="320" cy="220" r="24" />
+                    <text class="tree-label" x="320" y="225">15</text>
+                    <text class="tree-note green" x="320" y="252">gain 15</text>
+
+                    <circle class="tree-node good" cx="460" cy="220" r="24" />
+                    <text class="tree-label" x="460" y="225">7</text>
+                    <text class="tree-note green" x="460" y="252">gain 7</text>
+
+                    <text class="tree-note green" x="390" y="300">optimal path: 15 &rarr; 20 &rarr; 7 = 42</text>
+                </svg>
+
+                <div class="formula-box">record at node: node.val + left + right&nbsp;&nbsp;&nbsp;// may bend here<br>return to parent: max(0, node.val + max(left, right))&nbsp;&nbsp;&nbsp;// one branch only</div>
+
+                <div class="flow-row"><span class="flow-box">9: L=0, R=0 &rarr; best 9, return 9</span></div>
+                <div class="flow-row"><span class="flow-box">15: L=0, R=0 &rarr; best 15, return 15</span><span class="flow-box">7: L=0, R=0 &rarr; best stays 15, return 7</span></div>
+                <div class="flow-row"><span class="flow-box valid">20: L=15, R=7 &rarr; best 42, return 35</span></div>
+                <div class="flow-row"><span class="flow-box">-10: L=9, R=35 &rarr; candidate 34, best stays 42, return 25</span></div>
+                <div class="flow-row"><span class="flow-box result">answer = 42</span></div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7; border-color: #6fcfae;"></div> Optimal path</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6; border-color: #ff9aa2;"></div> Root apex candidate</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffffff; border-color: #a8d8ea;"></div> Non-path node</div>
+            </div>
+
+            <ol class="step-list">
+                <li>Initialize <code>res = -Infinity</code>.</li>
+                <li><code>getMax(null)</code> returns 0.</li>
+                <li>Recursively obtain the clamped gains of the left and right subtrees.</li>
+                <li>Record <code>left + right + node.val</code> as a complete path.</li>
+                <li>Return <code>max(0, node.val + max(left, right))</code> to the parent.</li>
+                <li>After the traversal, return <code>res</code>.</li>
+            </ol>
+
+            <div class="code-block">res = -Infinity;
+const getMax = (node) =&gt; {
+    if (!node) return 0;
+    const left = getMax(node.left);
+    const right = getMax(node.right);
+    res = Math.max(res, left + right + node.val);
+    return Math.max(0, node.val + Math.max(left, right));
+};
+getMax(root);
+return res;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Iterative Post-order with a Gain Map</h2>
+            <p><strong>Intuition:</strong> Emulate the post-order recursion with an explicit stack. Push each node twice: once to expand its children and once to process it after both gains are known. A map stores the gain of every processed node.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Processing order (children before parents)</div>
+                <div class="order-row">
+                    <div class="order-chip"><div class="order-node done">7</div><div class="order-idx">1st</div></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="order-chip"><div class="order-node done">15</div><div class="order-idx">2nd</div></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="order-chip"><div class="order-node done">20</div><div class="order-idx">3rd</div></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="order-chip"><div class="order-node done">9</div><div class="order-idx">4th</div></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="order-chip"><div class="order-node done">-10</div><div class="order-idx">5th</div></div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Processed node</th>
+                                <th>left gain</th>
+                                <th>right gain</th>
+                                <th>candidate</th>
+                                <th>best</th>
+                                <th>stored gain</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>7</strong></td><td>0</td><td>0</td><td>7</td><td>7</td><td>7</td></tr>
+                            <tr><td><strong>15</strong></td><td>0</td><td>0</td><td>15</td><td>15</td><td>15</td></tr>
+                            <tr><td><strong>20</strong></td><td>15</td><td>7</td><td>42</td><td>42</td><td>35</td></tr>
+                            <tr><td><strong>9</strong></td><td>0</td><td>0</td><td>9</td><td>42</td><td>9</td></tr>
+                            <tr><td><strong>-10</strong></td><td>9</td><td>35</td><td>34</td><td>42</td><td>25</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flow-row"><span class="flow-box">stack: [(-10,false)]</span><span class="arrow">&rarr;</span><span class="flow-box">push (-10,true), 9, 20</span></div>
+                <div class="flow-row"><span class="flow-box">process 7, 15</span><span class="arrow">&rarr;</span><span class="flow-box valid">process 20: best 42, gain 35</span></div>
+                <div class="flow-row"><span class="flow-box">process 9</span><span class="arrow">&rarr;</span><span class="flow-box">process -10: candidate 34</span><span class="arrow">&rarr;</span><span class="flow-box result">return 42</span></div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">The explicit stack avoids the call-stack limit for deep trees. The map is necessary because a parent needs the gains of children that have already been popped.</p>
+            </div>
+
+            <ol class="step-list">
+                <li>Push <code>[root, false]</code>.</li>
+                <li>On the first pop, push <code>[node, true]</code> and its non-null children with <code>false</code>.</li>
+                <li>On the second pop, read both child gains from the map, clamped to 0.</li>
+                <li>Update the global best with <code>node.val + left + right</code>.</li>
+                <li>Store <code>node.val + max(left, right)</code> as this node's gain.</li>
+                <li>Return the best after the stack empties.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Brute force</strong></td>
+                            <td>O(n&sup2;) worst</td>
+                            <td>O(h)</td>
+                            <td>Try every apex; recomputes the same gains repeatedly.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Post-order DFS (implemented)</strong></td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>One pass; record both-branch paths, return one-branch gains.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Iterative post-order</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>Avoids recursion depth; needs a stack and a gain map.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Two-value recursion</strong></td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>Returns gain and best path together; no shared mutable state.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Common Pitfalls</h2>
+            <div class="callout">
+                <p><strong>Key insight:</strong> Record paths that use <strong>both</strong> branches, but return paths that use <strong>one</strong> branch. A path cannot branch twice, so the parent may only inherit one side.</p>
+            </div>
+            <ul class="pitfalls">
+                <li><strong>Assuming the root is included.</strong> In Example 2 the best path avoids the root entirely.</li>
+                <li><strong>Returning <code>val + left + right</code>.</strong> That is a complete path, not a path that can be extended upward.</li>
+                <li><strong>Ignoring negative branches.</strong> Clamp gains with <code>max(0, ...)</code> so a losing subtree contributes nothing.</li>
+                <li><strong>Initializing best to 0.</strong> Use <code>-Infinity</code>; a tree of negative values still needs a non-empty path.</li>
+                <li><strong>Resetting the global maximum.</strong> Initialize <code>res</code> once, outside the recursion.</li>
+                <li><strong>Deep chains.</strong> Up to 30,000 nodes can overflow the JavaScript stack; the iterative version is the safe alternative.</li>
+                <li><strong>Reusing a Solution instance.</strong> A class field keeps the previous answer; reset it before a new call if the instance is shared.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/binary-tree-maximum-path-sum/" target="_blank" rel="noopener">LeetCode 124: Binary Tree Maximum Path Sum</a></li>
+                <li><a href="https://neetcode.io/problems/binary-tree-maximum-path-sum" target="_blank" rel="noopener">NeetCode: Binary Tree Maximum Path Sum</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Binary_tree" target="_blank" rel="noopener">Concept: Binary trees (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/find-maximum-path-sum-in-a-binary-tree/" target="_blank" rel="noopener">GeeksforGeeks: Maximum path sum in a binary tree</a></li>
+                <li><a href="../binary-tree-diameter/">Related in this repo: Binary Tree Diameter (post-order path aggregation)</a></li>
+                <li><a href="../path-sum/">Related in this repo: Path Sum (root-to-leaf path reasoning)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
