@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Sorted Array - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-block { display: inline-block; vertical-align: top; margin: 0 16px 12px 0; }
+        .array-row { display: flex; gap: 4px; }
+        .array-cell { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; background: #ffffff; color: #2d3436; }
+        .array-cell.placeholder { background: #f0eef6; border-color: #dfe6e9; color: #a0a8ac; border-style: dashed; }
+        .array-cell.compared { background: #ffffd8; border-color: #f0c929; }
+        .array-cell.copied { background: #b5ead7; border-color: #9fd8c2; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.final { background: #b5ead7; border-color: #9fd8c2; }
+        .array-cell.removed { background: #ff9aa2; border-color: #e8878f; color: #fff; }
+        .array-cell.merged { background: #aa96da; border-color: #8f79c9; color: #fff; }
+        .index-row { display: flex; gap: 4px; margin-top: 2px; }
+        .index-cell { width: 46px; text-align: center; font-size: 11px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .pointer-row { display: flex; gap: 4px; margin-bottom: 2px; }
+        .pointer-cell { width: 46px; text-align: center; font-size: 12px; font-weight: 700; color: #aa96da; height: 18px; }
+        .pointer-cell.blue { color: #4a9ab5; }
+        .pointer-cell.red { color: #d97b83; }
+        .array-label { font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; margin-bottom: 4px; }
+        .step-row { padding: 10px 12px; margin: 8px 0; background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; }
+        .step-row.current { background: #ffffd8; border-color: #f0c929; }
+        .step-title { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.neutral { background: #f0eef6; border-color: #dfe6e9; }
+        .arrow { color: #aa96da; font-weight: 700; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 2px 8px 2px 0; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 12px; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .array-cell, .index-cell, .pointer-cell { width: 38px; }
+            .array-cell { height: 40px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Merge Sorted Array</h1>
+            <p class="subtitle">LeetCode 88 &mdash; Merge two sorted arrays into <code>nums1</code> in place</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Two Pointers</span>
+                <span class="tag">Sorting</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p><code>nums1</code> has length <code>m + n</code>: the first <code>m</code> cells hold sorted data, the last <code>n</code> are placeholders. <code>nums2</code> holds <code>n</code> sorted values. Merge them so that <code>nums1</code> becomes fully sorted, without returning a new array.</p>
+            <div class="code-block">Input:  nums1 = [1,2,3,0,0,0], m = 3
+        nums2 = [2,5,6],       n = 3
+                     ^     ^
+                  real data  placeholders
+
+Output: nums1 = [1,2,2,3,5,6]   (mutated in place)</div>
+        </div>
+
+        <div class="card">
+            <h2>Starting State</h2>
+            <div class="diagram">
+                <div class="diagram-title">Three regions of nums1, plus nums2</div>
+
+                <div class="array-label">nums1 (length 6 = m + n)</div>
+                <div class="pointer-row">
+                    <div class="pointer-cell blue">0</div>
+                    <div class="pointer-cell"></div>
+                    <div class="pointer-cell"></div>
+                    <div class="pointer-cell red">m = 3</div>
+                    <div class="pointer-cell"></div>
+                    <div class="pointer-cell"></div>
+                </div>
+                <div class="array-row">
+                    <div class="array-cell">1</div>
+                    <div class="array-cell">2</div>
+                    <div class="array-cell">3</div>
+                    <div class="array-cell placeholder">0</div>
+                    <div class="array-cell placeholder">0</div>
+                    <div class="array-cell placeholder">0</div>
+                </div>
+                <div class="index-row">
+                    <div class="index-cell">0</div><div class="index-cell">1</div><div class="index-cell">2</div>
+                    <div class="index-cell">3</div><div class="index-cell">4</div><div class="index-cell">5</div>
+                </div>
+
+                <div class="array-label" style="margin-top:16px;">nums2 (length n = 3)</div>
+                <div class="array-row">
+                    <div class="array-cell">2</div>
+                    <div class="array-cell">5</div>
+                    <div class="array-cell">6</div>
+                </div>
+                <div class="index-row">
+                    <div class="index-cell">0</div><div class="index-cell">1</div><div class="index-cell">2</div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffffff;border-color:#a8d8ea;"></div> real sorted data</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#f0eef6;border-style:dashed;"></div> placeholder (ignored input)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Copy Into the Tail, Then Sort (Implemented)</h2>
+            <p><strong>Intuition:</strong> the last <code>n</code> cells are unusable for data anyway, so overwrite them with <code>nums2</code> and let a numeric sort put everything in order.</p>
+            <span class="badge badge-time">Time: O((m+n) log(m+n))</span>
+            <span class="badge badge-space">Space: O(1) extra</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Step 1 &mdash; copy nums2 back-to-front into the placeholders</div>
+
+                <div class="step-row">
+                    <span class="step-title">count = 0: nums2[0] = 2 &rarr; nums1[6 - 1] = nums1[5]</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div><div class="array-cell">2</div><div class="array-cell">3</div>
+                        <div class="array-cell placeholder">0</div><div class="array-cell placeholder">0</div>
+                        <div class="array-cell active">2</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-title">count = 1: nums2[1] = 5 &rarr; nums1[6 - 2] = nums1[4]</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div><div class="array-cell">2</div><div class="array-cell">3</div>
+                        <div class="array-cell placeholder">0</div>
+                        <div class="array-cell active">5</div>
+                        <div class="array-cell copied">2</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-title">count = 2: nums2[2] = 6 &rarr; nums1[6 - 3] = nums1[3]</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div><div class="array-cell">2</div><div class="array-cell">3</div>
+                        <div class="array-cell active">6</div>
+                        <div class="array-cell copied">5</div>
+                        <div class="array-cell copied">2</div>
+                    </div>
+                </div>
+
+                <div class="flow-row" style="margin-top:14px;">
+                    <span class="flow-box neutral">after copy: [1, 2, 3, 6, 5, 2]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">sort((a,b) =&gt; a - b)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">[1, 2, 2, 3, 5, 6]</span>
+                </div>
+
+                <p style="font-size:13px;margin-top:8px;">The copy touches only placeholder cells, so the first <code>m</code> values are preserved. The sort then fixes the interleaving &mdash; but it discards the information that both halves were already sorted.</p>
+            </div>
+
+            <div class="key-insight"><strong>Comparator required:</strong> <code>nums1.sort()</code> without a comparator sorts by <em>string</em>. <code>[1,2,3,6,5,2]</code> happens to survive, but <code>[10,9,100]</code> would become <code>[10,100,9]</code> and negatives would be ordered as <code>-1, -3, -5</code>.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Three Pointers from the End (Optimal)</h2>
+            <p><strong>Intuition:</strong> fill the largest remaining value into the last unfilled cell. Because both halves are sorted, the largest remaining value is always at one of the two read pointers &mdash; and writing at the back can only overwrite cells that are placeholders or already-consumed values.</p>
+            <span class="badge badge-time">Time: O(m+n)</span>
+            <span class="badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">i = last real value of nums1, j = last value of nums2, k = last empty cell</div>
+
+                <div class="step-row current">
+                    <span class="step-title">Start: i = 2 (3), j = 2 (6), k = 5</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell active">3</div>
+                        <div class="array-cell placeholder">0</div>
+                        <div class="array-cell placeholder">0</div>
+                        <div class="array-cell placeholder">0</div>
+                    </div>
+                    <div class="pointer-row">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell">i</div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell">k</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box neutral">nums2[j] = 6 &gt; nums1[i] = 3</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box valid">nums1[5] = 6, j = 1, k = 4</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-title">i = 2 (3), j = 1 (5), k = 4</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div><div class="array-cell">2</div>
+                        <div class="array-cell active">3</div>
+                        <div class="array-cell placeholder">0</div>
+                        <div class="array-cell placeholder">0</div>
+                        <div class="array-cell copied">6</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box neutral">5 &gt; 3</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box valid">nums1[4] = 5, j = 0, k = 3</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-title">i = 2 (3), j = 0 (2), k = 3</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div><div class="array-cell">2</div>
+                        <div class="array-cell active">3</div>
+                        <div class="array-cell placeholder">0</div>
+                        <div class="array-cell copied">5</div>
+                        <div class="array-cell copied">6</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box neutral">3 &gt; 2</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box valid">nums1[3] = 3, i = 1, k = 2</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-title">i = 1 (2), j = 0 (2), k = 2</span>
+                    <div class="array-row">
+                        <div class="array-cell">1</div>
+                        <div class="array-cell active">2</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell copied">3</div>
+                        <div class="array-cell copied">5</div>
+                        <div class="array-cell copied">6</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box neutral">2 &ge; 2 (tie, either side works)</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box valid">nums1[2] = 2, j = -1, k = 1</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <span class="step-title">j = -1 &mdash; nums2 exhausted</span>
+                    <div class="array-row">
+                        <div class="array-cell final">1</div>
+                        <div class="array-cell final">2</div>
+                        <div class="array-cell final">2</div>
+                        <div class="array-cell final">3</div>
+                        <div class="array-cell final">5</div>
+                        <div class="array-cell final">6</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">[1, 2, 2, 3, 5, 6] &mdash; the untouched prefix was already in place</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2;"></div> current comparison</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> already written / final</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> newly written value</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Why backward is safe:</strong> there are exactly <code>n</code> spare cells for <code>n</code> incoming values. Each write lands at index <code>k</code>, and everything at or after <code>k</code> is already final. Values at indices below <code>i</code> have not been consumed and are never written over.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Merge Into an Extra Buffer</h2>
+            <p><strong>Intuition:</strong> the classic textbook merge reads both inputs from the front and appends the smaller head to a separate buffer, then copies the buffer back.</p>
+            <span class="badge badge-time">Time: O(m+n)</span>
+            <span class="badge badge-space">Space: O(m+n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Front merge &mdash; i over nums1, j over nums2, append to buffer</div>
+
+                <div class="array-label">nums1 (only the first m = 3 cells are data)</div>
+                <div class="array-row">
+                    <div class="array-cell">1</div><div class="array-cell">2</div><div class="array-cell">3</div>
+                    <div class="array-cell placeholder">0</div><div class="array-cell placeholder">0</div><div class="array-cell placeholder">0</div>
+                </div>
+                <div class="array-label" style="margin-top:10px;">nums2</div>
+                <div class="array-row">
+                    <div class="array-cell">2</div><div class="array-cell">5</div><div class="array-cell">6</div>
+                </div>
+
+                <div class="flow-row" style="margin-top:14px;">
+                    <span class="flow-box neutral">buffer = []</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">1 &lt; 2 &rarr; buffer = [1]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">2 &le; 2 &rarr; buffer = [1, 2]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">2 &le; 2? next 2 vs 5 &rarr; buffer = [1, 2, 2]</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">3 &lt; 5 &rarr; buffer = [1, 2, 2, 3]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">nums1 exhausted, append 5, 6</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box valid">buffer = [1, 2, 2, 3, 5, 6]</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">copy back into nums1</span>
+                </div>
+
+                <p style="font-size:13px;margin-top:8px;">Correct and easy to reason about, but allocates a second array of size <code>m + n</code> &mdash; exactly the memory the in-place layout was designed to save.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Uses sorted inputs?</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Copy + sort</strong> (implemented)</td>
+                            <td>O((m+n) log(m+n))</td>
+                            <td>O(1) extra</td>
+                            <td>Only after copying</td>
+                            <td>Short and safe; re-sorts data unnecessarily</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Three pointers, back to front</strong></td>
+                            <td>O(m+n)</td>
+                            <td>O(1)</td>
+                            <td>Yes</td>
+                            <td>Optimal; handles m = 0 and n = 0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Extra buffer merge</strong></td>
+                            <td>O(m+n)</td>
+                            <td>O(m+n)</td>
+                            <td>Yes</td>
+                            <td>Easiest to verify; allocates</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ol class="step-list">
+                <li><strong>Forward merge overwrites unread data.</strong> Writing <code>nums1[0]</code> while <code>nums1[1..m-1]</code> is still unread destroys the input. Merge backward or use a buffer.</li>
+                <li><strong>Default sort is lexicographic.</strong> Always pass <code>(a, b) =&gt; a - b</code>; otherwise <code>10</code> sorts before <code>9</code>.</li>
+                <li><strong>Placeholders are not values.</strong> The trailing zeros must never be compared or counted as data.</li>
+                <li><strong><code>m = 0</code>.</strong> There is no real prefix; the answer is all of <code>nums2</code>. Copying into the single placeholder handles it.</li>
+                <li><strong><code>n = 0</code>.</strong> The copy loop must not run, and the sort must leave <code>nums1</code> untouched.</li>
+                <li><strong>Copy loop indexing.</strong> <code>nums1[nums1.length - (count + 1)]</code> walks the tail from the end. An off-by-one here either skips the first <code>nums2</code> value or writes past the array.</li>
+                <li><strong>Returning a new array.</strong> The judge reads the mutated <code>nums1</code>; the method should return nothing.</li>
+            </ol>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/merge-sorted-array/" target="_blank" rel="noopener">LeetCode 88: Merge Sorted Array</a></li>
+                <li><a href="https://neetcode.io/problems/merge-sorted-array" target="_blank" rel="noopener">NeetCode: Merge Sorted Array</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Merge_algorithm" target="_blank" rel="noopener">Concept: Merge algorithm (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/merge-two-sorted-arrays/" target="_blank" rel="noopener">Concept: Merge two sorted arrays (GeeksforGeeks)</a></li>
+                <li><a href="../median-of-two-sorted-arrays/README.md">Related in this repo: Median of Two Sorted Arrays (partition instead of merge)</a></li>
+                <li><a href="../merge-two-sorted-linked-lists/README.md">Related in this repo: Merge Two Sorted Linked Lists (same merge, pointer rewiring)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
