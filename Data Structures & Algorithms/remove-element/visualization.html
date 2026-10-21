@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Element - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-row { display: flex; gap: 4px; }
+        .array-cell { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #ffffff; color: #2d3436; flex: 0 0 auto; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.removed { background: #ff9aa2; border-color: #e8878f; color: #fff; }
+        .array-cell.kept { background: #b5ead7; border-color: #9fd8c2; }
+        .array-cell.written { background: #aa96da; border-color: #8f79c9; color: #fff; }
+        .array-cell.stale { background: #f0eef6; border-color: #dfe6e9; color: #a0a8ac; }
+        .array-cell.empty { border-style: dashed; border-color: #dfe6e9; background: #ffffff; color: #b0b8bc; }
+        .index-row { display: flex; gap: 4px; margin-top: 2px; }
+        .index-cell { width: 40px; text-align: center; font-size: 10px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .pointer-row { display: flex; gap: 4px; margin-bottom: 2px; }
+        .pointer-cell { width: 40px; text-align: center; font-size: 12px; font-weight: 700; color: #aa96da; height: 18px; }
+        .pointer-cell.read { color: #d97b83; }
+        .pointer-cell.write { color: #4a9ab5; }
+        .step-row { padding: 10px 12px; margin: 8px 0; background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; }
+        .step-row.current { background: #ffffd8; border-color: #f0c929; }
+        .step-title { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.neutral { background: #f0eef6; border-color: #dfe6e9; }
+        .arrow { color: #aa96da; font-weight: 700; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 2px 8px 2px 0; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 12px; }
+        .sublabel { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; color: #636e72; margin: 10px 0 4px; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .array-cell, .index-cell, .pointer-cell { width: 32px; }
+            .array-cell { height: 34px; font-size: 11px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Remove Element</h1>
+            <p class="subtitle">LeetCode 27 &mdash; Keep every value that is not <code>val</code> in the first <em>k</em> cells</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Two Pointers</span>
+                <span class="tag purple">In-Place</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Remove all copies of <code>val</code> from <code>nums</code> in place and return how many elements survive. The survivors must occupy <code>nums[0..k-1]</code>, but their order may change &mdash; the judge sorts that prefix before comparing.</p>
+            <div class="code-block">Input:  nums = [0,1,2,2,3,0,4,2], val = 2
+Output: k = 5
+        nums[0..4] = [0,1,3,0,4]   (any order accepted)
+        nums[5..7] = leftovers, ignored
+
+Input:  nums = [], val = 0
+Output: k = 0</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Mark With Infinity, Sort, Count (Implemented)</h2>
+            <p><strong>Intuition:</strong> replace every occurrence of <code>val</code> with a value that cannot legally appear, sort so those sentinels collect at the end, then count everything else.</p>
+            <span class="badge badge-time">Time: O(n log n)</span>
+            <span class="badge badge-space">Space: O(1) extra</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [0,1,2,2,3,0,4,2], val = 2</div>
+
+                <div class="step-row">
+                    <div class="step-title">Step 1 &mdash; scan and replace: splice(count, 1, Infinity) keeps the length unchanged</div>
+                    <div class="sublabel">before</div>
+                    <div class="array-row">
+                        <div class="array-cell">0</div><div class="array-cell">1</div>
+                        <div class="array-cell active">2</div><div class="array-cell active">2</div>
+                        <div class="array-cell">3</div><div class="array-cell">0</div>
+                        <div class="array-cell">4</div><div class="array-cell active">2</div>
+                    </div>
+                    <div class="index-row">
+                        <div class="index-cell">0</div><div class="index-cell">1</div><div class="index-cell">2</div>
+                        <div class="index-cell">3</div><div class="index-cell">4</div><div class="index-cell">5</div>
+                        <div class="index-cell">6</div><div class="index-cell">7</div>
+                    </div>
+                    <div class="arrow" style="margin:10px 0; text-align:center;">&darr;</div>
+                    <div class="sublabel">after marking (indices 2, 3, 7 replaced)</div>
+                    <div class="array-row">
+                        <div class="array-cell">0</div><div class="array-cell">1</div>
+                        <div class="array-cell removed">Inf</div><div class="array-cell removed">Inf</div>
+                        <div class="array-cell">3</div><div class="array-cell">0</div>
+                        <div class="array-cell">4</div><div class="array-cell removed">Inf</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">Step 2 &mdash; nums.sort(): the string "Infinity" sorts after every digit</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell kept">3</div>
+                        <div class="array-cell kept">4</div>
+                        <div class="array-cell removed">Inf</div>
+                        <div class="array-cell removed">Inf</div>
+                        <div class="array-cell removed">Inf</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell write">&nbsp;</div>
+                        <div class="pointer-cell" style="color:#636e72;">k = 5</div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box neutral">the survivors are reordered (lexicographically), which is allowed</span>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">Step 3 &mdash; reduce: count entries !== Infinity</div>
+                    <div class="flow-row">
+                        <span class="flow-box valid">0 &rarr; +1</span>
+                        <span class="flow-box valid">0 &rarr; +1</span>
+                        <span class="flow-box valid">1 &rarr; +1</span>
+                        <span class="flow-box valid">3 &rarr; +1</span>
+                        <span class="flow-box valid">4 &rarr; +1</span>
+                        <span class="flow-box invalid">Inf &rarr; +0</span>
+                        <span class="flow-box invalid">Inf &rarr; +0</span>
+                        <span class="flow-box invalid">Inf &rarr; +0</span>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">return 5</span>
+                        <span class="flow-box neutral">nums[0..4] = [0,0,1,3,4]</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ff9aa2;"></div> marked for removal</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> survivor</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2;"></div> occurrence of val</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Replace, don't delete:</strong> <code>splice(count, 1, Infinity)</code> swaps one cell for one cell, so the array length and all later indices stay the same and the forward loop cannot skip anything. <code>splice(count, 1)</code> would shift the tail left and skip the next element.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Write Pointer (Optimal, Stable)</h2>
+            <p><strong>Intuition:</strong> <code>write</code> is the next slot for a survivor; <code>read</code> inspects every cell. Copy only values that differ from <code>val</code>, then return <code>write</code>.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [0,1,2,2,3,0,4,2], val = 2</div>
+
+                <div class="step-row">
+                    <div class="step-title">After r = 0 and r = 1: both survived; w = 2; next r = 2</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell active">2</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">3</div>
+                        <div class="array-cell">0</div>
+                        <div class="array-cell">4</div>
+                        <div class="array-cell">2</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w, r</div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box invalid">nums[2] = 2 equals val &rarr; skip</span>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">r = 3 skipped; r = 4: 3 survives &rarr; nums[2] = 3, w = 3</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell written">3</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell active">3</div>
+                        <div class="array-cell">0</div>
+                        <div class="array-cell">4</div>
+                        <div class="array-cell">2</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w</div>
+                        <div class="pointer-cell read">r</div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">r = 5: 0 survives &rarr; nums[3] = 0; r = 6: 4 survives &rarr; nums[4] = 4, w = 5</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell kept">3</div>
+                        <div class="array-cell written">0</div>
+                        <div class="array-cell written">4</div>
+                        <div class="array-cell stale">0</div>
+                        <div class="array-cell active">4</div>
+                        <div class="array-cell">2</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div><div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell write">w</div>
+                        <div class="pointer-cell read">r</div>
+                        <div class="pointer-cell"></div>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">r = 7: 2 equals val &rarr; skip; scan ends &rarr; return w = 5</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell kept">3</div>
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">4</div>
+                        <div class="array-cell stale">0</div>
+                        <div class="array-cell stale">4</div>
+                        <div class="array-cell active">2</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">k = 5, nums[0..4] = [0,1,3,0,4]</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> survivor written</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> just written</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2;"></div> currently reading</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#f0eef6;"></div> stale tail</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Order is preserved.</strong> Survivors are written in the order they are read, so this is the variant to use when stability matters. <code>read</code> is always at or ahead of <code>write</code>, so each copy overwrites a cell that has already been processed.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Swap With the End (Optimal, Unstable)</h2>
+            <p><strong>Intuition:</strong> when <code>nums[i] === val</code>, overwrite it with the last still-active element and shrink the active range. The swapped-in value must be re-inspected, so <code>i</code> does not advance in that case.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [3,2,2,3], val = 3 &mdash; the re-check after a swap is essential</div>
+
+                <div class="step-row">
+                    <div class="step-title">i = 0, last = 3: nums[0] = 3 &rarr; nums[0] = nums[3] = 3, last = 2; i stays</div>
+                    <div class="array-row">
+                        <div class="array-cell removed">3</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell stale">3</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell read">i</div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell write">last</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box neutral">the copied value is also 3 &mdash; still an occurrence</span>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">Again at i = 0: nums[0] = 3 &rarr; copy nums[2] = 2 into nums[0]; last becomes 1</div>
+                    <div class="array-row">
+                        <div class="array-cell written">2</div>
+                        <div class="array-cell">2</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell stale">3</div>
+                    </div>
+                    <div class="pointer-row" style="margin-top:4px;">
+                        <div class="pointer-cell read">i</div>
+                        <div class="pointer-cell"></div>
+                        <div class="pointer-cell write">last</div>
+                        <div class="pointer-cell"></div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">nums[0] = 2 &ne; 3 &rarr; i = 1; nums[1] = 2 &ne; 3 &rarr; i = 2; i &gt; last, stop</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">2</div>
+                        <div class="array-cell kept">2</div>
+                        <div class="array-cell stale">2</div>
+                        <div class="array-cell stale">3</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">return last + 1 = 2</span>
+                        <span class="flow-box neutral">active range was 0..1</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ff9aa2;"></div> value being removed</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> swapped in</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> survivor</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#f0eef6;"></div> outside active range</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>No copying of survivors.</strong> Each removal consumes one write and shrinks the range; survivors are never moved. This is the fastest variant when most elements are removed, at the cost of destroying the original order.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Filter Into a New Array</h2>
+            <p><strong>Intuition:</strong> build a new array containing only values that differ from <code>val</code>, then copy it back into the front of <code>nums</code>. The clearest version, at the cost of an allocation.</p>
+            <span class="badge badge-time">Time: O(n)</span>
+            <span class="badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">nums = [0,1,2,2,3,0,4,2], val = 2</div>
+
+                <div class="step-row">
+                    <div class="step-title">Step 1 &mdash; filter: keep every value !== val, in original order</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell removed">2</div>
+                        <div class="array-cell removed">2</div>
+                        <div class="array-cell kept">3</div>
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">4</div>
+                        <div class="array-cell removed">2</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box valid">kept = [0, 1, 3, 0, 4]</span>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">Step 2 &mdash; copy kept[0..4] into nums[0..4] and return its length</div>
+                    <div class="array-row">
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">1</div>
+                        <div class="array-cell kept">3</div>
+                        <div class="array-cell kept">0</div>
+                        <div class="array-cell kept">4</div>
+                        <div class="array-cell stale">0</div>
+                        <div class="array-cell stale">4</div>
+                        <div class="array-cell stale">2</div>
+                    </div>
+                    <div class="flow-row">
+                        <span class="flow-box result">k = kept.length = 5</span>
+                        <span class="flow-box neutral">stable: the survivors keep their relative order</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Stable?</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Mark + sort + count</strong> (implemented)</td>
+                            <td>O(n log n)</td>
+                            <td>O(1) extra</td>
+                            <td>No</td>
+                            <td>Sentinel <code>Infinity</code>; sort groups it at the end</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Write pointer</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Yes</td>
+                            <td>Optimal; handles empty input naturally</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Swap with end</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>No</td>
+                            <td>Fewest writes; must re-check after each swap</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Filter + copy back</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>Yes</td>
+                            <td>Clearest, but allocates</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size:13px;">The marking loop is O(n) on V8 because a one-for-one <code>splice</code> does not shift the tail; on an engine that does shift, it degrades to O(n&sup2;). The sort is the guaranteed dominant cost.</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ol class="step-list">
+                <li><strong>Deleting instead of replacing.</strong> <code>splice(i, 1)</code> shifts the tail and the forward loop skips the element that slides into <code>i</code>. <code>splice(i, 1, Infinity)</code> avoids that.</li>
+                <li><strong>Returning the array.</strong> The answer is <code>k</code>; the judge inspects <code>nums</code> separately.</li>
+                <li><strong>Wrong sentinel.</strong> A value like <code>0</code> or <code>-1</code> can appear in the input. <code>Infinity</code> is safe only because the constraints cap values at 50 &mdash; and it sorts last as the string "Infinity".</li>
+                <li><strong>Assuming numeric order.</strong> The default sort is lexicographic, so the survivors are not numerically sorted. That is fine for LeetCode 27 because the prefix is sorted by the judge before comparison.</li>
+                <li><strong>Empty input.</strong> <code>[].reduce(fn)</code> throws a <code>TypeError</code>; the constraints allow an empty array, so guard it or use an initial accumulator.</li>
+                <li><strong>Advancing after a swap.</strong> In the end-swap variant the new value at <code>i</code> has not been checked; incrementing skips it.</li>
+                <li><strong>Off-by-one on the active range.</strong> The range is <code>0..last</code> inclusive, so the survivor count is <code>last + 1</code> (0 when everything is removed).</li>
+                <li><strong>Clearing the tail.</strong> Unnecessary; only <code>nums[0..k-1]</code> is validated.</li>
+            </ol>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/remove-element/" target="_blank" rel="noopener">LeetCode 27: Remove Element</a></li>
+                <li><a href="https://neetcode.io/problems/remove-element" target="_blank" rel="noopener">NeetCode: Remove Element</a></li>
+                <li><a href="https://www.geeksforgeeks.org/remove-element/" target="_blank" rel="noopener">Concept: Remove an element from an array (GeeksforGeeks)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/In-place_algorithm" target="_blank" rel="noopener">Concept: In-place algorithm (Wikipedia)</a></li>
+                <li><a href="../remove-duplicates-from-sorted-array/README.md">Related in this repo: Remove Duplicates from Sorted Array (same read/write compaction)</a></li>
+                <li><a href="../sort-colors/">Related in this repo: Sort Colors (in-place partitioning with pointers)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
