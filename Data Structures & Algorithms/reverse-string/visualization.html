@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reverse String - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; }
+        .card h3 { font-size: 1rem; margin: 18px 0 8px; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #2d3436; white-space: pre; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; font-size: 14px; }
+        .array-row { display: flex; gap: 4px; margin: 4px 0; flex-wrap: wrap; }
+        .cell-wrap { display: flex; flex-direction: column; align-items: center; min-width: 44px; }
+        .cell-index { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; color: #636e72; margin-bottom: 2px; }
+        .array-cell { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffff; color: #2d3436; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.done { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.swapped { background: #aa96da; border-color: #aa96da; color: #ffffff; }
+        .array-cell.blank { border-style: dashed; color: #b2bec3; background: transparent; }
+        .pointer { height: 34px; font-size: 11px; color: #636e72; text-align: center; line-height: 1.2; padding-top: 2px; }
+        .pointer span { display: block; color: #aa96da; font-size: 14px; }
+        .stage { margin: 14px 0; }
+        .stage-label { font-size: 13px; color: #636e72; margin-bottom: 4px; font-weight: 600; }
+        .row-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; color: #636e72; margin-top: 10px; }
+        .arrow-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .stack-frame { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 10px 14px; margin: 0 0 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .stack-frame.base { background: #b5ead7; border-color: #b5ead7; }
+        .stack-frame.swap { background: #ffd3b6; border-color: #ff9aa2; }
+        .stack-indent { margin-left: 24px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-scroll { overflow-x: auto; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 4px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .pitfall { border-left: 4px solid #ff9aa2; background: #fff5f6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; color: #2d3436; }
+        .insight { border-left: 4px solid #b5ead7; background: #f2fbf7; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .array-cell { width: 38px; height: 38px; font-size: 13px; }
+            .cell-wrap { min-width: 38px; }
+            th, td { padding: 8px 10px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Reverse String</h1>
+            <p class="subtitle">LeetCode 344 &mdash; Reverse a character array in place</p>
+            <div class="tags">
+                <span class="tag">Two Pointers</span>
+                <span class="tag">String</span>
+                <span class="tag purple">O(1) Space</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a character array <code>s</code>, reverse it <strong>in place</strong> using <code>O(1)</code> extra memory. The function must mutate the caller's array and return nothing.</p>
+            <div class="code-block">Input:  s = ["h","e","l","l","o"]
+Output: ["o","l","l","e","h"]
+
+Input:  s = ["H","a","n","n","a","h"]
+Output: ["h","a","n","n","a","H"]</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Extra Array (Not In-Place)</h2>
+            <p><strong>Intuition:</strong> Copy characters from the end of <code>s</code> into a new array, then copy that array back. It produces the right answer but uses <code>O(n)</code> memory, which the problem forbids.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Read backwards, write forwards, then copy back</div>
+                <div class="row-label">s (input)</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell">h</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell">e</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">l</div></div>
+                    <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell">l</div></div>
+                    <div class="cell-wrap"><div class="cell-index">4</div><div class="array-cell">o</div></div>
+                </div>
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">copy[i] = s[n - 1 - i]</span></div>
+                <div class="row-label">copy (new array)</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell active">o</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell active">l</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell active">l</div></div>
+                    <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell active">e</div></div>
+                    <div class="cell-wrap"><div class="cell-index">4</div><div class="array-cell active">h</div></div>
+                </div>
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">s[i] = copy[i] &nbsp;(second O(n) pass)</span></div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell done">o</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell done">l</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell done">l</div></div>
+                    <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell done">e</div></div>
+                    <div class="cell-wrap"><div class="cell-index">4</div><div class="array-cell done">h</div></div>
+                </div>
+                <p style="font-size: 13px; margin-top: 12px;">Correct result, but the extra <code>copy</code> array breaks the <code>O(1)</code> space requirement.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Two Pointers In-Place (Implemented)</h2>
+            <p><strong>Intuition:</strong> Swap the outer pair, then move both pointers inward. Each swap fixes two positions permanently, so the center of the array is reached after <code>floor(n / 2)</code> swaps.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">s = ["h","e","l","l","o"]</div>
+
+                <div class="stage">
+                    <div class="stage-label">Start: ptr1 = 0, ptr2 = 4</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell active">h</div><div class="pointer"><span>&uarr;</span>ptr1</div></div>
+                        <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell">e</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">l</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell">l</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">4</div><div class="array-cell active">o</div><div class="pointer"><span>&uarr;</span>ptr2</div></div>
+                    </div>
+                </div>
+
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">swap(s[0], s[4]) &rarr; ptr1++, ptr2--</span></div>
+
+                <div class="stage">
+                    <div class="stage-label">After swap 1: <strong>o</strong> is final at index 0, <strong>h</strong> is final at index 4</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell swapped">o</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell active">e</div><div class="pointer"><span>&uarr;</span>ptr1</div></div>
+                        <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">l</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell active">l</div><div class="pointer"><span>&uarr;</span>ptr2</div></div>
+                        <div class="cell-wrap"><div class="cell-index">4</div><div class="array-cell swapped">h</div><div class="pointer"></div></div>
+                    </div>
+                </div>
+
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">swap(s[1], s[3]) &rarr; ptr1++, ptr2--</span></div>
+
+                <div class="stage">
+                    <div class="stage-label">After swap 2: ptr1 = ptr2 = 2, loop stops</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell done">o</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell done">l</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell active">l</div><div class="pointer"><span>&uarr;</span>ptr1 ptr2</div></div>
+                        <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell done">e</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">4</div><div class="array-cell done">h</div><div class="pointer"></div></div>
+                    </div>
+                </div>
+
+                <div class="arrow-row"><span class="flow-box result">Result: ["o","l","l","e","h"]</span></div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;"></div> Active pair / center</div>
+                <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> Already swapped</div>
+                <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> Final position</div>
+            </div>
+
+            <div class="code-block">let ptr1 = 0;
+let ptr2 = s.length - 1;
+while (ptr1 &lt; ptr2) {
+    [s[ptr1], s[ptr2]] = [s[ptr2], s[ptr1]];
+    ptr1++;
+    ptr2--;
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Recursive Two Pointers</h2>
+            <p><strong>Intuition:</strong> The outer swap is independent of the inner substring. Swap the ends, then recursively reverse what remains between them. The base case is a one-character or empty range.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n) call stack</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Call stack for ["h","e","l","l","o"]</div>
+                <div class="stack-frame swap">reverse(0, 4) &nbsp;&rarr;&nbsp; swap h/o &nbsp;&rarr;&nbsp; ["o","e","l","l","h"]</div>
+                <div class="stack-indent">
+                    <div class="stack-frame swap">reverse(1, 3) &nbsp;&rarr;&nbsp; swap e/l &nbsp;&rarr;&nbsp; ["o","l","l","e","h"]</div>
+                    <div class="stack-indent">
+                        <div class="stack-frame base">reverse(2, 2) &nbsp;&rarr;&nbsp; left &ge; right, return (center)</div>
+                    </div>
+                </div>
+                <p style="font-size: 13px; margin-top: 12px;">The stack grows to <code>n / 2</code> frames. That is fine for short strings, but <code>n = 10^5</code> can exceed the JavaScript call-stack limit.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Stack-Based Reversal</h2>
+            <p><strong>Intuition:</strong> A stack is last-in, first-out. Push every character in order, then pop them back into the array from left to right &mdash; the order comes out reversed.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Push left-to-right, pop into s[0..n-1]</div>
+                <div class="row-label">Push order</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="array-cell active">h</div><div class="pointer">push 1</div></div>
+                    <div class="cell-wrap"><div class="array-cell active">e</div><div class="pointer">push 2</div></div>
+                    <div class="cell-wrap"><div class="array-cell active">l</div><div class="pointer">push 3</div></div>
+                    <div class="cell-wrap"><div class="array-cell active">l</div><div class="pointer">push 4</div></div>
+                    <div class="cell-wrap"><div class="array-cell active">o</div><div class="pointer">push 5 (top)</div></div>
+                </div>
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">pop 5 times &mdash; last pushed is first popped</span></div>
+                <div class="row-label">Write-back order</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="array-cell done">o</div><div class="pointer">pop 1</div></div>
+                    <div class="cell-wrap"><div class="array-cell done">l</div><div class="pointer">pop 2</div></div>
+                    <div class="cell-wrap"><div class="array-cell done">l</div><div class="pointer">pop 3</div></div>
+                    <div class="cell-wrap"><div class="array-cell done">e</div><div class="pointer">pop 4</div></div>
+                    <div class="cell-wrap"><div class="array-cell done">h</div><div class="pointer">pop 5</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>In-place?</th><th>Verdict</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Extra Array</td><td>O(n)</td><td>O(n)</td><td>No</td><td>Violates the memory constraint</td></tr>
+                        <tr><td><strong>Two Pointers</strong></td><td><strong>O(n)</strong></td><td><strong>O(1)</strong></td><td><strong>Yes</strong></td><td><strong>Optimal &mdash; implemented</strong></td></tr>
+                        <tr><td>Recursive Two Pointers</td><td>O(n)</td><td>O(n) stack</td><td>Yes</td><td>Stack overflow risk at n = 10^5</td></tr>
+                        <tr><td>Stack</td><td>O(n)</td><td>O(n)</td><td>Yes</td><td>Extra memory for no benefit</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Pitfalls</h2>
+            <div class="insight"><strong>Key insight:</strong> index <code>i</code> and index <code>n - 1 - i</code> are partners. One swap finalizes both, so only <code>floor(n / 2)</code> swaps are needed &mdash; the middle element of an odd-length array is already in place.</div>
+            <div class="pitfall"><strong>Pitfall 1:</strong> Using <code>while (left &lt;= right)</code> swaps the center with itself. It is harmless but pointless; <code>left &lt; right</code> is the precise condition.</div>
+            <div class="pitfall"><strong>Pitfall 2:</strong> Assigning <code>s = s.slice().reverse()</code> only reassigns the local parameter. The caller's array is unchanged, so the judge sees no reversal.</div>
+            <div class="pitfall"><strong>Pitfall 3:</strong> Forgetting to increment <code>ptr1</code> or decrement <code>ptr2</code> creates an infinite loop.</div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/reverse-string/" target="_blank" rel="noopener">LeetCode 344: Reverse String</a></li>
+                <li><a href="https://neetcode.io/problems/reverse-string" target="_blank" rel="noopener">NeetCode: Reverse String</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Two_pointers_technique" target="_blank" rel="noopener">Concept: Two-pointers technique (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/dsa/program-to-reverse-an-array/" target="_blank" rel="noopener">GeeksforGeeks: Reverse an array in place</a></li>
+                <li><a href="../two-integer-sum/README.md">Related in this repo: Two Integer Sum (two pointers in a sorted array)</a></li>
+                <li><a href="../is-palindrome/README.md">Related in this repo: Valid Palindrome (two pointers from both ends)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
