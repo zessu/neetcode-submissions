@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Time to Buy and Sell Stock II (LeetCode 122) - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card ul, .card ol { margin: 8px 0 12px 22px; color: #636e72; }
+        .card li { margin-bottom: 6px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; background: #f0eef6; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 14px; color: #2d3436; font-size: 14px; }
+        .note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        svg { display: block; width: 100%; height: auto; }
+        .svg-label { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; fill: #2d3436; }
+        .svg-small { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; fill: #636e72; }
+        .svg-tiny { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11px; fill: #636e72; }
+        .price-strip { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+        .price-cell { width: 62px; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; text-align: center; padding: 6px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .price-cell .day { display: block; font-size: 10px; color: #636e72; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .delta-strip { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 12px; }
+        .delta { width: 62px; text-align: center; border-radius: 8px; padding: 5px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; border: 1px solid #dfe6e9; background: #ffffff; color: #636e72; }
+        .delta.up { background: #b5ead7; border-color: #b5ead7; color: #2d3436; font-weight: 700; }
+        .delta.down { background: #ff9aa2; border-color: #ff9aa2; color: #2d3436; }
+        .delta.flat { background: #ffffd8; border-color: #e8d98a; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-best { background: #aa96da; color: #ffffff; }
+        .state-flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+        .state-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 10px; padding: 10px 18px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; }
+        .state-box.hold { background: #ffd3b6; border-color: #ff9aa2; }
+        .state-box.cash { background: #b5ead7; border-color: #b5ead7; }
+        .transition { background: #f0eef6; border-left: 3px solid #aa96da; border-radius: 0 6px 6px 0; padding: 6px 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; color: #636e72; }
+        .resources li:last-child { border-bottom: none; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #e8d98a; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; font-size: 14px; color: #2d3436; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.55rem; }
+            .card { padding: 18px; }
+            .price-cell, .delta { width: 54px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Best Time to Buy and Sell Stock II</h1>
+            <p class="subtitle">LeetCode 122 &mdash; Maximize profit with unlimited transactions</p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag">Greedy</span>
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag purple">O(n)</span>
+                <span class="tag green">O(1) space</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Each day has a stock price. You may buy and/or sell, but you can hold <strong>at most one share</strong> at a time. You can buy and sell on the same day, and you may make as many transactions as you like. Return the maximum total profit (or <code>0</code> if no profit is possible).</p>
+            <div class="code-block">Input:  prices = [7,1,5,3,6,4]
+Output: 7
+        buy @ 1 (day 2) -&gt; sell @ 5 (day 3): +4
+        buy @ 3 (day 4) -&gt; sell @ 6 (day 5): +3
+
+Input:  prices = [1,2,3,4,5]   Output: 4
+Input:  prices = [7,6,4,3,1]   Output: 0</div>
+            <div class="key-insight"><strong>Key insight:</strong> a multi-day profit telescopes into the sum of its daily price changes. With no fees and unlimited trades, collect every <em>upward</em> step and ignore every downward or flat step.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force (DFS on Buy / Sell / Skip)</h2>
+            <p><strong>Intuition:</strong> Model every day as a choice. If you are holding a share, either sell it or keep holding. If you are free, either buy or skip. Take the best branch.</p>
+            <span class="complexity-badge badge-time">Time: O(2^n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Decision tree for <code>dfs(day, holding)</code> &mdash; two branches per day</div>
+                <svg viewBox="0 0 760 300" role="img" aria-label="Binary decision tree of buy, sell, or skip choices">
+                    <line x1="380" y1="58" x2="210" y2="118" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="380" y1="58" x2="550" y2="118" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="210" y1="150" x2="110" y2="208" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="210" y1="150" x2="310" y2="208" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="550" y1="150" x2="450" y2="208" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="550" y1="150" x2="650" y2="208" stroke="#aa96da" stroke-width="2"/>
+
+                    <rect x="300" y="24" width="160" height="34" rx="8" fill="#a8d8ea" stroke="#a8d8ea"/>
+                    <text x="380" y="46" text-anchor="middle" class="svg-label" font-weight="600">day 0 &middot; free</text>
+
+                    <rect x="120" y="118" width="180" height="34" rx="8" fill="#ffd3b6" stroke="#ff9aa2"/>
+                    <text x="210" y="140" text-anchor="middle" class="svg-label">buy &rarr; holding</text>
+                    <text x="270" y="104" text-anchor="middle" class="svg-tiny">&minus;price[0]</text>
+
+                    <rect x="460" y="118" width="180" height="34" rx="8" fill="#ffffff" stroke="#a8d8ea"/>
+                    <text x="550" y="140" text-anchor="middle" class="svg-label">skip &rarr; free</text>
+                    <text x="500" y="104" text-anchor="middle" class="svg-tiny">+0</text>
+
+                    <rect x="30" y="208" width="160" height="34" rx="8" fill="#b5ead7" stroke="#b5ead7"/>
+                    <text x="110" y="230" text-anchor="middle" class="svg-label">sell &rarr; cash</text>
+
+                    <rect x="230" y="208" width="160" height="34" rx="8" fill="#ffd3b6" stroke="#ff9aa2"/>
+                    <text x="310" y="230" text-anchor="middle" class="svg-label">hold</text>
+
+                    <rect x="370" y="208" width="160" height="34" rx="8" fill="#ffd3b6" stroke="#ff9aa2"/>
+                    <text x="450" y="230" text-anchor="middle" class="svg-label">buy</text>
+
+                    <rect x="570" y="208" width="160" height="34" rx="8" fill="#ffffff" stroke="#a8d8ea"/>
+                    <text x="650" y="230" text-anchor="middle" class="svg-label">skip</text>
+
+                    <text x="380" y="278" text-anchor="middle" class="svg-tiny">... the tree continues for every remaining day &rarr; 2 choices per day &rarr; O(2^n) paths</text>
+                </svg>
+                <p class="note">This is correct but exponential. Memoizing <code>(day, holding)</code> collapses it to <code>O(n)</code> states — that is the DP approach below.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Greedy Daily Sum (Implemented)</h2>
+            <p><strong>Intuition:</strong> Whenever tomorrow is more expensive than today, "buy today and sell tomorrow" captures that rise. Linking all rises together reconstructs any longer profitable hold. Falls are skipped by selling first and buying back lower.</p>
+            <span class="complexity-badge badge-best">Best / implemented</span>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="price-strip">
+                <div class="price-cell">7<span class="day">day 0</span></div>
+                <div class="price-cell">1<span class="day">day 1</span></div>
+                <div class="price-cell">5<span class="day">day 2</span></div>
+                <div class="price-cell">3<span class="day">day 3</span></div>
+                <div class="price-cell">6<span class="day">day 4</span></div>
+                <div class="price-cell">4<span class="day">day 5</span></div>
+            </div>
+            <div class="delta-strip">
+                <div class="delta down">&minus;6</div>
+                <div class="delta up">+4 &#10003;</div>
+                <div class="delta down">&minus;2</div>
+                <div class="delta up">+3 &#10003;</div>
+                <div class="delta down">&minus;2</div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Price chart &mdash; the two upward segments are the only profit sources</div>
+                <svg viewBox="0 0 760 280" role="img" aria-label="Line chart of prices 7, 1, 5, 3, 6, 4 with rising segments highlighted">
+                    <line x1="60" y1="210" x2="700" y2="210" stroke="#dfe6e9" stroke-width="1"/>
+                    <line x1="60" y1="50" x2="60" y2="210" stroke="#dfe6e9" stroke-width="1"/>
+
+                    <polyline points="60,50 180,210 300,103 420,157 540,77 660,130" fill="none" stroke="#a8d8ea" stroke-width="3"/>
+
+                    <line x1="180" y1="210" x2="300" y2="103" stroke="#6fbf9a" stroke-width="8" stroke-linecap="round" opacity="0.85"/>
+                    <line x1="420" y1="157" x2="540" y2="77" stroke="#6fbf9a" stroke-width="8" stroke-linecap="round" opacity="0.85"/>
+
+                    <circle cx="60" cy="50" r="6" fill="#ffffff" stroke="#a8d8ea" stroke-width="3"/>
+                    <circle cx="180" cy="210" r="6" fill="#ffffff" stroke="#a8d8ea" stroke-width="3"/>
+                    <circle cx="300" cy="103" r="6" fill="#b5ead7" stroke="#6fbf9a" stroke-width="3"/>
+                    <circle cx="420" cy="157" r="6" fill="#ffffff" stroke="#a8d8ea" stroke-width="3"/>
+                    <circle cx="540" cy="77" r="6" fill="#b5ead7" stroke="#6fbf9a" stroke-width="3"/>
+                    <circle cx="660" cy="130" r="6" fill="#ffffff" stroke="#a8d8ea" stroke-width="3"/>
+
+                    <text x="60" y="235" text-anchor="middle" class="svg-small">7</text>
+                    <text x="180" y="235" text-anchor="middle" class="svg-small">1</text>
+                    <text x="300" y="235" text-anchor="middle" class="svg-small">5</text>
+                    <text x="420" y="235" text-anchor="middle" class="svg-small">3</text>
+                    <text x="540" y="235" text-anchor="middle" class="svg-small">6</text>
+                    <text x="660" y="235" text-anchor="middle" class="svg-small">4</text>
+
+                    <text x="240" y="145" text-anchor="middle" class="svg-label" font-weight="700" fill="#3d8f6f">+4</text>
+                    <text x="480" y="105" text-anchor="middle" class="svg-label" font-weight="700" fill="#3d8f6f">+3</text>
+
+                    <text x="180" y="258" text-anchor="middle" class="svg-tiny">buy</text>
+                    <text x="300" y="258" text-anchor="middle" class="svg-tiny">sell</text>
+                    <text x="420" y="258" text-anchor="middle" class="svg-tiny">buy</text>
+                    <text x="540" y="258" text-anchor="middle" class="svg-tiny">sell</text>
+                </svg>
+                <p class="note"><code>sum = max(0, 5-1) + max(0, 6-3) = 4 + 3 = 7</code>. The gray falling segments contribute nothing.</p>
+            </div>
+
+            <div class="code-block">let sum = 0;
+for (let i = 1; i &lt; prices.length; i++) {
+    if (prices[i] &gt; prices[i - 1]) {
+        sum += prices[i] - prices[i - 1];
+    }
+}
+return sum;</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Peak-Valley Two Pointers</h2>
+            <p><strong>Intuition:</strong> Instead of inspecting every edge, jump from each local minimum (valley) to the next local maximum (peak). Each such pair is one transaction; their differences sum to the same profit.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">The same chart with valleys and peaks marked</div>
+                <svg viewBox="0 0 760 280" role="img" aria-label="Price chart with valleys at 1 and 3 and peaks at 5 and 6">
+                    <line x1="60" y1="210" x2="700" y2="210" stroke="#dfe6e9" stroke-width="1"/>
+                    <line x1="60" y1="50" x2="60" y2="210" stroke="#dfe6e9" stroke-width="1"/>
+
+                    <line x1="180" y1="210" x2="180" y2="103" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="4 4"/>
+                    <line x1="300" y1="103" x2="300" y2="210" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="4 4"/>
+                    <line x1="420" y1="157" x2="420" y2="77" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="4 4"/>
+                    <line x1="540" y1="77" x2="540" y2="157" stroke="#dfe6e9" stroke-width="1" stroke-dasharray="4 4"/>
+
+                    <polyline points="60,50 180,210 300,103 420,157 540,77 660,130" fill="none" stroke="#a8d8ea" stroke-width="3"/>
+
+                    <circle cx="180" cy="210" r="10" fill="#b5ead7" stroke="#3d8f6f" stroke-width="2"/>
+                    <text x="150" y="240" class="svg-small" fill="#3d8f6f">valley 1</text>
+                    <circle cx="300" cy="103" r="10" fill="#aa96da" stroke="#7c63bd" stroke-width="2"/>
+                    <text x="308" y="96" class="svg-small" fill="#7c63bd">peak 5</text>
+
+                    <circle cx="420" cy="157" r="10" fill="#b5ead7" stroke="#3d8f6f" stroke-width="2"/>
+                    <text x="392" y="188" class="svg-small" fill="#3d8f6f">valley 3</text>
+                    <circle cx="540" cy="77" r="10" fill="#aa96da" stroke="#7c63bd" stroke-width="2"/>
+                    <text x="548" y="70" class="svg-small" fill="#7c63bd">peak 6</text>
+
+                    <text x="240" y="135" text-anchor="middle" class="svg-label" font-weight="700" fill="#3d8f6f">buy 1 &rarr; sell 5 = +4</text>
+                    <text x="480" y="112" text-anchor="middle" class="svg-label" font-weight="700" fill="#3d8f6f">buy 3 &rarr; sell 6 = +3</text>
+
+                    <text x="60" y="235" text-anchor="middle" class="svg-small">7</text>
+                    <text x="660" y="235" text-anchor="middle" class="svg-small">4</text>
+                </svg>
+                <p class="note">Valley detection: advance while the next price is lower or equal. Peak detection: advance while the next price is higher or equal. Each index moves forward only.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Dynamic Programming (Hold / Cash)</h2>
+            <p><strong>Intuition:</strong> Keep the best profit for the two possible states after each day: <code>hold</code> (own one share) and <code>cash</code> (own none). Buying moves cash &rarr; hold; selling moves hold &rarr; cash.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="state-flow">
+                <div class="state-box cash">cash</div>
+                <div class="transition">buy: cash &minus; price[i] &rarr; hold</div>
+                <div class="state-box hold">hold</div>
+                <div class="transition">sell: hold + price[i] &rarr; cash</div>
+                <div class="state-box cash">cash</div>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">State values for prices = [7,1,5,3,6,4]</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Price</th>
+                                <th><code>hold</code> after day</th>
+                                <th><code>cash</code> after day</th>
+                                <th>Best action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>0</td><td>7</td><td>&minus;7 (buy)</td><td>0 (skip)</td><td>start</td></tr>
+                            <tr><td>1</td><td>1</td><td>max(&minus;7, 0&minus;1) = &minus;1</td><td>max(0, &minus;1+1) = 0</td><td>buy cheaper</td></tr>
+                            <tr><td>2</td><td>5</td><td>max(&minus;1, 0&minus;5) = &minus;1</td><td>max(0, &minus;1+5) = 4</td><td><strong style="color:#3d8f6f">sell +4</strong></td></tr>
+                            <tr><td>3</td><td>3</td><td>max(&minus;1, 4&minus;3) = 1</td><td>max(4, 1+3) = 4</td><td>rebuy at 3</td></tr>
+                            <tr><td>4</td><td>6</td><td>max(1, 4&minus;6) = 1</td><td>max(4, 1+6) = 7</td><td><strong style="color:#3d8f6f">sell +3</strong></td></tr>
+                            <tr><td>5</td><td>4</td><td>max(1, 7&minus;4) = 3</td><td>max(7, 3+4) = 7</td><td>stay in cash</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note">Final answer is <code>cash = 7</code>. Only two variables are needed because each day depends solely on the previous day.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Greedy Daily Sum</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Shortest correct solution; one pass</td>
+                            <td>Only works with unlimited, fee-free trades</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Peak-Valley</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Explicit buy/sell pairs</td>
+                            <td>More pointer bookkeeping and edge cases</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dynamic Programming</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Extends to fees, cooldowns, and trade limits</td>
+                            <td>More state than the greedy sum</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Brute Force (DFS)</strong></td>
+                            <td>O(2<sup>n</sup>)</td>
+                            <td>O(n)</td>
+                            <td>Explores every legal strategy</td>
+                            <td>Exponential; impractical beyond tiny inputs</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul>
+                <li><strong>Confusing this with LeetCode 121.</strong> That problem allows only one transaction; this one allows unlimited transactions.</li>
+                <li><strong>Adding negative changes.</strong> Accumulating every difference collapses to <code>prices[n-1] - prices[0]</code>, which is wrong when prices fall.</li>
+                <li><strong>Forgetting flat days.</strong> Equal prices produce a zero change; adding it is harmless, but treating it as a loss is not.</li>
+                <li><strong>Forcing a gap between trades.</strong> Same-day sell-and-rebuy is allowed; no cooldown exists here.</li>
+                <li><strong>Assuming one continuous hold is optimal.</strong> Selling before a dip and rebuying lower can add profit (for example, exiting at 5 before the drop to 3).</li>
+                <li><strong>Returning a negative profit.</strong> Start at <code>0</code>; doing nothing is always legal.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/" target="_blank" rel="noopener">LeetCode 122: Best Time to Buy and Sell Stock II</a></li>
+                <li><a href="https://neetcode.io/problems/best-time-to-buy-and-sell-stock-ii" target="_blank" rel="noopener">NeetCode: Best Time to Buy and Sell Stock II</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Greedy_algorithm" target="_blank" rel="noopener">Concept: Greedy Algorithm (Wikipedia)</a></li>
+                <li><a href="../buy-and-sell-crypto/" target="_blank" rel="noopener">Related in this repo: Best Time to Buy and Sell Stock (one transaction)</a></li>
+                <li><a href="../coin-change/" target="_blank" rel="noopener">Related in this repo: Coin Change (dynamic programming)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
