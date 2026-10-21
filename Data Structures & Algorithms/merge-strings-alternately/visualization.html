@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Strings Alternately - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .row-block { margin: 10px 0; }
+        .row-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; color: #636e72; margin-bottom: 4px; }
+        .array-row { display: flex; gap: 4px; align-items: center; }
+        .char-cell { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffff; color: #2d3436; }
+        .char-cell.index-cell { width: 42px; height: 18px; border: none; background: transparent; font-size: 10px; color: #636e72; }
+        .char-cell.consumed { background: #f0eef6; border-color: #dfe6e9; color: #b0b8bc; text-decoration: line-through; }
+        .char-cell.current { background: #ffd3b6; border-color: #ff9aa2; }
+        .char-cell.appended { background: #aa96da; border-color: #8f79c9; color: #fff; }
+        .char-cell.result { background: #b5ead7; border-color: #9fd8c2; }
+        .char-cell.empty { border-style: dashed; border-color: #dfe6e9; background: #ffffff; color: #b0b8bc; }
+        .dash { color: #b0b8bc; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; padding: 0 6px; }
+        .step-row { padding: 10px 12px; margin: 8px 0; background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; }
+        .step-row.current { background: #ffffd8; border-color: #f0c929; }
+        .step-title { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .flow-box.neutral { background: #f0eef6; border-color: #dfe6e9; }
+        .arrow { color: #aa96da; font-weight: 700; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 2px 8px 2px 0; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #f0c929; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 12px; }
+        .recursion { margin-left: 0; }
+        .recursion .recursion { margin-left: 28px; border-left: 2px solid #aa96da; padding-left: 14px; margin-top: 8px; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .char-cell { width: 34px; height: 36px; font-size: 13px; }
+            .char-cell.index-cell { width: 34px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Merge Strings Alternately</h1>
+            <p class="subtitle">LeetCode 1768 &mdash; Interleave two strings starting with <code>word1</code></p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag">Two Pointers</span>
+                <span class="tag purple">Simulation</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Take characters in turns: <code>word1[0]</code>, then <code>word2[0]</code>, then <code>word1[1]</code>, and so on. When one string is exhausted, append the untouched remainder of the other string and stop.</p>
+            <div class="code-block">Input:  word1 = "abc",  word2 = "pqr"
+Output: "apbqcr"
+
+word1:  a   b   c
+word2:    p   q   r
+merged: a p b q c r</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Shrink Both Strings Each Iteration (Implemented)</h2>
+            <p><strong>Intuition:</strong> simulate the definition with two working copies. Append the front character of each, then cut those characters off. If one copy is empty, dump the rest of the other copy and break.</p>
+            <span class="badge badge-time">Time: O(L1 + L2)</span>
+            <span class="badge badge-space">Space: O(L1 + L2)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">word1 = "ab", word2 = "pqrs" &mdash; the unequal-length case</div>
+
+                <div class="row-block">
+                    <div class="row-label">start: word1</div>
+                    <div class="array-row">
+                        <div class="char-cell current">a</div>
+                        <div class="char-cell current">b</div>
+                        <span class="dash">&nbsp;</span>
+                    </div>
+                    <div class="row-label" style="margin-top:6px;">start: word2</div>
+                    <div class="array-row">
+                        <div class="char-cell current">p</div>
+                        <div class="char-cell current">q</div>
+                        <div class="char-cell current">r</div>
+                        <div class="char-cell current">s</div>
+                    </div>
+                    <div class="row-label" style="margin-top:6px;">result</div>
+                    <div class="array-row"><div class="char-cell empty">&nbsp;</div></div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">Iteration 1 &mdash; both non-empty: append "a" + "p", then slice(1)</div>
+                    <div class="array-row">
+                        <div class="char-cell consumed">a</div>
+                        <div class="char-cell">b</div>
+                        <span class="arrow">&rarr;</span>
+                        <div class="char-cell consumed">p</div>
+                        <div class="char-cell">q</div>
+                        <div class="char-cell">r</div>
+                        <div class="char-cell">s</div>
+                        <span class="arrow">&rarr;</span>
+                        <div class="char-cell result">a</div>
+                        <div class="char-cell result">p</div>
+                    </div>
+                </div>
+
+                <div class="step-row">
+                    <div class="step-title">Iteration 2 &mdash; append "b" + "q", then slice(1); word1 is now empty</div>
+                    <div class="array-row">
+                        <div class="char-cell consumed">b</div>
+                        <span class="dash">(empty)</span>
+                        <span class="arrow">&rarr;</span>
+                        <div class="char-cell consumed">q</div>
+                        <div class="char-cell">r</div>
+                        <div class="char-cell">s</div>
+                        <span class="arrow">&rarr;</span>
+                        <div class="char-cell result">a</div>
+                        <div class="char-cell result">p</div>
+                        <div class="char-cell result">b</div>
+                        <div class="char-cell result">q</div>
+                    </div>
+                </div>
+
+                <div class="step-row current">
+                    <div class="step-title">Iteration 3 &mdash; word1.length is 0: append the whole remainder of word2, break</div>
+                    <div class="array-row">
+                        <div class="char-cell consumed">r</div>
+                        <div class="char-cell consumed">s</div>
+                        <span class="arrow">&rarr;</span>
+                        <div class="char-cell result">a</div>
+                        <div class="char-cell result">p</div>
+                        <div class="char-cell result">b</div>
+                        <div class="char-cell result">q</div>
+                        <div class="char-cell appended">r</div>
+                        <div class="char-cell appended">s</div>
+                    </div>
+                </div>
+
+                <div class="flow-row">
+                    <span class="flow-box result">return "apbqrs"</span>
+                    <span class="flow-box neutral">the tail "rs" is emitted in one operation, never interleaved</span>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2;"></div> available</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#f0eef6;"></div> consumed</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> already alternated</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#aa96da;"></div> appended remainder</div>
+                </div>
+            </div>
+
+            <div class="key-insight"><strong>Order of the checks matters:</strong> the "word1 empty" branch runs first. If both strings become empty at the same time, that branch appends an empty string and breaks &mdash; harmless, and the symmetric branch never runs.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Index Two Pointers (Optimal)</h2>
+            <p><strong>Intuition:</strong> use a single index <code>i</code> over both strings. At each step, emit <code>word1[i]</code> if it exists and <code>word2[i]</code> if it exists. No strings are ever sliced or copied.</p>
+            <span class="badge badge-time">Time: O(L1 + L2)</span>
+            <span class="badge badge-space">Space: O(L1 + L2) output</span>
+
+            <div class="diagram">
+                <div class="diagram-title">word1 = "ab", word2 = "pqrs" &mdash; i walks from 0 to max(L1, L2) - 1 = 3</div>
+
+                <div class="array-row">
+                    <div class="char-cell index-cell">i=0</div>
+                    <div class="char-cell index-cell">i=1</div>
+                    <div class="char-cell index-cell">i=2</div>
+                    <div class="char-cell index-cell">i=3</div>
+                </div>
+                <div class="row-label">word1</div>
+                <div class="array-row">
+                    <div class="char-cell active">a</div>
+                    <div class="char-cell active">b</div>
+                    <div class="char-cell empty">&mdash;</div>
+                    <div class="char-cell empty">&mdash;</div>
+                </div>
+                <div class="row-label" style="margin-top:8px;">word2</div>
+                <div class="array-row">
+                    <div class="char-cell active">p</div>
+                    <div class="char-cell active">q</div>
+                    <div class="char-cell active">r</div>
+                    <div class="char-cell active">s</div>
+                </div>
+                <div class="row-label" style="margin-top:8px;">output (push order)</div>
+                <div class="array-row">
+                    <div class="char-cell result">a</div>
+                    <div class="char-cell result">p</div>
+                    <div class="char-cell result">b</div>
+                    <div class="char-cell result">q</div>
+                    <div class="char-cell result">r</div>
+                    <div class="char-cell result">s</div>
+                </div>
+
+                <div class="flow-row" style="margin-top:14px;">
+                    <span class="flow-box neutral">i = 0: push w1[0]=a, w2[0]=p</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box neutral">i = 1: push w1[1]=b, w2[1]=q</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box neutral">i = 2: w1[2] is out of range, push w2[2]=r only</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box neutral">i = 3: push w2[3]=s only</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box result">join output &rarr; "apbqrs"</span>
+                </div>
+
+                <p style="font-size:13px;margin-top:8px;">The length guards <code>i &lt; word1.length</code> / <code>i &lt; word2.length</code> are what replace the "append the remainder" special case. Missing a guard would push <code>undefined</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Recursive Merge</h2>
+            <p><strong>Intuition:</strong> read the definition recursively &mdash; the answer is the first character of each string, followed by the merge of the two suffixes. When one suffix is empty, the other suffix <em>is</em> the answer.</p>
+            <span class="badge badge-time">Time: O(L1 + L2)</span>
+            <span class="badge badge-space">Space: O(L1 + L2) stack</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Call chain for merge("ab", "pqrs")</div>
+
+                <div class="recursion">
+                    <div class="flow-row">
+                        <span class="flow-box neutral">merge("ab", "pqrs")</span>
+                        <span class="arrow">&rarr;</span>
+                        <span class="flow-box">"a" + "p" + merge("b", "qrs")</span>
+                    </div>
+                    <div class="recursion">
+                        <div class="flow-row">
+                            <span class="flow-box neutral">merge("b", "qrs")</span>
+                            <span class="arrow">&rarr;</span>
+                            <span class="flow-box">"b" + "q" + merge("", "rs")</span>
+                        </div>
+                        <div class="recursion">
+                            <div class="flow-row">
+                                <span class="flow-box neutral">merge("", "rs")</span>
+                                <span class="arrow">&rarr;</span>
+                                <span class="flow-box valid">base case: word1 empty &rarr; "rs"</span>
+                            </div>
+                            <div class="flow-row">
+                                <span class="flow-box result">unwind: "b" + "q" + "rs" = "bqrs"</span>
+                            </div>
+                        </div>
+                        <div class="flow-row">
+                            <span class="flow-box result">unwind: "a" + "p" + "bqrs" = "apbqrs"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="font-size:13px;margin-top:8px;">The base case must return the <em>whole</em> remaining string, not a single character. Returning <code>word2[0]</code> would silently drop the tail.</p>
+            </div>
+
+            <div class="key-insight"><strong>Recursion depth equals <code>min(L1, L2) + 1</code>.</strong> Each call consumes one character from both strings, so the chain stops as soon as the shorter string is exhausted &mdash; not at the longer length. A base case that only checks one string would be wrong.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Slicing?</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Shrink via slice</strong> (implemented)</td>
+                            <td>O(L1+L2)</td>
+                            <td>O(L1+L2)</td>
+                            <td>Yes, every iteration</td>
+                            <td>Direct simulation; explicit remainder handling</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Index two pointers</strong></td>
+                            <td>O(L1+L2)</td>
+                            <td>O(L1+L2) output</td>
+                            <td>No</td>
+                            <td>Guaranteed linear; no intermediates</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Recursive merge</strong></td>
+                            <td>O(L1+L2)</td>
+                            <td>O(L1+L2) stack</td>
+                            <td>Yes</td>
+                            <td>Elegant but stack-bound</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size:13px;">With a copying engine, the slice-based and recursive versions degrade to O(L1&sup2; + L2&sup2;); the index version never does. At the stated limit of 100 characters per string, all three are effectively instant.</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ol class="step-list">
+                <li><strong>Dropping the tail.</strong> When the lengths differ, the leftover characters must be appended in order &mdash; once, at the end.</li>
+                <li><strong>Reading past the end.</strong> <code>word2[i]</code> for an out-of-range <code>i</code> is <code>undefined</code>; concatenating it produces the literal text "undefined". Guard every index.</li>
+                <li><strong>Looping only <code>min(L1, L2)</code> times</strong> without a remainder step &mdash; the longer string's tail disappears.</li>
+                <li><strong>Using <code>continue</code> instead of <code>break</code></strong> after appending the remainder: the other string is still non-empty, so the loop repeats and duplicates the tail forever.</li>
+                <li><strong>Starting with <code>word2</code>.</strong> The first emitted character is always <code>word1[0]</code>, regardless of which string is longer.</li>
+                <li><strong>Assuming the inputs were mutated.</strong> Strings are immutable; <code>word1 = word1.slice(1)</code> only rebinds the local parameter.</li>
+                <li><strong>Unicode assumptions.</strong> <code>slice(0,1)</code> and <code>word[i]</code> split UTF-16 surrogate pairs. Safe for the lowercase-only constraint, not for arbitrary text.</li>
+            </ol>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/merge-strings-alternately/" target="_blank" rel="noopener">LeetCode 1768: Merge Strings Alternately</a></li>
+                <li><a href="https://neetcode.io/problems/merge-strings-alternately" target="_blank" rel="noopener">NeetCode: Merge Strings Alternately</a></li>
+                <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice" target="_blank" rel="noopener">Concept: String.prototype.slice (MDN)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Interleave" target="_blank" rel="noopener">Concept: Interleaving sequences (Wikipedia)</a></li>
+                <li><a href="../is-anagram/README.md">Related in this repo: Is Anagram (character-level string scanning)</a></li>
+                <li><a href="../merge-sorted-array/README.md">Related in this repo: Merge Sorted Array (interleaving two ordered sequences)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
