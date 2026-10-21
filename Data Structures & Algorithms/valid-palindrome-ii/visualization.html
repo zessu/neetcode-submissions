@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Palindrome II - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #fff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; padding: 2px 6px; border-radius: 4px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; font-size: 14px; }
+        .array-row { display: flex; gap: 4px; margin: 4px 0; flex-wrap: wrap; }
+        .cell-wrap { display: flex; flex-direction: column; align-items: center; min-width: 44px; }
+        .cell-index { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; color: #636e72; margin-bottom: 2px; }
+        .array-cell { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 16px; background: #ffffff; }
+        .array-cell.match { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.mismatch { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.deleted { background: #ff9aa2; border-color: #ff9aa2; color: #fff; text-decoration: line-through; }
+        .array-cell.pal { background: #b5ead7; border-color: #b5ead7; }
+        .pointer { height: 32px; font-size: 11px; color: #636e72; text-align: center; line-height: 1.2; padding-top: 2px; white-space: nowrap; }
+        .pointer span { display: block; color: #aa96da; font-size: 14px; }
+        .stage { margin: 14px 0; }
+        .stage-label { font-size: 13px; color: #636e72; margin-bottom: 4px; font-weight: 600; }
+        .row-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; color: #636e72; margin-top: 10px; }
+        .arrow-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #fff5f6; border-color: #ff9aa2; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .tree-row { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin: 8px 0; }
+        .tree-node { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; text-align: center; }
+        .tree-node.fail { background: #fff5f6; border-color: #ff9aa2; }
+        .tree-node.root { background: #ffd3b6; border-color: #ff9aa2; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .table-scroll { overflow-x: auto; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 4px; }
+        .badge-time { background: #b5ead7; }
+        .badge-space { background: #ffffd8; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .pitfall { border-left: 4px solid #ff9aa2; background: #fff5f6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        .insight { border-left: 4px solid #b5ead7; background: #f2fbf7; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .array-cell { width: 38px; height: 38px; font-size: 14px; }
+            .cell-wrap { min-width: 38px; }
+            th, td { padding: 8px 10px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Valid Palindrome II</h1>
+            <p class="subtitle">LeetCode 680 &mdash; Palindrome after at most one deletion</p>
+            <div class="tags">
+                <span class="tag">Two Pointers</span>
+                <span class="tag">String</span>
+                <span class="tag">Greedy</span>
+                <span class="tag purple">O(1) Space</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Return <code>true</code> if <code>s</code> can become a palindrome by deleting <strong>at most one</strong> character. Zero deletions count, so an already-palindromic string is valid.</p>
+            <div class="code-block">Input:  s = "abca"
+Output: true      delete 'b' -> "aca", or delete 'c' -> "aba"
+
+Input:  s = "abc"
+Output: false     deleting any one character still leaves a non-palindrome</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force (Try Every Deletion)</h2>
+            <p><strong>Intuition:</strong> Remove each character in turn and check whether the result is a palindrome. Also check the original string, because deleting zero characters is allowed.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">s = "abca" &mdash; test the original and all four deletions</div>
+                <div class="array-row">
+                    <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell">a</div></div>
+                    <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell">b</div></div>
+                    <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">c</div></div>
+                    <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell">a</div></div>
+                </div>
+                <div class="arrow-row"><span class="flow-box invalid">original "abca" &rarr; reverse "acba" &#10007;</span></div>
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr><th>Delete index</th><th>Character</th><th>Result</th><th>Reverse</th><th>Palindrome?</th></tr></thead>
+                        <tbody>
+                            <tr><td>0</td><td>a</td><td>"bca"</td><td>"acb"</td><td>&#10007;</td></tr>
+                            <tr><td>1</td><td>b</td><td>"aca"</td><td>"aca"</td><td>&#10003;</td></tr>
+                            <tr><td>2</td><td>c</td><td>"aba"</td><td>"aba"</td><td>&#10003;</td></tr>
+                            <tr><td>3</td><td>a</td><td>"abc"</td><td>"cba"</td><td>&#10007;</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="arrow-row"><span class="flow-box result">At least one works &rarr; true</span></div>
+                <p style="font-size:13px; margin-top:8px;">Each candidate is built and checked in <code>O(n)</code>, and there are <code>n</code> candidates.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Two Pointers + Candidate Deletion (Implemented)</h2>
+            <p><strong>Intuition:</strong> Match from both ends. At the first mismatch, a valid answer must delete the left character or the right character &mdash; deleting anything else leaves the mismatched pair in place. Test only those two candidates.</p>
+            <span class="complexity-badge badge-time">Time: O(n) typical, O(n&sup2;) worst as written</span>
+            <span class="complexity-badge badge-space">Space: O(n) for slices</span>
+
+            <div class="diagram">
+                <div class="diagram-title">s = "abca"</div>
+
+                <div class="stage">
+                    <div class="stage-label">Step 1: outer pair matches</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell match">a</div><div class="pointer"><span>&uarr;</span>left</div></div>
+                        <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell">b</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell">c</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell match">a</div><div class="pointer"><span>&uarr;</span>right</div></div>
+                    </div>
+                </div>
+
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">move inward: left=1, right=2</span></div>
+
+                <div class="stage">
+                    <div class="stage-label">Step 2: first mismatch &mdash; 'b' vs 'c'</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell match">a</div><div class="pointer"></div></div>
+                        <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell mismatch">b</div><div class="pointer"><span>&uarr;</span>left</div></div>
+                        <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell mismatch">c</div><div class="pointer"><span>&uarr;</span>right</div></div>
+                        <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell match">a</div><div class="pointer"></div></div>
+                    </div>
+                </div>
+
+                <div class="arrow-row"><span class="arrow">&darr;</span><span class="flow-box">only two possible deletions</span></div>
+
+                <div class="stage">
+                    <div class="stage-label">Candidate A &mdash; delete left ('b') &rarr; "aca"</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="array-cell pal">a</div></div>
+                        <div class="cell-wrap"><div class="array-cell deleted">b</div></div>
+                        <div class="cell-wrap"><div class="array-cell pal">c</div></div>
+                        <div class="cell-wrap"><div class="array-cell pal">a</div></div>
+                    </div>
+                </div>
+
+                <div class="stage">
+                    <div class="stage-label">Candidate B &mdash; delete right ('c') &rarr; "aba"</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="array-cell pal">a</div></div>
+                        <div class="cell-wrap"><div class="array-cell pal">b</div></div>
+                        <div class="cell-wrap"><div class="array-cell deleted">c</div></div>
+                        <div class="cell-wrap"><div class="array-cell pal">a</div></div>
+                    </div>
+                </div>
+
+                <div class="arrow-row"><span class="flow-box result">Either candidate is a palindrome &rarr; true</span></div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> Matched / palindrome</div>
+                <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;"></div> Mismatched pair</div>
+                <div class="legend-item"><div class="legend-swatch" style="background:#ff9aa2;"></div> Deleted character</div>
+            </div>
+
+            <div class="code-block">let left = 0, right = s.length - 1;
+while (left &lt; right) {
+    if (s[left] === s[right]) { left++; right--; }
+    else {
+        const a = s.slice(0, left) + s.slice(left + 1);
+        const b = s.slice(0, right) + s.slice(right + 1);
+        if (isPal(a) || isPal(b)) return true;
+    }
+}
+return false;</div>
+
+            <div class="pitfall"><strong>Efficiency note:</strong> the submitted version reverses the two sliced strings on every mismatch and does not return <code>false</code> when both fail. That is correct but can reach <code>O(n&sup2;)</code>. Returning <code>false</code> immediately after both candidates fail, or using an index helper, restores <code>O(n)</code>.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Greedy Two Pointers with a Helper (Optimal)</h2>
+            <p><strong>Intuition:</strong> Use the same first-mismatch insight, but verify each candidate with an index-based palindrome scan. No substrings are created, and the first failure returns <code>false</code> immediately.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">s = "abca" &mdash; ranges checked after the mismatch at (1, 2)</div>
+
+                <div class="stage">
+                    <div class="stage-label">Known matches outside the range: indices 0 and 3 are already equal</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="cell-index">0</div><div class="array-cell match">a</div></div>
+                        <div class="cell-wrap"><div class="cell-index">1</div><div class="array-cell mismatch">b</div></div>
+                        <div class="cell-wrap"><div class="cell-index">2</div><div class="array-cell mismatch">c</div></div>
+                        <div class="cell-wrap"><div class="cell-index">3</div><div class="array-cell match">a</div></div>
+                    </div>
+                </div>
+
+                <div class="stage">
+                    <div class="stage-label">Branch 1: skip left &rarr; isPalindrome(2, 2)</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="array-cell" style="opacity:.35;">a</div></div>
+                        <div class="cell-wrap"><div class="array-cell" style="opacity:.35;">b</div></div>
+                        <div class="cell-wrap"><div class="array-cell pal">c</div></div>
+                        <div class="cell-wrap"><div class="array-cell" style="opacity:.35;">a</div></div>
+                    </div>
+                    <div class="flow-box valid">single character &rarr; palindrome, with outer 'a' pairs already matched</div>
+                </div>
+
+                <div class="stage">
+                    <div class="stage-label">Branch 2: skip right &rarr; isPalindrome(1, 1)</div>
+                    <div class="array-row">
+                        <div class="cell-wrap"><div class="array-cell" style="opacity:.35;">a</div></div>
+                        <div class="cell-wrap"><div class="array-cell pal">b</div></div>
+                        <div class="cell-wrap"><div class="array-cell" style="opacity:.35;">c</div></div>
+                        <div class="cell-wrap"><div class="array-cell" style="opacity:.35;">a</div></div>
+                    </div>
+                    <div class="flow-box valid">single character &rarr; palindrome</div>
+                </div>
+
+                <div class="arrow-row"><span class="flow-box result">First branch succeeds &rarr; true</span></div>
+                <p style="font-size:13px; margin-top:8px;">For a longer remainder, the helper simply walks its two indices inward, using <code>O(1)</code> memory.</p>
+            </div>
+
+            <div class="code-block">function validPalindrome(s) {
+    let l = 0, r = s.length - 1;
+    while (l &lt; r) {
+        if (s[l] !== s[r]) {
+            return isPal(s, l + 1, r) || isPal(s, l, r - 1);
+        }
+        l++; r--;
+    }
+    return true;
+}
+
+function isPal(s, l, r) {
+    while (l &lt; r) {
+        if (s[l] !== s[r]) return false;
+        l++; r--;
+    }
+    return true;
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Recursive Deletion</h2>
+            <p><strong>Intuition:</strong> Walk inward with a budget of one deletion. At a mismatch, spend the budget on either the left or the right character and recurse. The string is valid if either branch reaches the center.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n) call stack</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Decision tree for s = "abc"</div>
+                <div class="tree-row">
+                    <div class="tree-node root">check(0, 2, canDelete=true)<br>'a' vs 'c' &#10007;</div>
+                </div>
+                <div class="arrow-row" style="justify-content:center;"><span class="arrow">&darr;</span></div>
+                <div class="tree-row">
+                    <div class="tree-node fail">skip 'a': check(1, 2, false)<br>'b' vs 'c' &#10007; &rarr; false</div>
+                    <div class="tree-node fail">skip 'c': check(0, 1, false)<br>'a' vs 'b' &#10007; &rarr; false</div>
+                </div>
+                <div class="arrow-row" style="justify-content:center;"><span class="arrow">&darr;</span><span class="flow-box result">both branches fail &rarr; false</span></div>
+                <p style="font-size:13px; margin-top:8px;">At most two branches are explored because the budget is consumed after the first skip. Recursion depth can reach <code>n / 2</code>, which is risky at <code>n = 10^5</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Verdict</th></tr></thead>
+                    <tbody>
+                        <tr><td>Brute Force</td><td>O(n&sup2;)</td><td>O(n)</td><td>Tries unnecessary inner deletions</td></tr>
+                        <tr><td><strong>Two Pointers + Candidate Deletion</strong></td><td>O(n) typical / O(n&sup2;) worst as written</td><td>O(n)</td><td><strong>Implemented</strong>; correct, but slices on every mismatch</td></tr>
+                        <tr><td>Greedy + Helper</td><td><strong>O(n)</strong></td><td><strong>O(1)</strong></td><td><strong>Optimal</strong>; expected interview answer</td></tr>
+                        <tr><td>Recursive Deletion</td><td>O(n)</td><td>O(n) stack</td><td>Elegant; stack overflow risk at large n</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Pitfalls</h2>
+            <div class="insight"><strong>Key insight:</strong> at the first mismatch, only two deletions can possibly work &mdash; remove the left character or remove the right character. Everything outside the mismatched pair has already matched, so deleting an inner character cannot repair the pair.</div>
+            <div class="pitfall"><strong>Pitfall 1:</strong> Zero deletions are allowed. Check the original string first; <code>"aba"</code> must return <code>true</code>.</div>
+            <div class="pitfall"><strong>Pitfall 2:</strong> Test <em>both</em> candidates. Checking only the left or only the right misses valid cases like <code>"abca"</code>.</div>
+            <div class="pitfall"><strong>Pitfall 3:</strong> After a deletion, the rest must be an exact palindrome &mdash; do not allow a second skip in the helper.</div>
+            <div class="pitfall"><strong>Pitfall 4:</strong> Slice indices are easy to get wrong: deleting <code>left</code> is <code>s.slice(0,left) + s.slice(left+1)</code>; the helper equivalent is the range <code>[left+1, right]</code>.</div>
+            <div class="pitfall"><strong>Pitfall 5:</strong> If both candidates fail at the first mismatch, return <code>false</code> right away. Continuing is correct but can turn <code>O(n)</code> into <code>O(n&sup2;)</code>.</div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/valid-palindrome-ii/" target="_blank" rel="noopener">LeetCode 680: Valid Palindrome II</a></li>
+                <li><a href="https://neetcode.io/problems/valid-palindrome-ii" target="_blank" rel="noopener">NeetCode: Valid Palindrome II</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Palindrome" target="_blank" rel="noopener">Concept: Palindrome (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/dsa/two-pointers-technique/" target="_blank" rel="noopener">GeeksforGeeks: Two-pointers technique</a></li>
+                <li><a href="../is-palindrome/README.md">Related in this repo: Valid Palindrome (two pointers from both ends)</a></li>
+                <li><a href="../reverse-string/README.md">Related in this repo: Reverse String (in-place two pointers)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
