@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Common Prefix (LeetCode 14) - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card ul, .card ol { margin: 8px 0 12px 22px; color: #636e72; }
+        .card li { margin-bottom: 6px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; background: #f0eef6; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 14px; color: #2d3436; font-size: 14px; }
+        .note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        svg { display: block; width: 100%; height: auto; }
+        .svg-label { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; fill: #2d3436; }
+        .svg-mono { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; fill: #2d3436; }
+        .svg-small { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; fill: #636e72; }
+        .prefix-table { border-collapse: separate; border-spacing: 4px; margin: 0 auto; }
+        .prefix-table th { background: transparent; border: none; padding: 2px 0; text-align: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; color: #636e72; font-weight: 400; }
+        .prefix-table td { border: none; padding: 0; background: transparent; }
+        .prefix-table td.row-label { text-align: right; padding-right: 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #2d3436; white-space: nowrap; }
+        .char { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; font-weight: 600; }
+        .char.match { background: #b5ead7; border-color: #b5ead7; }
+        .char.mismatch { background: #ff9aa2; border-color: #ff9aa2; }
+        .char.blank { border: 2px dashed #dfe6e9; color: #b2bec3; background: #ffffff; }
+        .char.check { width: 42px; height: 26px; border: none; background: transparent; font-size: 16px; }
+        .prefix-evolution { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 10px 0; }
+        .prefix-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; letter-spacing: 2px; }
+        .prefix-box .keep { color: #2d3436; font-weight: 700; }
+        .prefix-box .drop { color: #d36b75; text-decoration: line-through; opacity: 0.8; }
+        .prefix-box.final { background: #b5ead7; border-color: #b5ead7; }
+        .arrow-right { color: #aa96da; font-size: 22px; font-weight: 700; }
+        .compare-note { font-size: 13px; color: #636e72; margin-left: 4px; }
+        .sort-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .sort-word { width: 150px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; }
+        .sort-chars { display: flex; gap: 4px; }
+        .sort-cell { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 7px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; }
+        .sort-cell.match { background: #b5ead7; border-color: #b5ead7; }
+        .sort-cell.mismatch { background: #ff9aa2; border-color: #ff9aa2; }
+        .sort-cell.middle { background: #fdf6f0; border-style: dashed; color: #b2bec3; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .badge-best { background: #aa96da; color: #ffffff; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; color: #636e72; }
+        .resources li:last-child { border-bottom: none; }
+        .key-insight { background: #ffffd8; border-left: 4px solid #e8d98a; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 14px 0; font-size: 14px; color: #2d3436; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.55rem; }
+            .card { padding: 18px; }
+            .char { width: 34px; height: 34px; font-size: 13px; }
+            .sort-word { width: 110px; }
+            .sort-cell { width: 32px; height: 32px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Longest Common Prefix</h1>
+            <p class="subtitle">LeetCode 14 &mdash; Find the shared beginning of every string</p>
+            <div class="tags">
+                <span class="tag">String</span>
+                <span class="tag">Trie</span>
+                <span class="tag purple">O(S)</span>
+                <span class="tag green">O(m) space</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an array of strings, return the longest string that is a prefix of <strong>every</strong> string. If they share no starting character, return <code>""</code>.</p>
+            <div class="code-block">Input:  strs = ["flower","flow","flight"]
+Output: "fl"
+
+Input:  strs = ["dog","racecar","car"]
+Output: ""
+
+Input:  strs = ["a"]
+Output: "a"</div>
+            <div class="key-insight"><strong>Key insight:</strong> the answer can only shrink as more strings are considered. At the first column where any string disagrees, the prefix is complete.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Vertical Scanning (Implemented)</h2>
+            <p><strong>Intuition:</strong> Compare all strings column by column. Column 0 must match everywhere, then column 1, and so on. Stop at the first column that contains a mismatch or a string that has already ended.</p>
+            <span class="complexity-badge badge-best">Best / implemented</span>
+            <span class="complexity-badge badge-time">Time: O(n &middot; m)</span>
+            <span class="complexity-badge badge-space">Space: O(m)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Column-by-column comparison &mdash; ["flower","flow","flight"]</div>
+                <table class="prefix-table" aria-label="Character grid for vertical scanning">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>0</th>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>4</th>
+                            <th>5</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-label">flower</td>
+                            <td><div class="char match">f</div></td>
+                            <td><div class="char match">l</div></td>
+                            <td><div class="char mismatch">o</div></td>
+                            <td><div class="char">w</div></td>
+                            <td><div class="char">e</div></td>
+                            <td><div class="char">r</div></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">flow</td>
+                            <td><div class="char match">f</div></td>
+                            <td><div class="char match">l</div></td>
+                            <td><div class="char mismatch">o</div></td>
+                            <td><div class="char">w</div></td>
+                            <td><div class="char blank">&middot;</div></td>
+                            <td><div class="char blank">&middot;</div></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">flight</td>
+                            <td><div class="char match">f</div></td>
+                            <td><div class="char match">l</div></td>
+                            <td><div class="char mismatch">i</div></td>
+                            <td><div class="char">g</div></td>
+                            <td><div class="char">h</div></td>
+                            <td><div class="char">t</div></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">column</td>
+                            <td><div class="char check">&#10003;</div></td>
+                            <td><div class="char check">&#10003;</div></td>
+                            <td><div class="char check">&#10007;</div></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note">Columns 0 and 1 agree for all three strings. Column 2 has <code>o, o, i</code>, so the scan stops and returns the two matched characters: <code>"fl"</code>.</p>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;"></div> Matching column</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ff9aa2;"></div> First mismatch</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffffff;border-style:dashed;"></div> String ended</div>
+                </div>
+            </div>
+
+            <div class="code-block">for (let i = 0; i &lt; strs[0].length; i++) {
+    for (const str of strs) {
+        if (i === str.length || str[i] !== strs[0][i]) {
+            return strs[0].slice(0, i);
+        }
+    }
+}
+return strs[0];</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Horizontal Scanning</h2>
+            <p><strong>Intuition:</strong> Keep a candidate prefix, initially the first string. Compare it with the next string and truncate it until it fits. Repeat. The candidate never grows, so it ends as the longest common prefix.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; m)</span>
+            <span class="complexity-badge badge-space">Space: O(1) auxiliary</span>
+
+            <div class="diagram">
+                <div class="diagram-title">The prefix shrinks as each string is processed</div>
+                <div class="prefix-evolution">
+                    <div class="prefix-box"><span class="keep">flower</span></div>
+                    <span class="arrow-right">&rarr;</span>
+                    <div class="compare-note">vs "flow": ends after 4 chars</div>
+                    <span class="arrow-right">&rarr;</span>
+                    <div class="prefix-box"><span class="keep">flow</span></div>
+                </div>
+                <div class="prefix-evolution">
+                    <div class="prefix-box"><span class="keep">flow</span></div>
+                    <span class="arrow-right">&rarr;</span>
+                    <div class="compare-note">vs "flight": mismatch at index 2</div>
+                    <span class="arrow-right">&rarr;</span>
+                    <div class="prefix-box"><span class="keep">fl</span><span class="drop">ow</span></div>
+                    <span class="arrow-right">&rarr;</span>
+                    <div class="prefix-box final"><span class="keep">fl</span></div>
+                </div>
+                <p class="note">The strike-through characters are removed one at a time from the end. The final candidate is <code>"fl"</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Sorting</h2>
+            <p><strong>Intuition:</strong> After lexicographic sorting, the first and last strings are the "most different" pair. Any prefix shared by those two is shared by everything between them, so only two strings need character-by-character comparison.</p>
+            <span class="complexity-badge badge-time">Time: O(n log n &middot; L)</span>
+            <span class="complexity-badge badge-space">Space: O(1)&ndash;O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Sorted strings &mdash; compare first vs last</div>
+                <div class="sort-row">
+                    <span class="sort-word">first: "flight"</span>
+                    <div class="sort-chars">
+                        <span class="sort-cell match">f</span>
+                        <span class="sort-cell match">l</span>
+                        <span class="sort-cell mismatch">i</span>
+                        <span class="sort-cell">g</span>
+                        <span class="sort-cell">h</span>
+                        <span class="sort-cell">t</span>
+                    </div>
+                </div>
+                <div class="sort-row">
+                    <span class="sort-word">middle: "flow"</span>
+                    <div class="sort-chars">
+                        <span class="sort-cell middle">&mdash;</span>
+                        <span class="sort-cell middle">&mdash;</span>
+                        <span class="sort-cell middle">&mdash;</span>
+                        <span class="sort-cell middle">&mdash;</span>
+                    </div>
+                </div>
+                <div class="sort-row">
+                    <span class="sort-word">last: "flower"</span>
+                    <div class="sort-chars">
+                        <span class="sort-cell match">f</span>
+                        <span class="sort-cell match">l</span>
+                        <span class="sort-cell mismatch">o</span>
+                        <span class="sort-cell">w</span>
+                        <span class="sort-cell">e</span>
+                        <span class="sort-cell">r</span>
+                    </div>
+                </div>
+                <p class="note">Index 2 compares <code>i</code> with <code>o</code>. The common prefix is the first two characters, <code>"fl"</code>. The middle string is guaranteed to start with that prefix by sorted order.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Trie</h2>
+            <p><strong>Intuition:</strong> Insert all strings into a trie. The common prefix is the path from the root that every word follows. The first node with more than one child (or a word ending) is where the shared path stops.</p>
+            <span class="complexity-badge badge-time">Time: O(S)</span>
+            <span class="complexity-badge badge-space">Space: O(S)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Trie for ["flower","flow","flight"] &mdash; the shared path is f &rarr; l</div>
+                <svg viewBox="0 0 760 320" role="img" aria-label="Trie with a shared f-l path that branches into o for flower and flow and i for flight">
+                    <line x1="380" y1="46" x2="380" y2="74" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="380" y1="106" x2="380" y2="134" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="380" y1="166" x2="300" y2="196" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="380" y1="166" x2="460" y2="196" stroke="#aa96da" stroke-width="2"/>
+                    <line x1="300" y1="228" x2="300" y2="256" stroke="#aa96da" stroke-width="2" stroke-dasharray="4 4"/>
+                    <line x1="460" y1="228" x2="460" y2="256" stroke="#aa96da" stroke-width="2" stroke-dasharray="4 4"/>
+
+                    <circle cx="380" cy="30" r="16" fill="#f0eef6" stroke="#aa96da" stroke-width="2"/>
+                    <text x="380" y="35" text-anchor="middle" class="svg-small">root</text>
+
+                    <circle cx="380" cy="90" r="16" fill="#b5ead7" stroke="#3d8f6f" stroke-width="2"/>
+                    <text x="380" y="95" text-anchor="middle" class="svg-mono" font-weight="700">f</text>
+                    <text x="410" y="95" class="svg-small">depth 1</text>
+
+                    <circle cx="380" cy="150" r="16" fill="#b5ead7" stroke="#3d8f6f" stroke-width="2"/>
+                    <text x="380" y="155" text-anchor="middle" class="svg-mono" font-weight="700">l</text>
+                    <text x="410" y="155" class="svg-small">depth 2</text>
+
+                    <circle cx="300" cy="212" r="16" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"/>
+                    <text x="300" y="217" text-anchor="middle" class="svg-mono" font-weight="700">o</text>
+                    <text x="220" y="216" text-anchor="end" class="svg-small">"flower", "flow"</text>
+
+                    <circle cx="460" cy="212" r="16" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"/>
+                    <text x="460" y="217" text-anchor="middle" class="svg-mono" font-weight="700">i</text>
+                    <text x="540" y="216" class="svg-small">"flight"</text>
+
+                    <circle cx="300" cy="270" r="14" fill="#ffffff" stroke="#dfe6e9" stroke-width="2"/>
+                    <text x="300" y="275" text-anchor="middle" class="svg-mono">w</text>
+                    <circle cx="460" cy="270" r="14" fill="#ffffff" stroke="#dfe6e9" stroke-width="2"/>
+                    <text x="460" y="275" text-anchor="middle" class="svg-mono">g</text>
+
+                    <text x="300" y="302" text-anchor="middle" class="svg-small">... e, r / word end for flow</text>
+                    <text x="460" y="302" text-anchor="middle" class="svg-small">... h, t</text>
+
+                    <rect x="588" y="118" width="140" height="52" rx="8" fill="#b5ead7" stroke="#3d8f6f" stroke-width="2"/>
+                    <text x="658" y="139" text-anchor="middle" class="svg-small" fill="#2d3436">common path</text>
+                    <text x="658" y="159" text-anchor="middle" class="svg-mono" font-weight="700" fill="#2d3436">"fl"</text>
+                </svg>
+                <p class="note">The path is shared for two characters. At depth 3 the trie branches (<code>o</code> vs <code>i</code>), so no third character can be common to every word.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Vertical Scanning</strong> (implemented)</td>
+                            <td>O(n &middot; m) / O(S)</td>
+                            <td>O(m)</td>
+                            <td>Fails fast at the first bad column</td>
+                            <td>Rechecks the reference character each column</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Horizontal Scanning</strong></td>
+                            <td>O(n &middot; m) / O(S)</td>
+                            <td>O(1) auxiliary</td>
+                            <td>Minimal memory; very short code</td>
+                            <td>May rescan a long candidate prefix</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sorting</strong></td>
+                            <td>O(n log n &middot; L)</td>
+                            <td>O(1)&ndash;O(n) (engine-dependent)</td>
+                            <td>Only first and last strings need comparison</td>
+                            <td>Sorting dominates; reorders input</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trie</strong></td>
+                            <td>O(S)</td>
+                            <td>O(S)</td>
+                            <td>Great for repeated prefix queries</td>
+                            <td>High memory for one query</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="note"><code>n</code> = number of strings, <code>m</code> = length of the shortest string, <code>L</code> = length of the longest string, <code>S</code> = total characters across all strings.</p>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul>
+                <li><strong>Ignoring shorter strings.</strong> A prefix cannot exceed the shortest input; reading past the end gives <code>undefined</code>, which must count as a mismatch.</li>
+                <li><strong>Empty strings.</strong> They are allowed by the constraints; any empty string forces the answer to <code>""</code>.</li>
+                <li><strong>Checking only neighboring strings.</strong> Pairwise checks can miss a character that fails for a non-adjacent string.</li>
+                <li><strong>Growing the candidate.</strong> Horizontal scanning must truncate, never extend, the prefix.</li>
+                <li><strong>Off-by-one slicing.</strong> If the mismatch is at index <code>i</code>, return characters <code>0..i-1</code>, i.e. <code>slice(0, i)</code>.</li>
+                <li><strong>Mutating the caller's array.</strong> Sorting in place changes the input order; sort a copy if that matters.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/longest-common-prefix/" target="_blank" rel="noopener">LeetCode 14: Longest Common Prefix</a></li>
+                <li><a href="https://neetcode.io/problems/longest-common-prefix" target="_blank" rel="noopener">NeetCode: Longest Common Prefix</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Trie" target="_blank" rel="noopener">Concept: Trie (Wikipedia)</a></li>
+                <li><a href="../implement-prefix-tree/" target="_blank" rel="noopener">Related in this repo: Implement Prefix Tree</a></li>
+                <li><a href="../merge-strings-alternately/" target="_blank" rel="noopener">Related in this repo: Merge Strings Alternately</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
