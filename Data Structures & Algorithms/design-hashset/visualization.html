@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design HashSet - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: #2d3436; overflow-x: auto; margin: 12px 0; line-height: 1.5; white-space: pre; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-note { color: #636e72; font-size: 13px; margin-top: 10px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin: 0 8px 8px 0; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .array-container { display: flex; gap: 6px; margin: 16px 0; flex-wrap: wrap; }
+        .cell-col { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        .array-cell { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 14px; background: #ffffff; color: #2d3436; }
+        .array-cell.scan { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.hit { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.miss { background: #ff9aa2; border-color: #ff9aa2; }
+        .array-cell.zero { background: #ffffd8; border-color: #f0c929; }
+        .cell-label { font-size: 11px; color: #636e72; text-align: center; font-family: 'SF Mono', monospace; }
+        .node { display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 6px 14px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .node.hit { background: #b5ead7; border-color: #b5ead7; }
+        .node.scan { background: #ffd3b6; border-color: #ff9aa2; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 700; }
+        .bucket-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+        .bucket-index { width: 34px; height: 38px; display: flex; align-items: center; justify-content: center; background: #a8d8ea; border-radius: 6px; font-family: 'SF Mono', monospace; font-weight: 600; font-size: 13px; flex: 0 0 auto; }
+        .null-mark { color: #b2bec3; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', monospace; font-size: 13px; }
+        .flow-box.ok { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.bad { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; margin: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .pitfalls { list-style: none; padding: 0; margin: 0; }
+        .pitfalls li { padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid #dfe6e9; }
+        .pitfalls li:last-child { border-bottom: none; }
+        .pitfalls li::before { content: "!"; position: absolute; left: 0; top: 12px; width: 20px; height: 20px; background: #ff9aa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #2d3436; }
+        @media (max-width: 620px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Design HashSet</h1>
+            <p class="subtitle">LeetCode 705 &mdash; add / contains / remove with no built-in hash table</p>
+            <div class="tags">
+                <span class="tag">Hash Table</span>
+                <span class="tag">Design</span>
+                <span class="tag">Array</span>
+                <span class="tag">Linked List</span>
+                <span class="tag alt">Hash Function</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Implement a set of integers supporting <code>add(key)</code>, <code>contains(key)</code>, and <code>remove(key)</code>. Duplicate adds are no-ops, removing an absent key does nothing, and keys lie in <code>[0, 10^6]</code> with at most <code>10^4</code> calls.</p>
+            <div class="code-block">Input:
+["MyHashSet","add","add","contains","contains","add","contains","remove","contains"]
+[[],         [1],  [2],  [1],       [3],       [2],  [2],       [2],     [2]]
+
+Output:
+[null, null, null, true, false, null, true, null, false]</div>
+            <p>A set has no values &mdash; only "present" or "absent" &mdash; so each operation is a membership decision.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Array + Linear Scan (Implemented)</h2>
+            <p><strong>Intuition:</strong> Keep the distinct keys in an array. Every operation scans the array with <code>includes</code>; insertion appends, deletion filters.</p>
+            <span class="complexity-badge badge-time">Time: O(n) per operation</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">contains(3) on values = [1, 2]</div>
+                <div class="array-container">
+                    <div class="cell-col">
+                        <div class="array-cell miss">1</div>
+                        <div class="cell-label">values[0]</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell scan">2</div>
+                        <div class="cell-label">values[1]</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell" style="border-style: dashed; color: #b2bec3;">3?</div>
+                        <div class="cell-label">not stored</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box bad">1 &ne; 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box bad">2 &ne; 3</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">end of array: false</span>
+                </div>
+                <p class="diagram-note">Only two comparisons here, but a set with 10,000 keys would compare all 10,000. <code>remove</code> rebuilds the array with <code>filter</code>, which also scans and allocates.</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">add(2) when 2 is already present</div>
+                <div class="flow-row">
+                    <span class="flow-box">add(2)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">includes(2) = true</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">no-op, set stays [1, 2]</span>
+                </div>
+                <p class="diagram-note">This guard is what makes the structure a <em>set</em> rather than a bag; without it, duplicates would accumulate and inflate every later scan.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Direct Addressing / Bitset</h2>
+            <p><strong>Intuition:</strong> Keys are bounded by <code>10^6</code>, so the key can be used directly as an array index. Presence becomes a single byte (or bit) lookup, with no collisions.</p>
+            <span class="complexity-badge badge-time">Time: O(1)</span>
+            <span class="complexity-badge badge-space">Space: O(10^6) bytes (or bits)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">present = Uint8Array(10^6 + 1) after add(1), add(2), remove(2)</div>
+                <div class="array-container">
+                    <div class="cell-col">
+                        <div class="array-cell zero">0</div>
+                        <div class="cell-label">index 0</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell hit">1</div>
+                        <div class="cell-label">index 1</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell">0</div>
+                        <div class="cell-label">index 2</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell zero">0</div>
+                        <div class="cell-label">index 3</div>
+                    </div>
+                    <div class="cell-col">
+                        <div class="array-cell" style="border-style: dashed; color: #b2bec3;">&hellip;</div>
+                        <div class="cell-label">index 10^6</div>
+                    </div>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">contains(2)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box bad">present[2] === 0</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box result">false</span>
+                </div>
+                <p class="diagram-note">Key <code>0</code> is a legitimate index — the yellow cell shows why <code>if (key)</code> would be a bug. A bitset packs 8 keys per byte by setting bit <code>key % 8</code> of word <code>key &gt;&gt; 3</code>, using ~125 KB instead of ~1 MB.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Separate Chaining</h2>
+            <p><strong>Intuition:</strong> Compress each key into a bucket index with a hash function, then store colliding keys in a linked list. This is the general hash-set design that works for unbounded keys.</p>
+            <span class="complexity-badge badge-time">Time: O(1 + n/B) average</span>
+            <span class="complexity-badge badge-space">Space: O(n + B)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">B = 5 buckets, h(key) = key % 5, set = {1, 2, 4, 6, 7, 11}</div>
+                <div class="bucket-row">
+                    <div class="bucket-index">0</div>
+                    <span class="null-mark">&empty;</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">1</div>
+                    <div class="node scan"><span>1</span></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="node hit"><span>6</span></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="node"><span>11</span></div>
+                    <span class="null-mark">&rarr; null</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">2</div>
+                    <div class="node"><span>2</span></div>
+                    <span class="arrow">&rarr;</span>
+                    <div class="node"><span>7</span></div>
+                    <span class="null-mark">&rarr; null</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">3</div>
+                    <span class="null-mark">&empty;</span>
+                </div>
+                <div class="bucket-row">
+                    <div class="bucket-index">4</div>
+                    <div class="node"><span>4</span></div>
+                    <span class="null-mark">&rarr; null</span>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box">contains(6)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">h(6) = 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box ok">walk chain: 1, 6 &mdash; found</span>
+                </div>
+                <p class="diagram-note"><code>add(6)</code> would also start at bucket 1; finding <code>6</code> already there means no insert. <code>remove(6)</code> must unlink the middle node so the chain becomes <code>1 &rarr; 11</code>.</p>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-swatch" style="background: #a8d8ea;"></div> Bucket / chain node</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #b5ead7;"></div> Key being searched</div>
+                <div class="legend-item"><div class="legend-swatch" style="background: #ffd3b6;"></div> Scanned, no match</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>add</th><th>contains</th><th>remove</th><th>Space</th><th>When to use</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Array + linear scan (implemented)</strong></td>
+                            <td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td>
+                            <td>Few keys; simplest code</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Direct addressing</strong></td>
+                            <td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(10^6)</td>
+                            <td>Bounded integer keys</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bitset</strong></td>
+                            <td>O(1)</td><td>O(1)</td><td>O(1)</td><td>O(10^6) bits</td>
+                            <td>Bounded keys, tight memory</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Separate chaining</strong></td>
+                            <td>O(1) avg</td><td>O(1) avg</td><td>O(1) avg</td><td>O(n + B)</td>
+                            <td>Unbounded / arbitrary keys</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Common Pitfalls</h2>
+            <ul class="pitfalls">
+                <li><strong>Duplicate adds:</strong> check membership before inserting, or the "set" becomes a multiset.</li>
+                <li><strong>Removing an absent key:</strong> return early (or guard <code>index !== -1</code>); an unguarded <code>splice(-1, 1)</code> deletes the wrong element.</li>
+                <li><strong>Truthiness on key 0:</strong> <code>if (key)</code> treats a valid key as missing. Compare with <code>===</code> instead.</li>
+                <li><strong>Forgetting to reassign:</strong> <code>filter</code> returns a new array; <code>this.values = this.values.filter(...)</code> is required.</li>
+                <li><strong>Sentinel collisions:</strong> <code>-1</code> from <code>indexOf</code> is not a valid index — check it before using the result.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/design-hashset/" target="_blank" rel="noopener">LeetCode 705: Design HashSet</a></li>
+                <li><a href="https://neetcode.io/problems/design-hashset" target="_blank" rel="noopener">NeetCode: Design HashSet</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Hash_table" target="_blank" rel="noopener">Concept: Hash Table (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/hashing-data-structure/" target="_blank" rel="noopener">Concept: Hashing and Collision Resolution (GeeksforGeeks)</a></li>
+                <li><a href="../design-hashmap/visualization.html">Related in this repo: Design HashMap (LeetCode 706)</a></li>
+                <li><a href="../longest-consecutive-sequence/visualization.html">Related in this repo: Longest Consecutive Sequence (LeetCode 128)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
