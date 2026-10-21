@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number of Islands - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; color: #ffffff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.6; color: #2d3436;  white-space: pre;}
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; min-width: 560px; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; overflow-x: auto; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .diagram-grid { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; justify-content: center; }
+        .panel { flex: 1 1 280px; max-width: 400px; }
+        .panel .caption { text-align: center; font-size: 13px; color: #636e72; margin-top: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(5, 46px); gap: 4px; justify-content: center; margin: 0 auto; }
+        .cell { width: 46px; height: 46px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #dfe6e9; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; font-weight: 600; background: #ffffff; color: #2d3436; }
+        .cell.water { background: #eef6fb; border-color: #cfe6f2; color: #9ab7c6; font-weight: 400; }
+        .cell.a { background: #b5ead7; border-color: #2f9e78; }
+        .cell.b { background: #a8d8ea; border-color: #4a9fbd; }
+        .cell.c { background: #ffd3b6; border-color: #e8a27a; }
+        .cell.active { background: #ffffd8; border-color: #d9b64a; }
+        .cell small { font-size: 9px; font-weight: 400; color: #636e72; line-height: 1; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #d9b64a; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .insight { border-left: 4px solid #aa96da; background: #f0eef6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 12px; font-size: 14px; }
+        ul.pitfalls { padding-left: 22px; color: #636e72; }
+        ul.pitfalls li { margin-bottom: 10px; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; margin-top: 8px; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .uf-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+        .uf-node { width: 44px; height: 44px; border: 2px solid #a8d8ea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; background: #ffffff; }
+        .uf-node.root { background: #b5ead7; border-color: #2f9e78; }
+        .uf-node.merged { background: #ffffd8; border-color: #d9b64a; }
+        .uf-arrow { color: #aa96da; font-size: 18px; }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .grid { grid-template-columns: repeat(5, 36px); }
+            .cell { width: 36px; height: 36px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Number of Islands</h1>
+            <p class="subtitle">LeetCode 200 &mdash; Count connected components of land in a 4-directional grid</p>
+            <div class="tags">
+                <span class="tag">Matrix</span>
+                <span class="tag">DFS</span>
+                <span class="tag">BFS</span>
+                <span class="tag purple">Union-Find</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Land cells (<code>"1"</code>) connect only up, down, left, and right. An island is one maximal connected group of land. Scan every cell; each unvisited land cell starts a flood fill that consumes exactly one island.</p>
+            <div class="code-block">Input: grid = [["1","1","0","0","0"],
+                ["1","1","0","0","0"],
+                ["0","0","1","0","0"],
+                ["0","0","0","1","1"]]
+Output: 3</div>
+            <div class="diagram">
+                <div class="diagram-title">The three islands in Example 2</div>
+                <div class="grid">
+                    <div class="cell a">1<small>island A</small></div>
+                    <div class="cell a">1<small>A</small></div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+
+                    <div class="cell a">1<small>A</small></div>
+                    <div class="cell a">1<small>A</small></div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell b">1<small>B</small></div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell c">1<small>C</small></div>
+                    <div class="cell c">1<small>C</small></div>
+                </div>
+                <p class="caption">A is a 2&times;2 block, B is a single cell, C is a pair. Diagonal land never connects.</p>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:#b5ead7;border-color:#2f9e78;"></div> Island A</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#a8d8ea;border-color:#4a9fbd;"></div> Island B</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffd3b6;border-color:#e8a27a;"></div> Island C</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: DFS Flood Fill with a Visited Set (Implemented)</h2>
+            <p><strong>Intuition:</strong> When the scan finds unvisited land, it has found a new island. A DFS marks every cell reachable from it. The outer scan then skips all of those cells.</p>
+            <span class="complexity-badge badge-time">Time: O(m &middot; n)</span>
+            <span class="complexity-badge badge-space">Space: O(m &middot; n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">DFS visit order on island A (neighbors: right, left, down, up)</div>
+                <div class="diagram-grid">
+                    <div class="panel">
+                        <div class="grid">
+                            <div class="cell active">1<small>1</small></div>
+                            <div class="cell active">1<small>2</small></div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+
+                            <div class="cell active">1<small>4</small></div>
+                            <div class="cell active">1<small>3</small></div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell b">1<small>B</small></div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell c">1<small>C</small></div>
+                            <div class="cell c">1<small>C</small></div>
+                        </div>
+                        <p class="caption">Start at (0,0). The numbers show the DFS discovery order.</p>
+                    </div>
+                    <div class="panel" style="flex:1 1 230px;max-width:300px;">
+                        <div class="code-block" style="font-size:12px;">search(r, c) {
+  if (out of bounds ||
+      grid[r][c] === "0" ||
+      searched.has(key)) return;
+
+  searched.add(key);
+
+  search(r, c + 1);  // right
+  search(r, c - 1);  // left
+  search(r + 1, c);  // down
+  search(r - 1, c);  // up
+}</div>
+                    </div>
+                </div>
+                <div class="flow-row" style="margin-top:12px;">
+                    <span class="flow-box">scan (0,0): land, unvisited</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">flood fill A, count = 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">(2,2): count = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">(3,3): count = 3</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">Once A is marked, the outer loop sees <code>(0,1)</code>, <code>(1,0)</code>, and <code>(1,1)</code> as already searched, so it does not double-count them.</p>
+            </div>
+
+            <h3>The recursion-depth risk</h3>
+            <div class="diagram">
+                <div class="diagram-title">A 3 &times; 5 all-land grid can produce a long snake</div>
+                <div class="grid" style="grid-template-columns: repeat(5, 46px);">
+                    <div class="cell active">1<small>1</small></div>
+                    <div class="cell active">1<small>2</small></div>
+                    <div class="cell active">1<small>3</small></div>
+                    <div class="cell active">1<small>4</small></div>
+                    <div class="cell active">1<small>5</small></div>
+                    <div class="cell active">1<small>10</small></div>
+                    <div class="cell active">1<small>9</small></div>
+                    <div class="cell active">1<small>8</small></div>
+                    <div class="cell active">1<small>7</small></div>
+                    <div class="cell active">1<small>6</small></div>
+                    <div class="cell active">1<small>11</small></div>
+                    <div class="cell active">1<small>12</small></div>
+                    <div class="cell active">1<small>13</small></div>
+                    <div class="cell active">1<small>14</small></div>
+                    <div class="cell active">1<small>15</small></div>
+                </div>
+                <p class="caption">Right-first DFS snakes across rows, so recursion depth grows with the number of cells. At 300 &times; 300, that is ~90,000 frames &mdash; more than the JS stack usually allows.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: BFS Flood Fill</h2>
+            <p><strong>Intuition:</strong> Explore the island in rings with a queue. Mark cells when they are enqueued so each cell enters the queue at most once.</p>
+            <span class="complexity-badge badge-time">Time: O(m &middot; n)</span>
+            <span class="complexity-badge badge-space">Space: O(m &middot; n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">BFS distance from the start (0,0) on island A</div>
+                <div class="grid">
+                    <div class="cell a">1<small>dist 0</small></div>
+                    <div class="cell a">1<small>dist 1</small></div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+
+                    <div class="cell a">1<small>dist 1</small></div>
+                    <div class="cell a">1<small>dist 2</small></div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell b">1<small>B</small></div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell water">0</div>
+                    <div class="cell c">1<small>C</small></div>
+                    <div class="cell c">1<small>C</small></div>
+                </div>
+                <div class="flow-row" style="justify-content:center;margin-top:12px;">
+                    <span class="flow-box">queue: (0,0)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">queue: (0,1), (1,0)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">queue: (1,1)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">empty &rarr; island done</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">Marking on enqueue prevents the same cell from being added by two different neighbors. BFS uses heap memory for the queue instead of call-stack frames, so the 300 &times; 300 case is safe.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: In-Place DFS (Sink the Land)</h2>
+            <p><strong>Intuition:</strong> Use the grid itself as the visited structure. When a land cell is visited, overwrite it with <code>"0"</code>. Any later visit sees water and stops.</p>
+            <span class="complexity-badge badge-time">Time: O(m &middot; n)</span>
+            <span class="complexity-badge badge-space">Space: O(m &middot; n) stack</span>
+
+            <div class="diagram">
+                <div class="diagram-grid">
+                    <div class="panel">
+                        <div class="diagram-title" style="text-align:center;">Before</div>
+                        <div class="grid" style="grid-template-columns: repeat(4, 46px);">
+                            <div class="cell a">1</div>
+                            <div class="cell a">1</div>
+                            <div class="cell water">0</div>
+                            <div class="cell c">1</div>
+                            <div class="cell a">1</div>
+                            <div class="cell a">1</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell b">1</div>
+                            <div class="cell water">0</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="diagram-title" style="text-align:center;">After flood fill from (0,0)</div>
+                        <div class="grid" style="grid-template-columns: repeat(4, 46px);">
+                            <div class="cell water">0<small>sunk</small></div>
+                            <div class="cell water">0<small>sunk</small></div>
+                            <div class="cell water">0</div>
+                            <div class="cell c">1</div>
+                            <div class="cell water">0<small>sunk</small></div>
+                            <div class="cell water">0<small>sunk</small></div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell water">0</div>
+                            <div class="cell b">1</div>
+                            <div class="cell water">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-row" style="justify-content:center;margin-top:12px;">
+                    <span class="flow-box">count = 1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">(0,3) still land &rarr; count = 2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">(2,2) still land &rarr; count = 3</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">No <code>Set</code> is needed, but the input is destroyed. This is usually fine in an interview unless the caller needs the original grid.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Union-Find (Disjoint Set Union)</h2>
+            <p><strong>Intuition:</strong> Treat every land cell as its own component. Merge each land cell with its right and bottom land neighbors. Every successful merge reduces the component count by one.</p>
+            <span class="complexity-badge badge-time">Time: O(m &middot; n &middot; &alpha;)</span>
+            <span class="complexity-badge badge-space">Space: O(m &middot; n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">2 &times; 2 all-land block: 4 components merge into 1</div>
+                <div class="grid" style="grid-template-columns: repeat(2, 56px);">
+                    <div class="cell a">1<small>idx 0</small></div>
+                    <div class="cell a">1<small>idx 1</small></div>
+                    <div class="cell a">1<small>idx 2</small></div>
+                    <div class="cell a">1<small>idx 3</small></div>
+                </div>
+                <div class="uf-row" style="margin-top:18px;">
+                    <span class="flow-box">start: count = 4</span>
+                </div>
+                <div class="uf-row">
+                    <div class="uf-node merged">1</div>
+                    <div class="uf-arrow">&rarr;</div>
+                    <div class="uf-node root">0</div>
+                    <span class="flow-box">union(0, 1) &rarr; count = 3</span>
+                </div>
+                <div class="uf-row">
+                    <div class="uf-node merged">2</div>
+                    <div class="uf-arrow">&rarr;</div>
+                    <div class="uf-node root">0</div>
+                    <span class="flow-box">union(0, 2) &rarr; count = 2</span>
+                </div>
+                <div class="uf-row">
+                    <div class="uf-node merged">3</div>
+                    <div class="uf-arrow">&rarr;</div>
+                    <div class="uf-node root">0</div>
+                    <span class="flow-box">union(1, 3) &rarr; count = 1</span>
+                    <span class="flow-box">union(2, 3): same root, no change</span>
+                </div>
+                <p style="color:#636e72;font-size:13px;margin-top:8px;">Only right and down neighbors are checked, so each edge is considered once. Path compression keeps finds nearly constant time.</p>
+            </div>
+
+            <ol class="step-list">
+                <li>Scan the grid; each land cell gets a parent pointing to itself and size 1.</li>
+                <li>Initialize <code>count</code> to the number of land cells.</li>
+                <li>For every land cell, union with its right neighbor if it is land.</li>
+                <li>Union with its bottom neighbor if it is land.</li>
+                <li>Decrement <code>count</code> on every successful union (different roots).</li>
+                <li>Return <code>count</code>.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>DFS + visited set</strong> (implemented)</td>
+                            <td>O(m &middot; n)</td>
+                            <td>O(m &middot; n)</td>
+                            <td>Simple; grid stays intact</td>
+                            <td>Recursion can overflow; string keys cost memory</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BFS flood fill</strong></td>
+                            <td>O(m &middot; n)</td>
+                            <td>O(m &middot; n)</td>
+                            <td>No call-stack risk; safe on 300&times;300 all land</td>
+                            <td>Queue + visited set; slightly more bookkeeping</td>
+                        </tr>
+                        <tr>
+                            <td><strong>In-place DFS</strong></td>
+                            <td>O(m &middot; n)</td>
+                            <td>O(m &middot; n) stack only</td>
+                            <td>No visited set; compact</td>
+                            <td>Destroys the input; still recursive</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Union-Find</strong></td>
+                            <td>O(m &middot; n &middot; &alpha;)</td>
+                            <td>O(m &middot; n)</td>
+                            <td>Handles incremental land additions</td>
+                            <td>Most code; slower constants for one static grid</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insights &amp; Common Pitfalls</h2>
+            <div class="insight">
+                <strong>One sentence:</strong> every unvisited land cell starts exactly one island; flood fill (or union) consumes all cells that belong to it, and the count increments only at the start.
+            </div>
+            <ul class="pitfalls" style="margin-top:14px;">
+                <li><strong>Only four directions connect.</strong> Diagonally touching land is two islands, not one.</li>
+                <li><strong>Check bounds before indexing.</strong> JavaScript throws on <code>grid[-1]</code> or <code>grid[row][300]</code>; the guard must run first.</li>
+                <li><strong>Mark visited cells.</strong> Without marking, DFS bounces between neighboring land cells forever.</li>
+                <li><strong>Do not count inside the flood fill.</strong> Increment once per launched flood fill, not once per visited cell.</li>
+                <li><strong>Grid values are strings.</strong> Use <code>grid[i][j] === "1"</code> or <code>parseInt(...) === 0</code>; comparing to the number <code>1</code> never matches.</li>
+                <li><strong>Recursion depth is the weak point.</strong> The right-first DFS on a 300&times;300 all-land grid can recurse ~90,000 deep. Prefer BFS or an explicit stack for maximum inputs.</li>
+                <li><strong>In-place sinking mutates the input.</strong> It saves memory but leaves the caller with a grid full of water.</li>
+            </ul>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/number-of-islands/" target="_blank" rel="noopener">LeetCode 200: Number of Islands</a></li>
+                <li><a href="https://neetcode.io/problems/count-number-of-islands" target="_blank" rel="noopener">NeetCode: Number of Islands</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Flood_fill" target="_blank" rel="noopener">Concept: Flood Fill (Wikipedia)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure" target="_blank" rel="noopener">Concept: Disjoint-Set / Union-Find (Wikipedia)</a></li>
+                <li><a href="../largest-component/README.md">Related in this repo: Largest Component (connected components)</a></li>
+                <li><a href="../shortest-path/README.md">Related in this repo: Shortest Path (graph traversal)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
