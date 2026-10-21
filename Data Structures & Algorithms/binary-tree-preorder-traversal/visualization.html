@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Preorder Traversal - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.alt { background: #aa96da; color: #ffffff; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .card strong { color: #2d3436; }
+        code { background: #f0eef6; color: #636e72; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; border: 1px solid #dfe6e9; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; vertical-align: top; }
+        tbody tr:nth-child(even) td { background: #fdf6f0; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .tree-svg { width: 100%; max-width: 430px; margin: 0 auto; display: block; }
+        .tree-edge { stroke: #aa96da; stroke-width: 2px; }
+        .tree-edge.thread { stroke: #ff9aa2; stroke-width: 2px; stroke-dasharray: 6 5; }
+        .tree-node { fill: #ffffff; stroke: #a8d8ea; stroke-width: 2px; }
+        .tree-node.active { fill: #ffd3b6; stroke: #ff9aa2; }
+        .tree-node.done { fill: #b5ead7; stroke: #b5ead7; }
+        .tree-node.queued { fill: #ffffd8; stroke: #f0c929; }
+        .tree-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .tree-note { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 12px; fill: #636e72; text-anchor: middle; }
+        .badge { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11px; font-weight: 600; fill: #2d3436; text-anchor: middle; }
+        .badge-bg { fill: #ffffd8; stroke: #f0c929; stroke-width: 1px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 20px; font-weight: 700; }
+        .stack-row { display: flex; align-items: center; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
+        .stack-label { width: 74px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; font-weight: 600; color: #636e72; flex-shrink: 0; }
+        .stack-cells { display: flex; gap: 4px; flex-wrap: wrap; }
+        .cell { min-width: 38px; height: 38px; padding: 0 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; background: #ffffff; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; font-weight: 600; }
+        .cell.top { background: #ffd3b6; border-color: #ff9aa2; }
+        .cell.done { background: #b5ead7; border-color: #b5ead7; }
+        .cell.empty { border-style: dashed; border-color: #dfe6e9; color: #b2bec3; font-weight: 400; font-size: 12px; }
+        .step-label { font-size: 13px; color: #636e72; min-width: 100%; margin-top: 2px; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #636e72; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .legend-swatch.round { border-radius: 50%; }
+        .pill-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+        .pill { background: #ffffff; border-left: 4px solid #a8d8ea; border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 14px; color: #636e72; }
+        .pill.warn { border-left-color: #ff9aa2; }
+        .pill.good { border-left-color: #b5ead7; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; font-size: 14px; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        @media (max-width: 600px) {
+            .container { padding: 24px 14px; }
+            .header h1 { font-size: 1.5rem; }
+            .card { padding: 18px; }
+            .card h2 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Binary Tree Preorder Traversal</h1>
+            <p class="subtitle">LeetCode 144 &mdash; node &rarr; left &rarr; right</p>
+            <div class="tags">
+                <span class="tag">Tree</span>
+                <span class="tag">DFS</span>
+                <span class="tag">Stack</span>
+                <span class="tag alt">Binary Tree</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Return the values of a binary tree in <strong>preorder</strong>: record the node first, then fully explore the left subtree, then the right subtree. The root is always the first value in the output.</p>
+            <div class="code-block">Input:  root = [1, null, 2, 3]
+
+        1
+         \
+          2
+         /
+        3
+
+Output: [1, 2, 3]
+
+1 is recorded immediately, then its right subtree: 2, then 3.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Recursive DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> Append the node on entry, then recurse left and right. The moment a node is reached is exactly when preorder wants it.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Emission order on root = [1, null, 2, 3]</div>
+                <svg class="tree-svg" viewBox="0 0 440 290" role="img" aria-label="Tree with root 1, right child 2, and 3 as the left child of 2. The preorder output positions are 1 first, 2 second, 3 third.">
+                    <line class="tree-edge" x1="220" y1="55" x2="300" y2="135" />
+                    <line class="tree-edge" x1="300" y1="135" x2="220" y2="215" />
+                    <line class="tree-edge" x1="200" y1="60" x2="150" y2="120" style="stroke: #dfe6e9; stroke-dasharray: 5 5;" />
+                    <text class="tree-note" x="118" y="136">null</text>
+
+                    <circle class="tree-node done" cx="220" cy="55" r="22" />
+                    <text class="tree-label" x="220" y="60">1</text>
+                    <rect class="badge-bg" x="252" y="19" width="50" height="24" rx="6" />
+                    <text class="badge" x="277" y="35">1st out</text>
+
+                    <circle class="tree-node done" cx="300" cy="135" r="22" />
+                    <text class="tree-label" x="300" y="140">2</text>
+                    <rect class="badge-bg" x="332" y="99" width="50" height="24" rx="6" />
+                    <text class="badge" x="357" y="115">2nd out</text>
+
+                    <circle class="tree-node done" cx="220" cy="215" r="22" />
+                    <text class="tree-label" x="220" y="220">3</text>
+                    <rect class="badge-bg" x="252" y="203" width="50" height="24" rx="6" />
+                    <text class="badge" x="277" y="219">3rd out</text>
+                </svg>
+                <p style="font-size: 13px; margin-top: 8px;">The null left child of <code>1</code> is skipped. Descent goes right to <code>2</code>, then left to <code>3</code>.</p>
+            </div>
+
+            <div class="diagram">
+                <div class="diagram-title">Recursive call flow</div>
+                <div class="flow-row">
+                    <span class="flow-box valid">traverse(1): emit 1</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">left = null</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">traverse(2): emit 2</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">traverse(3): emit 3</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box result">result = [1, 2, 3]</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Explicit Stack</h2>
+            <p><strong>Intuition:</strong> Pop and visit a node, then push its children. Pushing <strong>right first, left second</strong> makes the left child pop next, preserving node &rarr; left &rarr; right.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(h)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Stack states for root = [1, null, 2, 3]</div>
+                <div class="stack-row">
+                    <span class="stack-label">start</span>
+                    <span class="stack-cells"><span class="cell top">1</span></span>
+                    <span class="step-label">Push the root.</span>
+                </div>
+                <div class="stack-row">
+                    <span class="stack-label">pop 1</span>
+                    <span class="stack-cells"><span class="cell top">2</span></span>
+                    <span class="step-label">Output <strong>1</strong>. Left is null; push right child 2.</span>
+                </div>
+                <div class="stack-row">
+                    <span class="stack-label">pop 2</span>
+                    <span class="stack-cells"><span class="cell top">3</span></span>
+                    <span class="step-label">Output <strong>2</strong>. Right is null; push left child 3.</span>
+                </div>
+                <div class="stack-row">
+                    <span class="stack-label">pop 3</span>
+                    <span class="stack-cells"><span class="cell empty">empty</span></span>
+                    <span class="step-label">Output <strong>3</strong>. No children; the stack empties.</span>
+                </div>
+                <div class="flow-row" style="margin-top: 12px;">
+                    <span class="flow-box result">output = [1, 2, 3]</span>
+                </div>
+            </div>
+
+            <div class="code-block">const stack = [root];
+while (stack.length) {
+  const node = stack.pop();
+  result.push(node.val);
+  if (node.right) stack.push(node.right); // right first
+  if (node.left) stack.push(node.left);   // left pops next
+}</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Morris Traversal (O(1) Space)</h2>
+            <p><strong>Intuition:</strong> For a node with a left subtree, find the rightmost node of that subtree and temporarily point its empty right pointer back to the current node. That thread lets the walk return without a stack. Preorder is emitted <em>before</em> descending, so recording happens when the thread is created.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Thread creation in the tree [1, 2, 3]</div>
+                <svg class="tree-svg" viewBox="0 0 430 230" role="img" aria-label="Tree with root 1 and children 2 and 3. A dashed thread runs from the right pointer of node 2 back up to node 1.">
+                    <line class="tree-edge" x1="215" y1="55" x2="130" y2="145" />
+                    <line class="tree-edge" x1="215" y1="55" x2="300" y2="145" />
+                    <path class="tree-edge thread" d="M 145 125 C 165 95, 185 70, 203 61" fill="none" />
+                    <text class="tree-note" x="92" y="86">thread</text>
+                    <text class="tree-note" x="92" y="102">2.right = 1</text>
+
+                    <circle class="tree-node active" cx="215" cy="55" r="22" />
+                    <text class="tree-label" x="215" y="60">1</text>
+                    <rect class="badge-bg" x="245" y="19" width="50" height="24" rx="6" />
+                    <text class="badge" x="270" y="35">1st out</text>
+
+                    <circle class="tree-node done" cx="130" cy="145" r="22" />
+                    <text class="tree-label" x="130" y="150">2</text>
+                    <rect class="badge-bg" x="52" y="160" width="50" height="24" rx="6" />
+                    <text class="badge" x="77" y="176">2nd out</text>
+
+                    <circle class="tree-node queued" cx="300" cy="145" r="22" />
+                    <text class="tree-label" x="300" y="150">3</text>
+                    <rect class="badge-bg" x="322" y="160" width="50" height="24" rx="6" />
+                    <text class="badge" x="347" y="176">3rd out</text>
+                </svg>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch round" style="background: #ffd3b6;"></div> Current node</div>
+                    <div class="legend-item"><div class="legend-swatch round" style="background: #b5ead7;"></div> Emitted</div>
+                    <div class="legend-item"><div class="legend-swatch round" style="background: #ffffd8;"></div> Pending right subtree</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background: #ff9aa2;"></div> Temporary thread</div>
+                </div>
+                <p style="font-size: 13px; margin-top: 8px;">After returning to <code>1</code> through the thread, it is removed (<code>2.right = null</code>) and the walk continues to <code>3</code>. The tree is restored exactly as it was.</p>
+            </div>
+
+            <ol class="step-list">
+                <li><code>curr = 1</code>: left child 2 exists. The rightmost node of that subtree is 2, whose right is null, so thread <code>2.right = 1</code>. Emit <code>1</code>, then move left.</li>
+                <li><code>curr = 2</code>: no left child. Emit <code>2</code>, then follow <code>right</code> to 1 (the thread).</li>
+                <li><code>curr = 1</code>: the thread is detected (<code>2.right === 1</code>). Remove it, then move right to 3.</li>
+                <li><code>curr = 3</code>: no left child. Emit <code>3</code>, move right to null and stop.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Time</th>
+                            <th>Space</th>
+                            <th>Pros</th>
+                            <th>Cons</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Recursive DFS</strong> (implemented)</td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>Shortest, clearest code</td>
+                            <td>Stack overflow on deep trees</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Explicit Stack</strong></td>
+                            <td>O(n)</td>
+                            <td>O(h)</td>
+                            <td>Iterative, standard answer</td>
+                            <td>Must push right before left</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Morris Traversal</strong></td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>Constant auxiliary memory</td>
+                            <td>Mutates pointers temporarily; subtle</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Key Insight &amp; Common Pitfalls</h2>
+            <div class="pill-list">
+                <div class="pill good"><strong>Key insight:</strong> preorder emits on entry, so the root comes first and each subtree is a contiguous block: <code>root + preorder(left) + preorder(right)</code>.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> pushing <code>left</code> before <code>right</code> reverses the children and yields node &rarr; right &rarr; left.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> a queue gives level order, not preorder. For <code>[1,2,3,4,5,6,7]</code>, BFS returns <code>[1,2,3,4,5,6,7]</code> while preorder returns <code>[1,2,4,5,3,6,7]</code>.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> Morris must remove every thread. Forgetting <code>pred.right = null</code> leaves the tree corrupted and loops forever.</div>
+                <div class="pill warn"><strong>Pitfall:</strong> the submission stores <code>res</code> on the instance; reuse of one <code>Solution</code> object across calls would keep old values.</div>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/binary-tree-preorder-traversal/" target="_blank" rel="noopener">LeetCode 144: Binary Tree Preorder Traversal</a></li>
+                <li><a href="https://neetcode.io/roadmaps/trees" target="_blank" rel="noopener">NeetCode: Trees Roadmap</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Tree_traversal" target="_blank" rel="noopener">Concept: Tree Traversal (Wikipedia)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/" target="_blank" rel="noopener">GeeksforGeeks: Inorder, Preorder and Postorder Traversal</a></li>
+                <li><a href="../binary-tree-postorder-traversal/">Related in this repo: Binary Tree Postorder Traversal (LeetCode 145)</a></li>
+                <li><a href="../depth-of-binary-tree/">Related in this repo: Maximum Depth of Binary Tree (LeetCode 104)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
