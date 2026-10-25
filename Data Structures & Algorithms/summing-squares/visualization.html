@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summing Squares - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 16px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.best { background: #b5ead7; border-color: #b5ead7; font-weight: 600; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 600; }
+        .array-container { display: flex; gap: 4px; margin: 16px 0; flex-wrap: wrap; }
+        .array-cell { width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; background: #ffffff; color: #2d3436; }
+        .array-cell small { font-size: 9px; color: #636e72; line-height: 1; margin-top: 2px; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.base { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .array-cell .index { font-size: 9px; color: #636e72; }
+        .levels { display: flex; flex-direction: column; gap: 10px; }
+        .level { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .level-label { min-width: 64px; font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .node { min-width: 42px; height: 38px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .node.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .node.done { background: #b5ead7; border-color: #b5ead7; }
+        .tree { overflow-x: auto; padding: 8px 0; }
+        .tree svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 6px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: #636e72; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .math-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+        .math-card { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 14px; text-align: center; }
+        .math-card .number { font-size: 1.6rem; font-weight: 700; color: #aa96da; }
+        .math-card .label { font-size: 12px; color: #636e72; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .card { padding: 18px; }
+            .array-cell { width: 40px; height: 42px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Summing Squares</h1>
+            <p class="subtitle">Structy #79 &mdash; Fewest perfect squares that sum to <code>n</code></p>
+            <div class="tags">
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag purple">Memoization</span>
+                <span class="tag green">BFS</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given a target <code>n</code>, return the minimum count of perfect squares (<code>1, 4, 9, 16, ...</code>) whose sum is exactly <code>n</code>. Squares may be reused.</p>
+            <div class="code-block">Input:  n = 12
+Output: 3          // 4 + 4 + 4
+
+Input:  n = 13
+Output: 2          // 9 + 4
+
+Input:  n = 0
+Output: 0          // empty sum</div>
+            <p>The equivalent LeetCode problem is <strong>279. Perfect Squares</strong>.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute-Force Recursion</h2>
+            <p><strong>Intuition:</strong> Subtract one square at a time and explore every choice. Keep the branch that reaches <code>0</code> using the fewest squares.</p>
+            <span class="complexity-badge badge-time">Time: exponential</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Recursion for n = 12 &mdash; every square is tried at every level</div>
+                <div class="flow-row">
+                    <span class="flow-box">12</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">-1 &nbsp;(subtract 16)</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">12</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box active">3 &nbsp;(subtract 9)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">2</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">1</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">0</span>
+                    <span class="flow-box result">4 squares</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">12</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box active">8 &nbsp;(subtract 4)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box active">4</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box best">0</span>
+                    <span class="flow-box result">3 squares &check;</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">12</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box active">11 &nbsp;(subtract 1)</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">...</span>
+                    <span class="flow-box invalid">more than 3</span>
+                </div>
+                <p style="color: #636e72; font-size: 13px; margin-top: 8px;">The same remainder (for example 8 or 4) is reached by many different paths and recomputed each time.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Memoized DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> Cache the answer for each remainder. Once <code>recurr(8)</code> is known to be <code>2</code>, every branch that reaches <code>8</code> reuses it in <code>O(1)</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; &radic;n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Memoized recursion tree for n = 12 (green = cached result)</div>
+                <div class="tree">
+                    <svg viewBox="0 0 720 380" role="img" aria-label="Key branches of the memoized recursion tree for summing squares of 12">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                <path d="M0,0 L8,4 L0,8 Z" fill="#aa96da"></path>
+                            </marker>
+                        </defs>
+
+                        <line x1="330" y1="62" x2="160" y2="132" stroke="#aa96da" stroke-width="2" marker-end="url(#arrowhead)"></line>
+                        <line x1="360" y1="62" x2="360" y2="132" stroke="#b5ead7" stroke-width="2" marker-end="url(#arrowhead)"></line>
+                        <line x1="390" y1="62" x2="560" y2="132" stroke="#aa96da" stroke-width="2" marker-end="url(#arrowhead)"></line>
+
+                        <line x1="335" y1="180" x2="275" y2="250" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrowhead)"></line>
+                        <line x1="385" y1="180" x2="445" y2="250" stroke="#b5ead7" stroke-width="2" marker-end="url(#arrowhead)"></line>
+                        <line x1="560" y1="174" x2="600" y2="250" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrowhead)"></line>
+
+                        <line x1="445" y1="292" x2="390" y2="344" stroke="#dfe6e9" stroke-width="2" marker-end="url(#arrowhead)"></line>
+                        <line x1="490" y1="292" x2="545" y2="344" stroke="#b5ead7" stroke-width="2" marker-end="url(#arrowhead)"></line>
+                        <text x="600" y="232" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" fill="#636e72">-1</text>
+
+                        <rect x="315" y="20" width="90" height="42" rx="8" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"></rect>
+                        <text x="360" y="46" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">12</text>
+
+                        <rect x="115" y="132" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="160" y="158" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">11</text>
+                        <text x="248" y="150" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" fill="#636e72">-1</text>
+
+                        <rect x="315" y="132" width="90" height="42" rx="8" fill="#b5ead7" stroke="#b5ead7" stroke-width="2"></rect>
+                        <text x="360" y="158" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">8</text>
+                        <text x="360" y="120" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" fill="#636e72">-4</text>
+
+                        <rect x="515" y="132" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="560" y="158" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">3</text>
+                        <text x="470" y="150" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="11" fill="#636e72">-9</text>
+
+                        <rect x="230" y="250" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="275" y="276" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">7</text>
+
+                        <rect x="400" y="250" width="90" height="42" rx="8" fill="#b5ead7" stroke="#b5ead7" stroke-width="2"></rect>
+                        <text x="445" y="276" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">4</text>
+
+                        <rect x="555" y="250" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="600" y="276" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">2</text>
+
+                        <rect x="345" y="344" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="390" y="370" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">3</text>
+
+                        <rect x="500" y="344" width="90" height="42" rx="8" fill="#b5ead7" stroke="#b5ead7" stroke-width="2"></rect>
+                        <text x="545" y="370" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">0</text>
+                    </svg>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2"></span> current state</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#b5ead7;border-color:#b5ead7"></span> cached answer</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffffff;border-color:#a8d8ea"></span> explored branch</span>
+                </div>
+            </div>
+
+            <div class="code-block">const range = Math.floor(Math.sqrt(n));
+const cache = new Map();
+
+const recurr = (remain) =&gt; {
+  if (remain &lt; 0) return Infinity;
+  if (remain === 0) return 0;
+  if (cache.has(remain)) return cache.get(remain);
+
+  let result = Infinity;
+  for (let i = 1; i &lt;= range; i++) {
+    const res = recurr(remain - i * i);
+    if (res !== Infinity) result = Math.min(result, res + 1);
+  }
+
+  cache.set(remain, result);
+  return result;
+};</div>
+            <p>The cached path for <code>12</code> is <code>12 &rarr; 8 &rarr; 4 &rarr; 0</code>: subtract <code>4</code> three times. That is <code>4 + 4 + 4</code>, so the answer is <strong>3</strong>.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Bottom-Up DP</h2>
+            <p><strong>Intuition:</strong> Fill <code>dp[0..n]</code> in increasing order. <code>dp[t]</code> depends only on smaller targets, which are already solved.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; &radic;n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">dp[t] = fewest squares summing to t</div>
+                <div class="array-container">
+                    <div class="array-cell base"><span class="index">0</span>0</div>
+                    <div class="array-cell"><span class="index">1</span>1</div>
+                    <div class="array-cell"><span class="index">2</span>2</div>
+                    <div class="array-cell"><span class="index">3</span>3</div>
+                    <div class="array-cell found"><span class="index">4</span>1</div>
+                    <div class="array-cell"><span class="index">5</span>2</div>
+                    <div class="array-cell"><span class="index">6</span>3</div>
+                    <div class="array-cell"><span class="index">7</span>4</div>
+                    <div class="array-cell found"><span class="index">8</span>2</div>
+                    <div class="array-cell found"><span class="index">9</span>1</div>
+                    <div class="array-cell"><span class="index">10</span>2</div>
+                    <div class="array-cell"><span class="index">11</span>3</div>
+                    <div class="array-cell active"><span class="index">12</span>3</div>
+                </div>
+                <p style="color:#636e72; font-size:13px;">At <code>t = 12</code>: <code>dp[11] + 1 = 4</code>, <code>dp[8] + 1 = 3</code>, <code>dp[3] + 1 = 4</code>. The minimum is <strong>3</strong>.</p>
+                <div class="code-block">dp[0] = 0;
+for (let t = 1; t &lt;= n; t++) {
+  for (let i = 1; i * i &lt;= t; i++) {
+    dp[t] = Math.min(dp[t], dp[t - i * i] + 1);
+  }
+}</div>
+            </div>
+            <p>The table has no recursion, so it cannot overflow the call stack. It computes every target from <code>0</code> to <code>n</code>, even targets that a particular DFS branch would never visit.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: BFS over Remainders</h2>
+            <p><strong>Intuition:</strong> Each remainder is a node, and subtracting a square is an edge of weight 1. The minimum number of squares is the shortest path from <code>n</code> to <code>0</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n &middot; &radic;n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">BFS levels for n = 12</div>
+                <div class="levels">
+                    <div class="level"><span class="level-label">level 0</span><span class="node active">12</span></div>
+                    <div class="level"><span class="level-label">level 1</span><span class="node">11</span><span class="node">8</span><span class="node">3</span></div>
+                    <div class="level"><span class="level-label">level 2</span><span class="node">10</span><span class="node">7</span><span class="node">4</span><span class="node">2</span></div>
+                    <div class="level"><span class="level-label">level 3</span><span class="node done">0</span><span class="node">...</span></div>
+                </div>
+                <p style="color:#636e72; font-size:13px; margin-top:10px;">The first time <code>0</code> is generated, the current level <code>3</code> is the minimum count. Duplicate remainders are skipped with a visited set.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 5: Four-Square Theorem</h2>
+            <p><strong>Intuition:</strong> Lagrange proved every non-negative integer is the sum of at most four squares. The answer can only be <strong>0, 1, 2, 3, or 4</strong>. Legendre's theorem identifies exactly when four are required.</p>
+            <span class="complexity-badge badge-time">Time: O(&radic;n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="math-grid">
+                <div class="math-card"><div class="number">0</div><div class="label">n = 0</div></div>
+                <div class="math-card"><div class="number">1</div><div class="label">n is a perfect square</div></div>
+                <div class="math-card"><div class="number">2</div><div class="label">n = a&sup2; + b&sup2;</div></div>
+                <div class="math-card"><div class="number">4</div><div class="label">n = 4<sup>a</sup>(8b + 7)</div></div>
+                <div class="math-card"><div class="number">3</div><div class="label">everything else</div></div>
+            </div>
+            <p style="margin-top:12px;">For <code>12</code>: removing factors of 4 leaves <code>3</code>, which is not <code>8b + 7</code>, and <code>12</code> is not a sum of two squares, so the answer is <strong>3</strong>. For <code>13</code>: <code>13 = 3&sup2; + 2&sup2;</code>, so the answer is <strong>2</strong>.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Brute-force recursion</td><td>Exponential</td><td>O(n)</td><td>Recomputes overlapping remainders.</td></tr>
+                        <tr><td><strong>Memoized DFS (implemented)</strong></td><td>O(n &middot; &radic;n)</td><td>O(n)</td><td>Direct recurrence, caches every state once.</td></tr>
+                        <tr><td>Bottom-up DP</td><td>O(n &middot; &radic;n)</td><td>O(n)</td><td>No recursion; safest for large n.</td></tr>
+                        <tr><td>BFS over remainders</td><td>O(n &middot; &radic;n)</td><td>O(n)</td><td>Can stop early when the answer is small.</td></tr>
+                        <tr><td>Four-square theorem</td><td>O(&radic;n)</td><td>O(1)</td><td>Fastest, but specific to perfect squares.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://structy.net/problems/summing-squares" target="_blank" rel="noopener">Structy &mdash; Summing Squares</a></li>
+                <li><a href="https://leetcode.com/problems/perfect-squares/" target="_blank" rel="noopener">LeetCode 279 &mdash; Perfect Squares</a></li>
+                <li><a href="https://neetcode.io/problems/perfect-squares" target="_blank" rel="noopener">NeetCode &mdash; Perfect Squares</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Lagrange%27s_four-square_theorem" target="_blank" rel="noopener">Wikipedia &mdash; Lagrange's four-square theorem</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Legendre%27s_three-square_theorem" target="_blank" rel="noopener">Wikipedia &mdash; Legendre's three-square theorem</a></li>
+                <li><a href="../coin-change-minimum-coins/README.md">Related problem in this repository &mdash; Coin Change (Minimum Coins)</a></li>
+                <li><a href="../coin-change/README.md">Related problem in this repository &mdash; Coin Change (LeetCode 322)</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
