@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Longest Subarray with Sum K - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .tag.yellow { background: #ffffd8; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 18px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .array-container { display: flex; gap: 4px; margin: 12px 0; flex-wrap: wrap; }
+        .array-cell { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffff; color: #2d3436; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #b5ead7; border-color: #b5ead7; font-weight: 600; }
+        .array-cell.visited { background: #ffffd8; border-color: #f0c929; }
+        .index-row { display: flex; gap: 4px; flex-wrap: wrap; }
+        .index-cell { width: 52px; text-align: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; color: #636e72; }
+        .map-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+        .map-chip { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 6px 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .map-chip.hit { background: #b5ead7; border-color: #b5ead7; font-weight: 600; }
+        .map-chip.new { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.valid { background: #b5ead7; border-color: #b5ead7; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 600; }
+        .label { min-width: 96px; font-size: 13px; color: #636e72; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 6px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: #636e72; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .formula { text-align: center; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffd8; border: 1px solid #f0c929; border-radius: 8px; padding: 12px; margin: 12px 0; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .card { padding: 18px; }
+            .array-cell, .index-cell { width: 42px; }
+            .array-cell { height: 46px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Longest Subarray with Sum K</h1>
+            <p class="subtitle">GeeksforGeeks &mdash; Find the longest contiguous subarray summing to <code>k</code></p>
+            <div class="tags">
+                <span class="tag">Array</span>
+                <span class="tag purple">Hash Table</span>
+                <span class="tag green">Prefix Sum</span>
+                <span class="tag yellow">Medium</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>Given an integer array (positive, negative, or zero values) and a target <code>k</code>, return the length of the longest contiguous subarray whose sum equals <code>k</code>. Return <code>0</code> if no such subarray exists.</p>
+            <div class="code-block">Input:  arr = [10, 5, 2, 7, 1, -10], k = 15
+Output: 6          // [10, 5, 2, 7, 1, -10]
+
+Input:  arr = [-5, 8, -14, 2, 4, 12], k = -5
+Output: 5          // [-5, 8, -14, 2, 4]
+
+Input:  arr = [10, -10, 20, 30], k = 5
+Output: 0</div>
+            <p>Because the array can contain negative numbers, the running sum is <strong>not monotonic</strong>. That is the key reason a sliding window cannot solve the general problem.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute Force</h2>
+            <p><strong>Intuition:</strong> Try every start index and extend the end index one element at a time, keeping a running sum.</p>
+            <span class="complexity-badge badge-time">Time: O(n&sup2;)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">arr = [10, 5, 2, 7, 1, -10], k = 15</div>
+                <div class="flow-row">
+                    <span class="label">start 0</span>
+                    <span class="flow-box">10</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">15 &check; len 2</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">17</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">24</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">25</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">15 &check; len 6</span>
+                </div>
+                <div class="flow-row">
+                    <span class="label">start 1</span>
+                    <span class="flow-box">5</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">7</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">14</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">15 &check; len 4</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">5</span>
+                </div>
+                <p style="color:#636e72; font-size:13px; margin-top:8px;">All O(n&sup2;) subarrays are examined. At n = 10&#8309;, that is roughly five billion operations.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Prefix Sum + Hash Map (Implemented)</h2>
+            <p><strong>Intuition:</strong> If the prefix sum up to the current index minus <code>k</code> has been seen before, the elements after that earlier prefix sum to exactly <code>k</code>. Store the <strong>first index</strong> of every prefix sum to maximize the length.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="formula">sum(arr[i..j]) = prefixSum[j] - prefixSum[i - 1] = k<br>&rArr; prefixSum[i - 1] = prefixSum[j] - k</div>
+
+            <div class="diagram">
+                <div class="diagram-title">Scan arr with a map of first prefix-sum indices</div>
+                <div class="array-container">
+                    <div class="array-cell found">10</div>
+                    <div class="array-cell found">5</div>
+                    <div class="array-cell found">2</div>
+                    <div class="array-cell found">7</div>
+                    <div class="array-cell found">1</div>
+                    <div class="array-cell found">-10</div>
+                </div>
+                <div class="index-row">
+                    <div class="index-cell">0</div><div class="index-cell">1</div><div class="index-cell">2</div>
+                    <div class="index-cell">3</div><div class="index-cell">4</div><div class="index-cell">5</div>
+                </div>
+
+                <div class="map-row">
+                    <span class="label">initial map</span>
+                    <span class="map-chip hit">0 &rarr; -1</span>
+                </div>
+                <div class="map-row">
+                    <span class="label">idx 0, sum 10</span>
+                    <span class="map-chip new">10 &rarr; 0</span>
+                    <span style="font-size:13px;color:#636e72;">diff -5 is absent</span>
+                </div>
+                <div class="map-row">
+                    <span class="label">idx 1, sum 15</span>
+                    <span class="map-chip hit">0 &rarr; -1</span>
+                    <span class="flow-box valid">length 1 - (-1) = 2</span>
+                </div>
+                <div class="map-row">
+                    <span class="label">idx 4, sum 25</span>
+                    <span class="map-chip hit">10 &rarr; 0</span>
+                    <span class="flow-box valid">length 4 - 0 = 4</span>
+                </div>
+                <div class="map-row">
+                    <span class="label">idx 5, sum 15</span>
+                    <span class="map-chip hit">0 &rarr; -1</span>
+                    <span class="flow-box result">length 5 - (-1) = 6 &check;</span>
+                </div>
+
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-swatch" style="background:#b5ead7;border-color:#b5ead7"></span> winning subarray</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#b5ead7;border-color:#b5ead7"></span> map hit</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2"></span> newly stored prefix</span>
+                </div>
+            </div>
+
+            <div class="code-block">let prefixSum = 0;
+let maxLength = 0;
+const diffMap = new Map();
+diffMap.set(0, -1);           // empty prefix before index 0
+
+for (const [idx, item] of arr.entries()) {
+  prefixSum += item;
+  const diff = prefixSum - k;
+
+  if (diffMap.has(diff)) {
+    maxLength = Math.max(maxLength, idx - diffMap.get(diff));
+  }
+
+  if (!diffMap.has(prefixSum)) {   // keep the EARLIEST index
+    diffMap.set(prefixSum, idx);
+  }
+}</div>
+            <p>The map stores only the first occurrence of each prefix sum. If a prefix sum appears again later, overwriting it would make future subarrays shorter, never longer.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Sliding Window (Non-Negative Arrays Only)</h2>
+            <p><strong>Intuition:</strong> When all values are non-negative, extending the window can only increase the sum and shrinking it can only decrease the sum. A two-pointer window can therefore find the answer in one pass.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Why negatives break it: arr = [10, 5, 2, 7, 1, -10], k = 15</div>
+                <div class="flow-row">
+                    <span class="flow-box">window [10, 5] = 15</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">found length 2</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">extend to [10, 5, 2] = 17</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box invalid">sum &gt; k, shrink left</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">[5, 2] = 7</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">too small, extend right</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">[5, 2, 7, 1] = 15</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box valid">length 4</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">[5, 2, 7, 1, -10] = 5</span>
+                    <span class="arrow">&rarr;</span>
+                    <span class="flow-box">sum drops; naive logic may discard the prefix</span>
+                </div>
+                <p style="color:#636e72; font-size:13px; margin-top:8px;">The length-6 answer is <strong>[10, 5, 2, 7, 1, -10]</strong>. A window that already shrank past index 0 cannot recover it. This is why the hash-map approach is required.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Brute force (running sum)</td><td>O(n&sup2;)</td><td>O(1)</td><td>Simple; too slow for n = 10&#8309;.</td></tr>
+                        <tr><td><strong>Prefix sum + hash map</strong></td><td>O(n)</td><td>O(n)</td><td>Implemented; correct with negatives and negative k.</td></tr>
+                        <tr><td>Sliding window</td><td>O(n) for non-negative arrays</td><td>O(1)</td><td>Not valid for the general problem; negatives break monotonicity.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://www.geeksforgeeks.org/problems/longest-sub-array-with-sum-k0809/1" target="_blank" rel="noopener">GeeksforGeeks &mdash; Longest Subarray with Sum K (Practice)</a></li>
+                <li><a href="https://www.geeksforgeeks.org/dsa/longest-sub-array-sum-k/" target="_blank" rel="noopener">GeeksforGeeks &mdash; Longest Subarray With Sum K (Article)</a></li>
+                <li><a href="https://leetcode.com/problems/subarray-sum-equals-k/" target="_blank" rel="noopener">LeetCode 560 &mdash; Subarray Sum Equals K (count version)</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Prefix_sum" target="_blank" rel="noopener">Wikipedia &mdash; Prefix sum</a></li>
+                <li><a href="../subarray-sum-equals-k/README.md">Related problem in this repository &mdash; Subarray Sum Equals K</a></li>
+                <li><a href="../two-integer-sum/README.md">Related problem in this repository &mdash; Two Integer Sum</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
