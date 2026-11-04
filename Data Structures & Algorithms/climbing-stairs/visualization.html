@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climbing Stairs - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 16px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .flow-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.best { background: #b5ead7; border-color: #b5ead7; font-weight: 600; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 600; }
+        .array-container { display: flex; gap: 4px; margin: 16px 0; flex-wrap: wrap; align-items: flex-end; }
+        .array-cell { width: 56px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 15px; background: #ffffff; color: #2d3436; }
+        .array-cell .index { font-size: 9px; color: #636e72; line-height: 1; margin-bottom: 2px; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.base { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .levels { display: flex; flex-direction: column; gap: 10px; }
+        .level { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .level-label { min-width: 120px; font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .node { min-width: 42px; height: 38px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .node.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .node.done { background: #b5ead7; border-color: #b5ead7; }
+        .node.zero { background: #ffffd8; border-color: #f0c929; }
+        .tree { overflow-x: auto; padding: 8px 0; }
+        .tree svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 6px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .step-list { list-style: none; padding: 0; counter-reset: step; }
+        .step-list li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; color: #636e72; }
+        .step-list li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: #a8d8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: #636e72; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .math-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+        .math-card { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 14px; text-align: center; }
+        .math-card .number { font-size: 1.6rem; font-weight: 700; color: #aa96da; }
+        .math-card .label { font-size: 12px; color: #636e72; }
+        .stairs { display: flex; align-items: flex-end; gap: 6px; margin: 16px 0; flex-wrap: wrap; }
+        .step { width: 60px; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px 8px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 8px 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .step .step-index { font-size: 10px; color: #636e72; }
+        .step .step-value { font-weight: 600; }
+        .step.highlight { background: #ffd3b6; border-color: #ff9aa2; }
+        .step.done { background: #b5ead7; border-color: #b5ead7; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .card { padding: 18px; }
+            .array-cell { width: 44px; height: 44px; font-size: 13px; }
+            .step { width: 48px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Climbing Stairs</h1>
+            <p class="subtitle">LeetCode 70 &mdash; Count the ways to climb <code>n</code> steps using 1-step and 2-step moves</p>
+            <div class="tags">
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag purple">Memoization</span>
+                <span class="tag green">Fibonacci</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p>You can climb <strong>1 or 2 steps</strong> at a time. Return the number of distinct sequences of moves that reach the top of an <code>n</code>-step staircase. Order matters, so <code>1 + 2</code> and <code>2 + 1</code> are different ways.</p>
+            <div class="code-block">Input:  n = 2
+Output: 2          // 1+1, 2
+
+Input:  n = 3
+Output: 3          // 1+1+1, 1+2, 2+1
+
+Input:  n = 5
+Output: 8          // the 6th Fibonacci number</div>
+            <p>The key observation: to stand on step <code>n</code>, your last move came from step <code>n - 1</code> or step <code>n - 2</code>. Those two cases are disjoint, so their counts add.</p>
+            <div class="stairs">
+                <div class="step done"><span class="step-index">0</span><span class="step-value">1</span></div>
+                <div class="step done"><span class="step-index">1</span><span class="step-value">1</span></div>
+                <div class="step done"><span class="step-index">2</span><span class="step-value">2</span></div>
+                <div class="step done"><span class="step-index">3</span><span class="step-value">3</span></div>
+                <div class="step done"><span class="step-index">4</span><span class="step-value">5</span></div>
+                <div class="step highlight"><span class="step-index">5</span><span class="step-value">8</span></div>
+            </div>
+            <p style="font-size:13px;">The number of ways to reach each step &mdash; <code>1, 1, 2, 3, 5, 8</code> &mdash; is the Fibonacci sequence.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute-Force Recursion</h2>
+            <p><strong>Intuition:</strong> Recurse on the two possible last moves without remembering anything. <code>ways(n) = ways(n-1) + ways(n-2)</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(2<sup>n</sup>)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Recursion tree for n = 5 &mdash; repeated subproblems highlighted</div>
+                <div class="tree">
+                    <svg viewBox="0 0 720 360" role="img" aria-label="Brute force recursion tree for climbing stairs with n equal to 5, showing repeated subproblems">
+                        <line x1="360" y1="52" x2="220" y2="122" stroke="#aa96da" stroke-width="2"></line>
+                        <line x1="360" y1="52" x2="500" y2="122" stroke="#aa96da" stroke-width="2"></line>
+                        <line x1="220" y1="164" x2="140" y2="234" stroke="#aa96da" stroke-width="2"></line>
+                        <line x1="220" y1="164" x2="300" y2="234" stroke="#aa96da" stroke-width="2"></line>
+                        <line x1="500" y1="164" x2="420" y2="234" stroke="#aa96da" stroke-width="2"></line>
+                        <line x1="500" y1="164" x2="580" y2="234" stroke="#aa96da" stroke-width="2"></line>
+                        <line x1="140" y1="276" x2="90" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="140" y1="276" x2="190" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="300" y1="276" x2="250" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="300" y1="276" x2="350" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="420" y1="276" x2="370" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="420" y1="276" x2="470" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="580" y1="276" x2="530" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+                        <line x1="580" y1="276" x2="630" y2="330" stroke="#dfe6e9" stroke-width="2"></line>
+
+                        <rect x="315" y="12" width="90" height="42" rx="8" fill="#ffd3b6" stroke="#ff9aa2" stroke-width="2"></rect>
+                        <text x="360" y="38" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">5</text>
+
+                        <rect x="175" y="122" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="220" y="148" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">4</text>
+                        <rect x="455" y="122" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="500" y="148" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">3</text>
+
+                        <rect x="95" y="234" width="90" height="42" rx="8" fill="#b5ead7" stroke="#b5ead7" stroke-width="2"></rect>
+                        <text x="140" y="260" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">3</text>
+                        <rect x="255" y="234" width="90" height="42" rx="8" fill="#b5ead7" stroke="#b5ead7" stroke-width="2"></rect>
+                        <text x="300" y="260" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">2</text>
+                        <rect x="375" y="234" width="90" height="42" rx="8" fill="#b5ead7" stroke="#b5ead7" stroke-width="2"></rect>
+                        <text x="420" y="260" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">2</text>
+                        <rect x="535" y="234" width="90" height="42" rx="8" fill="#ffffff" stroke="#a8d8ea" stroke-width="2"></rect>
+                        <text x="580" y="260" text-anchor="middle" font-family="'SF Mono', monospace" font-size="15" fill="#2d3436">1</text>
+
+                        <text x="90" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">2</text>
+                        <text x="190" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">1</text>
+                        <text x="250" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">1</text>
+                        <text x="350" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">0</text>
+                        <text x="370" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">1</text>
+                        <text x="470" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">0</text>
+                        <text x="530" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">1</text>
+                        <text x="630" y="352" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" fill="#636e72">0</text>
+                    </svg>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2"></span> root call</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#b5ead7;border-color:#b5ead7"></span> recomputed on another branch</span>
+                </div>
+                <p style="color:#636e72; font-size:13px; margin-top:8px;">The green nodes (<code>3</code> and <code>2</code>) are solved more than once. As <code>n</code> grows, the number of duplicate calls grows exponentially.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Memoized DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> Cache the answer for each step count. Once <code>recurr(3)</code> is known, every branch that needs it reads the cache in <code>O(1)</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Depth-first order for n = 5 &mdash; green means already cached</div>
+                <div class="levels">
+                    <div class="level"><span class="level-label">call 1</span><span class="node active">recurr(5)</span><span class="arrow">&rarr;</span><span class="node">recurr(4)</span></div>
+                    <div class="level"><span class="level-label">call 2</span><span class="node">recurr(4)</span><span class="arrow">&rarr;</span><span class="node">recurr(3)</span></div>
+                    <div class="level"><span class="level-label">call 3</span><span class="node">recurr(3)</span><span class="arrow">&rarr;</span><span class="node">recurr(2)</span></div>
+                    <div class="level"><span class="level-label">call 4</span><span class="node">recurr(2)</span><span class="arrow">&rarr;</span><span class="node">recurr(1)</span><span class="arrow">&rarr;</span><span class="node zero">recurr(0) = 1</span></div>
+                    <div class="level"><span class="level-label">unwind</span><span class="node done">1</span><span class="node done">2</span><span class="node done">3</span><span class="node done">5</span><span class="node done">8</span></div>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffd3b6;border-color:#ff9aa2"></span> current call</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#b5ead7;border-color:#b5ead7"></span> solved and cached</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffffd8;border-color:#f0c929"></span> base case</span>
+                </div>
+            </div>
+
+            <div class="code-block">const cache = new Map();
+
+const recurr = (val) =&gt; {
+  if (val === 0) return 1;
+  if (val &lt; 0) return 0;
+  if (cache.has(val)) return cache.get(val);
+
+  const left = recurr(val - 1);
+  const right = recurr(val - 2);
+
+  cache.set(val, left + right);
+  return left + right;
+};
+
+return recurr(n);</div>
+
+            <p>Every state from <code>0</code> to <code>n</code> is solved exactly once. With <code>n = 5</code>, the cache ends up holding <code>{1:1, 2:2, 3:3, 4:5, 5:8}</code>, and the total work is linear instead of exponential.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Bottom-Up DP</h2>
+            <p><strong>Intuition:</strong> Build the table from the bottom of the staircase. <code>dp[i]</code> is the number of ways to reach step <code>i</code>, and it depends only on <code>dp[i-1]</code> and <code>dp[i-2]</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">dp[i] = ways to reach step i</div>
+                <div class="array-container">
+                    <div class="array-cell base"><span class="index">0</span>1</div>
+                    <div class="array-cell"><span class="index">1</span>1</div>
+                    <div class="array-cell"><span class="index">2</span>2</div>
+                    <div class="array-cell"><span class="index">3</span>3</div>
+                    <div class="array-cell"><span class="index">4</span>5</div>
+                    <div class="array-cell active"><span class="index">5</span>8</div>
+                </div>
+                <p style="color:#636e72; font-size:13px;">At <code>i = 5</code>: <code>dp[4] + dp[3] = 5 + 3 = 8</code>. The base value <code>dp[0] = 1</code> means "one way to stand still."</p>
+                <div class="code-block">dp[0] = 1;
+for (let i = 1; i &lt;= n; i++) {
+  dp[i] = (dp[i - 1] || 0) + (dp[i - 2] || 0);
+}
+return dp[n];</div>
+            </div>
+            <p>No recursion, so the stack cannot overflow. The tradeoff is that all <code>n + 1</code> entries are stored even though only the last two are ever read.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Two-Variable DP (Constant Space)</h2>
+            <p><strong>Intuition:</strong> Keep only the previous two values and roll them forward. This is the same recurrence with <code>O(1)</code> memory.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Rolling variables for n = 5</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Round</th><th><code>prev</code></th><th><code>curr</code></th><th>New <code>curr</code></th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>start</td><td>0</td><td>1</td><td>&mdash;</td></tr>
+                            <tr><td>1</td><td>1</td><td>1</td><td>0 + 1 = 1</td></tr>
+                            <tr><td>2</td><td>1</td><td>2</td><td>1 + 1 = 2</td></tr>
+                            <tr><td>3</td><td>2</td><td>3</td><td>1 + 2 = 3</td></tr>
+                            <tr><td>4</td><td>3</td><td>5</td><td>2 + 3 = 5</td></tr>
+                            <tr><td>5</td><td>5</td><td>8</td><td>3 + 5 = 8</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="code-block">let prev = 0, curr = 1;
+for (let i = 0; i &lt; n; i++) {
+  [prev, curr] = [curr, prev + curr];
+}
+return curr;</div>
+            </div>
+            <p>This is the version most interviewers expect after you describe the recurrence: linear time, constant space, no stack.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 5: Matrix Exponentiation</h2>
+            <p><strong>Intuition:</strong> The recurrence is linear, so it can be written as a matrix power. Exponentiation by squaring computes it in logarithmic time.</p>
+            <span class="complexity-badge badge-time">Time: O(log n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="math-grid">
+                <div class="math-card"><div class="number">[1 1]</div><div class="label">row 1 of M</div></div>
+                <div class="math-card"><div class="number">[1 0]</div><div class="label">row 2 of M</div></div>
+                <div class="math-card"><div class="number">M<sup>n</sup></div><div class="label">answer in top-left</div></div>
+                <div class="math-card"><div class="number">O(log n)</div><div class="label">multiplications</div></div>
+            </div>
+            <p style="margin-top:12px;">For <code>n = 45</code> this is overkill, but for a variant with <code>n</code> up to <code>10^18</code> it is the only feasible approach. Binet's formula is the closed-form cousin, but floating-point rounding makes it unreliable.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Brute-force recursion</td><td>O(2<sup>n</sup>)</td><td>O(n)</td><td>Recomputes the same states exponentially often.</td></tr>
+                        <tr><td><strong>Memoized DFS (implemented)</strong></td><td>O(n)</td><td>O(n)</td><td>Direct recurrence, each state solved once.</td></tr>
+                        <tr><td>Bottom-up DP</td><td>O(n)</td><td>O(n)</td><td>No recursion; simple to trace.</td></tr>
+                        <tr><td>Two-variable DP</td><td>O(n)</td><td>O(1)</td><td>Best general solution; no stack, minimal memory.</td></tr>
+                        <tr><td>Matrix exponentiation</td><td>O(log n)</td><td>O(1)</td><td>For enormous n only.</td></tr>
+                        <tr><td>Binet's formula</td><td>O(1)</td><td>O(1)</td><td>Closed form, but floating-point error.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/climbing-stairs/" target="_blank" rel="noopener">LeetCode 70 &mdash; Climbing Stairs</a></li>
+                <li><a href="https://neetcode.io/problems/climbing-stairs" target="_blank" rel="noopener">NeetCode &mdash; Climbing Stairs</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Fibonacci_sequence" target="_blank" rel="noopener">Wikipedia &mdash; Fibonacci sequence</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" target="_blank" rel="noopener">Wikipedia &mdash; Exponentiation by squaring</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Memoization" target="_blank" rel="noopener">Wikipedia &mdash; Memoization</a></li>
+                <li><a href="../min-cost-climbing-stairs/README.md">Related problem in this repository &mdash; Min Cost Climbing Stairs</a></li>
+                <li><a href="../climbing-stairs/SOLUTION.md">This problem &mdash; detailed solution write-up</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
