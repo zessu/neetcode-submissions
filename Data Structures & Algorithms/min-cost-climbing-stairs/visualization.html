@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Min Cost Climbing Stairs - Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fdf6f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header .subtitle { color: #636e72; font-size: 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+        .tag { background: #a8d8ea; padding: 4px 12px; border-radius: 16px; font-size: 13px; color: #2d3436; }
+        .tag.purple { background: #aa96da; }
+        .tag.green { background: #b5ead7; }
+        .card { background: #ffffff; border: 1px solid #dfe6e9; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card h2 { font-size: 1.4rem; margin-bottom: 16px; color: #2d3436; }
+        .card h3 { font-size: 1.05rem; margin: 16px 0 8px; color: #2d3436; }
+        .card p { color: #636e72; margin-bottom: 12px; }
+        .code-block { background: #f0eef6; border-left: 4px solid #aa96da; padding: 16px 20px; border-radius: 0 8px 8px 0; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; color: #636e72; white-space: pre; }
+        code { background: #f0eef6; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: #636e72; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #a8d8ea; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 14px; }
+        td { padding: 12px 16px; font-size: 14px; border: 1px solid #dfe6e9; }
+        tr:nth-child(even) td { background: #fdf6f0; }
+        .table-wrap { overflow-x: auto; }
+        .diagram { margin: 20px 0; padding: 20px; background: #fdf6f0; border-radius: 8px; }
+        .diagram-title { font-weight: 600; margin-bottom: 12px; color: #2d3436; font-size: 14px; }
+        .flow-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .flow-box { background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; padding: 8px 14px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .flow-box.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .flow-box.best { background: #b5ead7; border-color: #b5ead7; font-weight: 600; }
+        .flow-box.invalid { background: #ff9aa2; border-color: #ff9aa2; }
+        .flow-box.result { background: #ffffd8; border-color: #f0c929; font-weight: 600; }
+        .arrow { color: #aa96da; font-size: 18px; font-weight: 600; }
+        .array-container { display: flex; gap: 6px; margin: 16px 0; flex-wrap: wrap; }
+        .array-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .array-cell { width: 64px; height: 52px; display: flex; align-items: center; justify-content: center; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 16px; background: #ffffff; color: #2d3436; }
+        .array-cell.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .array-cell.found { background: #b5ead7; border-color: #b5ead7; }
+        .array-cell.base { background: #ffffd8; border-color: #f0c929; }
+        .array-index { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; color: #636e72; }
+        .array-label { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 10px; color: #636e72; }
+        .levels { display: flex; flex-direction: column; gap: 10px; }
+        .level { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .level-label { min-width: 64px; font-size: 12px; color: #636e72; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+        .node { min-width: 42px; height: 38px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 2px solid #a8d8ea; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; }
+        .node.active { background: #ffd3b6; border-color: #ff9aa2; }
+        .node.done { background: #b5ead7; border-color: #b5ead7; }
+        .node.zero { background: #ffffd8; border-color: #f0c929; }
+        .complexity-badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 500; margin-right: 8px; margin-bottom: 6px; }
+        .badge-time { background: #b5ead7; color: #2d3436; }
+        .badge-space { background: #ffffd8; color: #2d3436; }
+        .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: #636e72; }
+        .legend-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #dfe6e9; }
+        .resources a { color: #aa96da; text-decoration: none; font-weight: 500; }
+        .resources a:hover { text-decoration: underline; }
+        .resources ul { list-style: none; padding: 0; }
+        .resources li { padding: 8px 0; border-bottom: 1px solid #dfe6e9; }
+        .resources li:last-child { border-bottom: none; }
+        .note { background: #ffffd8; border-left: 4px solid #f0c929; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 14px; color: #2d3436; margin: 12px 0; }
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.6rem; }
+            .card { padding: 18px; }
+            .array-cell { width: 50px; height: 46px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Min Cost Climbing Stairs</h1>
+            <p class="subtitle">LeetCode 746 &mdash; Cheapest route to the top, paying each stair you step on</p>
+            <div class="tags">
+                <span class="tag">Dynamic Programming</span>
+                <span class="tag purple">Memoization</span>
+                <span class="tag green">Array</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Problem Overview</h2>
+            <p><code>cost[i]</code> is the price of stepping on stair <code>i</code>. After paying, you may climb <strong>one or two</strong> stairs. You may start at index <code>0</code> or index <code>1</code>. Return the minimum total cost to reach the position <strong>just past the last index</strong>.</p>
+            <div class="code-block">Input:  cost = [10, 15, 20]
+Output: 15         // start at index 1, pay 15, jump 2 to the top
+
+Input:  cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]
+Output: 6          // pay indices 0, 2, 4, 6, 7, 9
+
+Input:  cost = [0, 0, 0]
+Output: 0</div>
+            <p>Think of the top as a virtual stair at index <code>n</code> with cost <code>0</code>. Jumping from <code>n - 2</code> straight to <code>n</code> means the last real stair is never paid for.</p>
+            <div class="array-container">
+                <div class="array-wrap"><div class="array-cell">10</div><div class="array-index">0</div></div>
+                <div class="array-wrap"><div class="array-cell active">15</div><div class="array-index">1</div></div>
+                <div class="array-wrap"><div class="array-cell">20</div><div class="array-index">2</div></div>
+                <div class="array-wrap"><div class="array-cell base">0</div><div class="array-index">3 (top)</div></div>
+            </div>
+            <p style="font-size:13px;">For <code>[10, 15, 20]</code>, the highlighted route pays only the <code>15</code> stair.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 1: Brute-Force Recursion</h2>
+            <p><strong>Intuition:</strong> From stair <code>idx</code>, pay <code>cost[idx]</code> and try both jumps. Keep the cheaper branch. The answer is the cheaper of starting at <code>0</code> or <code>1</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(2<sup>n</sup>)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Every route for cost = [10, 15, 20]</div>
+                <div class="flow-row">
+                    <span class="flow-box">start</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box active">0 (pay 10)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">1 (pay 15)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">2 (pay 20)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">top</span>
+                    <span class="flow-box result">45</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">start</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box active">0 (pay 10)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">2 (pay 20)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">top</span>
+                    <span class="flow-box result">30</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">start</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box active">0 (pay 10)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">1 (pay 15)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">top</span>
+                    <span class="flow-box result">25</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">start</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box best">1 (pay 15)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">2 (pay 20)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box">top</span>
+                    <span class="flow-box result">35</span>
+                </div>
+                <div class="flow-row">
+                    <span class="flow-box">start</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box best">1 (pay 15)</span><span class="arrow">&rarr;</span>
+                    <span class="flow-box best">top (jump 2)</span>
+                    <span class="flow-box result">15 &check;</span>
+                </div>
+                <p style="color:#636e72; font-size:13px; margin-top:8px;">The winning route skips stair <code>2</code> entirely. Greedily starting at the cheapest stair (<code>10</code>) would lose: it leads to a total of at least <code>25</code>.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 2: Memoized DFS (Implemented)</h2>
+            <p><strong>Intuition:</strong> The remaining cost depends only on the current index. Cache <code>recurr(idx)</code> so each stair is solved once, no matter how many routes reach it.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Memoized states for cost = [10, 15, 20]</div>
+                <div class="levels">
+                    <div class="level"><span class="level-label">recurr(2)</span><span class="node">20 + min(0, 0)</span><span class="arrow">&rarr;</span><span class="node done">20</span></div>
+                    <div class="level"><span class="level-label">recurr(1)</span><span class="node">15 + min(20, 0)</span><span class="arrow">&rarr;</span><span class="node done">15</span></div>
+                    <div class="level"><span class="level-label">recurr(0)</span><span class="node">10 + min(15, 20)</span><span class="arrow">&rarr;</span><span class="node done">25</span></div>
+                    <div class="level"><span class="level-label">answer</span><span class="node active">min(recurr(0), recurr(1))</span><span class="arrow">&rarr;</span><span class="node zero">15</span></div>
+                </div>
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-swatch" style="background:#b5ead7;border-color:#b5ead7"></span> cached result</span>
+                    <span class="legend-item"><span class="legend-swatch" style="background:#ffffd8;border-color:#f0c929"></span> final answer</span>
+                </div>
+            </div>
+
+            <div class="code-block">const cache = new Map();
+
+const recurr = (idx) =&gt; {
+  if (idx &gt;= cost.length) return 0;
+  if (cache.has(idx)) return cache.get(idx);
+
+  const left = cost[idx] + recurr(idx + 1);
+  const right = cost[idx] + recurr(idx + 2);
+
+  cache.set(idx, Math.min(left, right));
+  return Math.min(left, right);
+};
+
+return Math.min(recurr(0), recurr(1));</div>
+
+            <div class="note"><strong>Why the base case is <code>idx &gt;= cost.length</code>:</strong> the top sits one past the array. Once the index passes it, there is nothing left to pay, so the remaining cost is <code>0</code>. This is also what lets a jump from <code>n - 2</code> skip the final stair for free.</div>
+        </div>
+
+        <div class="card">
+            <h2>Approach 3: Bottom-Up DP</h2>
+            <p><strong>Intuition:</strong> <code>dp[i]</code> is the cheapest way to <em>reach position</em> <code>i</code>, with the top at position <code>n</code>. Fill left to right; the answer is <code>dp[n]</code>.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(n)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">dp[i] for the long example</div>
+                <div class="array-container">
+                    <div class="array-wrap"><div class="array-cell base">0</div><div class="array-index">index</div><div class="array-label">start</div></div>
+                    <div class="array-wrap"><div class="array-cell base">0</div><div class="array-index">1</div><div class="array-label">start</div></div>
+                    <div class="array-wrap"><div class="array-cell">1</div><div class="array-index">2</div><div class="array-label">cost 1</div></div>
+                    <div class="array-wrap"><div class="array-cell">2</div><div class="array-index">3</div><div class="array-label">cost 1</div></div>
+                    <div class="array-wrap"><div class="array-cell">2</div><div class="array-index">4</div><div class="array-label">cost 1</div></div>
+                    <div class="array-wrap"><div class="array-cell">3</div><div class="array-index">5</div><div class="array-label">cost 100</div></div>
+                    <div class="array-wrap"><div class="array-cell">3</div><div class="array-index">6</div><div class="array-label">cost 1</div></div>
+                    <div class="array-wrap"><div class="array-cell">4</div><div class="array-index">7</div><div class="array-label">cost 1</div></div>
+                    <div class="array-wrap"><div class="array-cell">4</div><div class="array-index">8</div><div class="array-label">cost 100</div></div>
+                    <div class="array-wrap"><div class="array-cell found">5</div><div class="array-index">9</div><div class="array-label">cost 1</div></div>
+                    <div class="array-wrap"><div class="array-cell active">6</div><div class="array-index">10</div><div class="array-label">top</div></div>
+                </div>
+                <p style="color:#636e72; font-size:13px;">The answer is <code>min(dp[9] + cost[9], dp[8] + cost[8]) = min(5 + 1, 4 + 100) = 6</code>. The expensive <code>100</code> stairs at indices <code>1</code>, <code>5</code>, and <code>8</code> are never on the optimal route.</p>
+                <div class="code-block">dp[0] = 0;
+dp[1] = 0;
+for (let i = 2; i &lt;= cost.length; i++) {
+  dp[i] = Math.min(
+    dp[i - 1] + cost[i - 1],
+    dp[i - 2] + cost[i - 2]
+  );
+}
+return dp[cost.length];</div>
+            </div>
+            <p>No recursion, so the stack cannot overflow, and the table can be printed to debug or to reconstruct the route.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach 4: Two Rolling Variables (Constant Space)</h2>
+            <p><strong>Intuition:</strong> Only the previous two DP values are needed. Keep them in two variables and update in one pass.</p>
+            <span class="complexity-badge badge-time">Time: O(n)</span>
+            <span class="complexity-badge badge-space">Space: O(1)</span>
+
+            <div class="diagram">
+                <div class="diagram-title">Rolling update for cost = [10, 15, 20], top = 3</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th><code>i</code></th><th><code>prev</code> = dp[i-2]</th><th><code>curr</code> = dp[i-1]</th><th>New <code>curr</code> = dp[i]</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>start</td><td>0</td><td>0</td><td>&mdash;</td></tr>
+                            <tr><td>2</td><td>0</td><td>0</td><td><code>min(0 + 15, 0 + 10) = 10</code></td></tr>
+                            <tr><td>3 (top)</td><td>0</td><td>10</td><td><code>min(10 + 20, 0 + 15) = 15</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="code-block">let prev = 0, curr = 0;
+for (let i = 2; i &lt;= cost.length; i++) {
+  const next = Math.min(
+    curr + cost[i - 1],
+    prev + cost[i - 2]
+  );
+  prev = curr;
+  curr = next;
+}
+return curr;</div>
+            </div>
+            <p>This is the strongest practical version: linear time, constant memory, and no call stack.</p>
+        </div>
+
+        <div class="card">
+            <h2>Approach Comparison</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Approach</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Brute-force recursion</td><td>O(2<sup>n</sup>)</td><td>O(n)</td><td>Correct, but recomputes every index along every route.</td></tr>
+                        <tr><td><strong>Memoized DFS (implemented)</strong></td><td>O(n)</td><td>O(n)</td><td>Single-index state; maps directly to the rules.</td></tr>
+                        <tr><td>Bottom-up DP</td><td>O(n)</td><td>O(n)</td><td>No recursion; easy to trace and debug.</td></tr>
+                        <tr><td>Two rolling variables</td><td>O(n)</td><td>O(1)</td><td>Best practical solution; no stack.</td></tr>
+                        <tr><td>Dijkstra / shortest path</td><td>O(n log n)</td><td>O(n)</td><td>Correct reframing, but adds a heap to a forward-only DAG.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card resources">
+            <h2>Resources</h2>
+            <ul>
+                <li><a href="https://leetcode.com/problems/min-cost-climbing-stairs/" target="_blank" rel="noopener">LeetCode 746 &mdash; Min Cost Climbing Stairs</a></li>
+                <li><a href="https://neetcode.io/problems/min-cost-climbing-stairs" target="_blank" rel="noopener">NeetCode &mdash; Min Cost Climbing Stairs</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Dynamic_programming" target="_blank" rel="noopener">Wikipedia &mdash; Dynamic programming</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Memoization" target="_blank" rel="noopener">Wikipedia &mdash; Memoization</a></li>
+                <li><a href="../climbing-stairs/README.md">Related problem in this repository &mdash; Climbing Stairs</a></li>
+                <li><a href="../summing-squares/README.md">Related problem in this repository &mdash; Summing Squares</a></li>
+                <li><a href="../min-cost-climbing-stairs/SOLUTION.md">This problem &mdash; detailed solution write-up</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
